@@ -1,0 +1,66 @@
+[
+  {
+    "id": "tamanrasset_center",
+    "titleEn": "Tamanrasset Center",
+    "titleAr": "وسط تمنراست",
+    "lat": 22.785,
+    "lng": 5.523,
+    "supported": true
+  },
+  {
+    "id": "tamanrasset_airport",
+    "titleEn": "Tamanrasset Airport",
+    "titleAr": "مطار تمنراست",
+    "lat": 22.812,
+    "lng": 5.451,
+    "supported": true
+  },
+  {
+    "id": "abalessa",
+    "titleEn": "Abalessa",
+    "titleAr": "أباليسة",
+    "lat": 22.873,
+    "lng": 4.847,
+    "supported": true
+  },
+  {
+    "id": "in_ghar",
+    "titleEn": "In Ghar",
+    "titleAr": "إين غار",
+    "lat": 27.108,
+    "lng": 1.808,
+    "supported": true
+  },
+  {
+    "id": "in_salah",
+    "titleEn": "In Salah",
+    "titleAr": "إين صالح",
+    "lat": 27.197,
+    "lng": 2.483,
+    "supported": true
+  },
+  {
+    "id": "tazrouk",
+    "titleEn": "Tazrouk",
+    "titleAr": "تازروك",
+    "lat": 23.424,
+    "lng": 5.675,
+    "supported": true
+  },
+  {
+    "id": "idles",
+    "titleEn": "Idles",
+    "titleAr": "إدلس",
+    "lat": 23.817,
+    "lng": 5.917,
+    "supported": true
+  },
+  {
+    "id": "in_amenas",
+    "titleEn": "In Amenas",
+    "titleAr": "إين أمenas",
+    "lat": 28.042,
+    "lng": 9.553,
+    "supported": false
+  }
+]
