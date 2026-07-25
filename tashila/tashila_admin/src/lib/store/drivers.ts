@@ -1,0 +1,116 @@
+"use client";
+
+import { create } from "zustand";
+import * as driversApi from "@/lib/api/drivers";
+import type {
+  DocumentStatus,
+  DocumentType,
+  Driver,
+  DriverApprovalStatus,
+  TruckType,
+} from "@/lib/types";
+
+type DriversState = {
+  drivers: Driver[];
+  loading: boolean;
+  loaded: boolean;
+  error: string | null;
+  load: (force?: boolean) => Promise<void>;
+  create: (input: {
+    name: string;
+    phone: string;
+    truckType: TruckType;
+    vehicleColor: string;
+    vehicleModel: string;
+    vehiclePlate: string;
+    uploadedDocs?: DocumentType[];
+  }) => Promise<Driver>;
+  setDocStatus: (
+    driverId: string,
+    docType: DocumentType,
+    status: DocumentStatus,
+    rejectionReason?: string
+  ) => Promise<Driver>;
+  setApproval: (
+    driverId: string,
+    status: DriverApprovalStatus
+  ) => Promise<Driver>;
+  applyPlatformPayment: (
+    driverId: string,
+    amountDzd: number,
+    note: string
+  ) => Promise<Driver>;
+  patchDriverLocation: (driverId: string, lat: number, lng: number) => void;
+  setDriverOffline: (driverId: string) => void;
+};
+
+export const useDriversStore = create<DriversState>((set, get) => ({
+  drivers: [],
+  loading: false,
+  loaded: false,
+  error: null,
+  load: async (force = false) => {
+    if (!force && get().loaded) return;
+    set({ loading: true, error: null });
+    try {
+      const drivers = await driversApi.listDrivers();
+      set({ drivers, loading: false, loaded: true });
+    } catch (e) {
+      set({
+        error: e instanceof Error ? e.message : "Failed to load drivers",
+        loading: false,
+      });
+    }
+  },
+  create: async (input) => {
+    const driver = await driversApi.createDriver(input);
+    set({ drivers: [driver, ...get().drivers] });
+    return driver;
+  },
+  setDocStatus: async (driverId, docType, status, rejectionReason) => {
+    const updated = await driversApi.updateDocumentStatus(
+      driverId,
+      docType,
+      status,
+      rejectionReason
+    );
+    set({
+      drivers: get().drivers.map((d) => (d.id === updated.id ? updated : d)),
+    });
+    return updated;
+  },
+  setApproval: async (driverId, status) => {
+    const updated = await driversApi.setDriverApproval(driverId, status);
+    set({
+      drivers: get().drivers.map((d) => (d.id === updated.id ? updated : d)),
+    });
+    return updated;
+  },
+  applyPlatformPayment: async (driverId, amountDzd, note) => {
+    const updated = await driversApi.applyPlatformPayment(
+      driverId,
+      amountDzd,
+      note
+    );
+    set({
+      drivers: get().drivers.map((d) => (d.id === updated.id ? updated : d)),
+    });
+    return updated;
+  },
+  patchDriverLocation: (driverId, lat, lng) => {
+    set({
+      drivers: get().drivers.map((d) =>
+        d.id === driverId
+          ? { ...d, lastLocation: { lat, lng }, availability: "online" }
+          : d,
+      ),
+    });
+  },
+  setDriverOffline: (driverId) => {
+    set({
+      drivers: get().drivers.map((d) =>
+        d.id === driverId ? { ...d, availability: "offline" } : d,
+      ),
+    });
+  },
+}));
