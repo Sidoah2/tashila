@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tashila_driver/core/config/api_config.dart';
+import 'package:tashila_driver/core/router/app_router.dart';
+import 'package:tashila_driver/core/widgets/api_loading_overlay.dart';
 
 const _kAccessToken = 'accessToken';
 const _kRefreshToken = 'refreshToken';
@@ -29,9 +31,26 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          if (options.extra['silent'] != true) {
+            final cancelToken = options.cancelToken ?? CancelToken();
+            options.cancelToken = cancelToken;
+            final ctx = rootNavigatorKey.currentContext;
+            if (ctx != null) {
+              ApiOverlayManager.show(ctx, cancelToken: cancelToken);
+            }
+          }
           handler.next(options);
         },
+        onResponse: (response, handler) {
+          if (response.requestOptions.extra['silent'] != true) {
+            ApiOverlayManager.hide();
+          }
+          handler.next(response);
+        },
         onError: (error, handler) async {
+          if (error.requestOptions.extra['silent'] != true) {
+            ApiOverlayManager.hide();
+          }
           if (error.response?.statusCode == 401) {
             final refreshed = await _tryRefresh();
             if (refreshed) {

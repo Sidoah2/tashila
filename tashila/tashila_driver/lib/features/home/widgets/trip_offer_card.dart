@@ -9,10 +9,11 @@ import 'offer_countdown_ring.dart';
 
 String _durationPart(int? minutes) {
   if (minutes == null || minutes <= 0) return '';
-  return 'trip_estimated_duration_inline'.tr(namedArgs: {
-    'duration':
-        '${westernDigits('$minutes')} ${'trip_unit_minutes'.tr()}',
-  });
+  return 'trip_estimated_duration_inline'.tr(
+    namedArgs: {
+      'duration': '${westernDigits('$minutes')} ${'trip_unit_minutes'.tr()}',
+    },
+  );
 }
 
 /// Single trip request with an integrated live countdown ring.
@@ -66,10 +67,10 @@ class TripOfferCard extends StatelessWidget {
     final borderColor = critical
         ? const Color(0xFFD32F2F)
         : urgent
-            ? AppColors.brandOrange
-            : isPrimary
-                ? AppColors.brandOrange.withValues(alpha: 0.55)
-                : Colors.black.withValues(alpha: 0.08);
+        ? AppColors.brandOrange
+        : isPrimary
+        ? AppColors.brandOrange.withValues(alpha: 0.55)
+        : Colors.black.withValues(alpha: 0.08);
 
     final meta = StringBuffer()
       ..write(
@@ -77,9 +78,7 @@ class TripOfferCard extends StatelessWidget {
       );
     if (offer.pickupDistanceKm != null && offer.pickupDistanceKm! > 0) {
       meta.write(
-        ' · ${'offer_pickup_distance'.tr(namedArgs: {
-          'km': westernDigits(offer.pickupDistanceKm!.toStringAsFixed(1)),
-        })}',
+        ' · ${'offer_pickup_distance'.tr(namedArgs: {'km': westernDigits(offer.pickupDistanceKm!.toStringAsFixed(1))})}',
       );
     }
     if (request.estimatedDurationMinutes != null &&
@@ -193,12 +192,14 @@ class TripOfferCard extends StatelessWidget {
                                   vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.brandOrange
-                                      .withValues(alpha: 0.12),
+                                  color: AppColors.brandOrange.withValues(
+                                    alpha: 0.12,
+                                  ),
                                   borderRadius: BorderRadius.circular(8),
                                   border: Border.all(
-                                    color: AppColors.brandOrange
-                                        .withValues(alpha: 0.35),
+                                    color: AppColors.brandOrange.withValues(
+                                      alpha: 0.35,
+                                    ),
                                   ),
                                 ),
                                 child: Text(
@@ -243,19 +244,27 @@ class TripOfferCard extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: OutlinedButton(
-                    onPressed: onReject,
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFFC62828),
-                      side: const BorderSide(color: Color(0xFFE57373)),
-                      padding: const EdgeInsets.symmetric(vertical: 11),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  child: SizedBox(
+                    height: 56,
+                    child: OutlinedButton(
+                      onPressed: onReject,
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFC62828),
+                        side: const BorderSide(
+                          color: Color(0xFFE57373),
+                          width: 1.5,
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      'reject'.tr(),
-                      style: const TextStyle(fontWeight: FontWeight.w800),
+                      child: Text(
+                        'reject'.tr(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -263,12 +272,9 @@ class TripOfferCard extends StatelessWidget {
                 Expanded(
                   flex: 2,
                   child: PrimaryButton(
-                    label: seconds <= 0
-                        ? 'offer_expired'.tr()
-                        : 'accept'.tr(),
+                    label: seconds <= 0 ? 'offer_expired'.tr() : 'accept'.tr(),
                     icon: Icons.check_rounded,
-                    onPressed:
-                        acceptEnabled && seconds > 0 ? onAccept : null,
+                    onPressed: acceptEnabled && seconds > 0 ? onAccept : null,
                   ),
                 ),
               ],

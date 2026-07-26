@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:tashila_client/core/state/app_state.dart';
@@ -9,8 +10,11 @@ import 'package:tashila_client/features/profile/profile_onboarding_screen.dart';
 import 'package:tashila_client/features/splash/splash_screen.dart';
 import 'package:tashila_client/features/trip_flow/trip_screen.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/',
     redirect: (context, state) {
       final appState = ref.read(appStateProvider);

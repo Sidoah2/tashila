@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/state/driver_app_state.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/rating_sheet_host.dart';
+import 'package:device_preview/device_preview.dart';
 
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
 
@@ -29,13 +30,16 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
   runApp(
-    EasyLocalization(
-      supportedLocales: _supported,
-      path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
-      startLocale: _localeFromDevice(),
-      useOnlyLangCode: true,
-      child: const ProviderScope(child: TashilaDriverApp()),
+    DevicePreview(
+      enabled: false,
+      builder: (context) => EasyLocalization(
+        supportedLocales: _supported,
+        path: 'assets/translations',
+        fallbackLocale: const Locale('en'),
+        startLocale: _localeFromDevice(),
+        useOnlyLangCode: true,
+        child: const ProviderScope(child: TashilaDriverApp()),
+      ),
     ),
   );
 }
@@ -66,7 +70,9 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
     if (lifecycleState != AppLifecycleState.resumed) return;
     final appState = ref.read(driverAppStateProvider);
     if (!appState.isAuthenticated || !appState.bootstrapped) return;
-    unawaited(ref.read(driverAppStateProvider.notifier).resumeSessionOnForeground());
+    unawaited(
+      ref.read(driverAppStateProvider.notifier).resumeSessionOnForeground(),
+    );
   }
 
   Future<void> _showClientRatingSheet() async {

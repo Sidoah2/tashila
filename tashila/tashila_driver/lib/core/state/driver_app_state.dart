@@ -534,6 +534,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _requestPollTimer?.cancel();
     _offerCountdownTimer?.cancel();
     _locationTimer?.cancel();
+    try {
+      await _apiClient.delete('/drivers/me');
+    } catch (_) {}
     await _driverSocket?.disconnect();
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool(kSeenOnboarding) ?? false;

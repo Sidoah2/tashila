@@ -73,13 +73,29 @@ ThemeData buildAppTheme() {
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
       fillColor: Colors.white,
-      labelStyle: textTheme.bodyMedium,
-      hintStyle: textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+      hintStyle: textTheme.bodyMedium?.copyWith(
+        color: AppColors.textSecondary.withValues(alpha: 0.5),
+        fontWeight: FontWeight.w500,
+      ),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14),
         borderSide: BorderSide.none,
       ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: BorderSide.none,
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: AppColors.brandOrange, width: 1.5),
+      ),
+      errorBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(14),
+        borderSide: const BorderSide(color: Colors.redAccent, width: 1),
+      ),
     ),
+
     chipTheme: ChipThemeData(
       labelStyle: textTheme.labelLarge,
       secondaryLabelStyle: textTheme.labelMedium,

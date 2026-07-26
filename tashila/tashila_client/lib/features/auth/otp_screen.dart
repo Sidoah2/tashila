@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -71,9 +72,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       await ref.read(appStateProvider.notifier).sendOtp(widget.phone);
     } catch (_) {}
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('otp_resend_sent'.tr())),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('otp_resend_sent'.tr())));
   }
 
   Future<void> _verifyAndContinue() async {
@@ -83,9 +84,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         .verifyOtp(widget.phone, pin.text);
     if (!mounted) return;
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('otp_invalid'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('otp_invalid'.tr())));
       return;
     }
     final needSetup = !ref.read(appStateProvider).profileSetupComplete;
@@ -93,113 +94,181 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   @override
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final pillBg = AppColors.brandOrange.withValues(alpha: 0.12);
+    final pillBg = AppColors.brandOrange.withValues(alpha: 0.1);
 
     final defaultPinTheme = PinTheme(
-      width: 48,
-      height: 56,
-      textStyle: theme.textTheme.titleLarge,
+      width: 50,
+      height: 58,
+      textStyle: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+        color: AppColors.textPrimary,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.grey.shade300),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(
+          color: Colors.black.withValues(alpha: 0.06),
+          width: 1.5,
+        ),
       ),
     );
 
     final focusedPinTheme = defaultPinTheme.copyWith(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(14),
         border: Border.all(color: AppColors.brandOrange, width: 2),
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandOrange.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text('otp_title'.tr())),
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(
-                'otp_subtitle'.tr(),
-                style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary),
-                textAlign: TextAlign.start,
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${'otp_sent'.tr()} ${widget.phone}',
-                style: theme.textTheme.bodyMedium,
-                textAlign: TextAlign.start,
-              ),
-              const SizedBox(height: 20),
-              AutofillGroup(
-                child: Pinput(
-                  length: 6,
-                  controller: pin,
-                  smsRetriever: _smsRetriever,
-                  autofillHints: const [AutofillHints.oneTimeCode],
-                  defaultPinTheme: defaultPinTheme,
-                  focusedPinTheme: focusedPinTheme,
-                  submittedPinTheme: focusedPinTheme,
-                  onCompleted: (_) => _verifyAndContinue(),
+        child: CustomScrollView(
+          physics: const BouncingScrollPhysics(),
+          slivers: [
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
                 ),
-              ),
-              const SizedBox(height: 24),
-              if (_secondsUntilResend > 0)
-                Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: pillBg,
-                      borderRadius: BorderRadius.circular(999),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SizedBox(height: 10),
+                    Text(
+                      'otp_title'.tr(),
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.w800,
+                        color: AppColors.textPrimary,
+                        letterSpacing: -0.4,
+                      ),
                     ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
+                    const SizedBox(height: 12),
+                    Text(
+                      'otp_subtitle'.tr(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
                       children: [
-                        Icon(Icons.timer_outlined, size: 20, color: AppColors.brandOrange),
+                        const Icon(
+                          Icons.phone_iphone_rounded,
+                          size: 18,
+                          color: AppColors.brandOrange,
+                        ),
                         const SizedBox(width: 8),
                         Text(
-                          _formattedCountdown,
-                          style: theme.textTheme.titleSmall?.copyWith(
-                            color: AppColors.brandOrange,
-                            fontWeight: FontWeight.w600,
+                          widget.phone,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                       ],
                     ),
-                  ),
-                ),
-              if (_secondsUntilResend > 0) const SizedBox(height: 16),
-              Text(
-                'otp_didnt_receive'.tr(),
-                textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
-              ),
-              const SizedBox(height: 8),
-              Center(
-                child: TextButton(
-                  onPressed: _secondsUntilResend == 0 ? _onResend : null,
-                  child: Text(
-                    'otp_resend'.tr(),
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: _secondsUntilResend == 0
-                          ? AppColors.brandOrange
-                          : AppColors.textSecondary.withValues(alpha: 0.5),
+                    const SizedBox(height: 36),
+                    Center(
+                      child: Directionality(
+                        textDirection: ui.TextDirection.ltr,
+                        child: AutofillGroup(
+                          child: Pinput(
+                            length: 6,
+                            controller: pin,
+                            smsRetriever: _smsRetriever,
+                            autofillHints: const [AutofillHints.oneTimeCode],
+                            defaultPinTheme: defaultPinTheme,
+                            focusedPinTheme: focusedPinTheme,
+                            submittedPinTheme: focusedPinTheme,
+                            onCompleted: (_) => _verifyAndContinue(),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 32),
+                    if (_secondsUntilResend > 0)
+                      Center(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: pillBg,
+                            borderRadius: BorderRadius.circular(99),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.timer_outlined,
+                                size: 18,
+                                color: AppColors.brandOrange,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                _formattedCountdown,
+                                style: theme.textTheme.labelMedium?.copyWith(
+                                  color: AppColors.brandOrange,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    if (_secondsUntilResend > 0) const SizedBox(height: 20),
+                    Text(
+                      'otp_didnt_receive'.tr(),
+                      textAlign: TextAlign.center,
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Center(
+                      child: TextButton(
+                        onPressed: _secondsUntilResend == 0 ? _onResend : null,
+                        child: Text(
+                          'otp_resend'.tr(),
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: _secondsUntilResend == 0
+                                ? AppColors.brandOrange
+                                : AppColors.textSecondary.withValues(
+                                    alpha: 0.4,
+                                  ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const Spacer(),
+                    const SizedBox(height: 24),
+                    PrimaryButton(
+                      label: 'verify'.tr(),
+                      onPressed: () async => _verifyAndContinue(),
+                    ),
+                  ],
                 ),
               ),
-              const Spacer(),
-              PrimaryButton(
-                label: 'verify'.tr(),
-                onPressed: () async => _verifyAndContinue(),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

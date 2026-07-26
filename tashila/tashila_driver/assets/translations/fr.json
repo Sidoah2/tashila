@@ -46,6 +46,11 @@
   "offline": "Hors ligne",
   "refresh_requests": "Actualiser les demandes proches",
   "requests_panel_heading": "Demandes à proximité",
+  "requests_deck_title": "Demandes de courses",
+  "requests_deck_subtitle": "Chaque carte a son propre chrono — acceptez avant expiration.",
+  "offer_card_priority": "Répondre en priorité",
+  "offer_expires_soon": "Vite — l'offre expire bientôt",
+  "offer_expires_critical": "Dernières secondes — acceptez ou l'offre passe",
   "requests_panel_count": "{count} offres",
   "nearby_requests": "Demandes proches",
   "no_requests": "Aucune demande pour le moment.",
@@ -237,5 +242,8 @@
   "active_trip_nav_locked": "Terminez la course en cours avant de changer d'onglet.",
   "logout_active_trip_title": "Quitter pendant une course active ?",
   "logout_active_trip_body": "Vous avez une course active. La deconnexion ne l'annulera pas sur le serveur. Continuer ?",
-  "socket_connect_failed": "Connexion aux mises a jour en direct impossible. Les offres peuvent etre retardees."
+  "socket_connect_failed": "Connexion aux mises a jour en direct impossible. Les offres peuvent etre retardees.",
+  "driver_select_city": "Sélectionner la ville / localisation",
+  "driver_city_label": "Localisation du chauffeur",
+  "driver_city_updated": "Localisation définie sur {city}"
 }

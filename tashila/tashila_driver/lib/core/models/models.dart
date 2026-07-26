@@ -345,7 +345,7 @@ class IncomingOffer {
     this.pickupDistanceKm,
   }) : offeredAt = offeredAt ?? DateTime.now().toUtc();
 
-  static const int defaultTtlSeconds = 30;
+  static const int defaultTtlSeconds = 180;
 
   final TripRequest request;
   final DateTime expiresAt;
@@ -470,6 +470,7 @@ class TripRecord {
     this.goodTraits = const [],
     this.badTraits = const [],
     this.cashConfirmed = false,
+    this.status = 'completed',
   });
 
   final String id;
@@ -486,6 +487,10 @@ class TripRecord {
   final List<String> goodTraits;
   final List<String> badTraits;
   final bool cashConfirmed;
+  final String status;
+
+  bool get isCompleted => status == 'completed' || status == 'awaitingCash' || status == 'awaitingPayment';
+  bool get isCancelled => status.contains('cancel');
 
   TripRecord copyWith({
     int? rating,
@@ -494,6 +499,7 @@ class TripRecord {
     List<String>? badTraits,
     bool? cashConfirmed,
     int? estimatedDurationMinutes,
+    String? status,
   }) {
     return TripRecord(
       id: id,
@@ -511,6 +517,7 @@ class TripRecord {
       goodTraits: goodTraits ?? this.goodTraits,
       badTraits: badTraits ?? this.badTraits,
       cashConfirmed: cashConfirmed ?? this.cashConfirmed,
+      status: status ?? this.status,
     );
   }
 
@@ -529,6 +536,7 @@ class TripRecord {
     'goodTraits': goodTraits,
     'badTraits': badTraits,
     'cashConfirmed': cashConfirmed,
+    'status': status,
   };
 
   /// Maps a trip document from `GET /drivers/me/trips`.
@@ -537,7 +545,7 @@ class TripRecord {
     if (id == null) return null;
     final pickup = json['pickup'] as Map<String, dynamic>? ?? {};
     final dropoff = json['dropoff'] as Map<String, dynamic>? ?? {};
-    final status = json['status'] as String? ?? '';
+    final status = json['status'] as String? ?? 'completed';
     final completedRaw =
         json['completedAt'] as String? ?? json['updatedAt'] as String?;
     final completedAt = DateTime.tryParse(completedRaw ?? '') ?? DateTime.now();
@@ -559,6 +567,7 @@ class TripRecord {
       rating: (json['clientRating'] as num?)?.toInt(),
       comment: json['clientRatingComment'] as String? ?? '',
       cashConfirmed: status == 'completed' || status == 'awaitingCash',
+      status: status,
     );
   }
 
@@ -584,6 +593,7 @@ class TripRecord {
           .map((e) => e as String)
           .toList(),
       cashConfirmed: json['cashConfirmed'] as bool? ?? false,
+      status: json['status'] as String? ?? 'completed',
     );
   }
 }

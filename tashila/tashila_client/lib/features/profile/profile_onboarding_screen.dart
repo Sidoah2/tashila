@@ -20,6 +20,7 @@ class _ProfileOnboardingScreenState extends ConsumerState<ProfileOnboardingScree
   final _lastName = TextEditingController();
   final _email = TextEditingController();
   String? _photoPath;
+  bool _saving = false;
 
   @override
   void dispose() {
@@ -49,52 +50,119 @@ class _ProfileOnboardingScreenState extends ConsumerState<ProfileOnboardingScree
       );
       return;
     }
-    await ref.read(appStateProvider.notifier).saveProfileSetup(
-          firstName: fn,
-          lastName: ln,
-          email: _email.text.trim(),
-          profilePhotoPath: _photoPath,
+    setState(() => _saving = true);
+    try {
+      await ref.read(appStateProvider.notifier).saveProfileSetup(
+            firstName: fn,
+            lastName: ln,
+            email: _email.text.trim(),
+            profilePhotoPath: _photoPath,
+          );
+      if (!mounted) return;
+      context.go('/home');
+    } catch (_) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('error_occurred'.tr())),
         );
-    if (!mounted) return;
-    context.go('/home');
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(title: Text('profile_onboarding_title'.tr())),
+      backgroundColor: AppColors.bg,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'profile_onboarding_title'.tr(),
+          style: theme.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: AppColors.textPrimary,
+            fontSize: 16,
+          ),
+        ),
+      ),
       body: SafeArea(
         child: ListView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+          physics: const BouncingScrollPhysics(),
           children: [
             Text(
               'profile_onboarding_subtitle'.tr(),
-              style: theme.textTheme.bodyLarge?.copyWith(color: AppColors.textSecondary, height: 1.4),
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: AppColors.textSecondary,
+                height: 1.45,
+                fontWeight: FontWeight.w500,
+              ),
             ),
             const SizedBox(height: 24),
             Center(
               child: Stack(
-                alignment: Alignment.bottomRight,
+                clipBehavior: Clip.none,
                 children: [
                   GestureDetector(
                     onTap: _pickPhoto,
-                    child: UploadImagePreview(
-                      localPath: _photoPath,
-                      width: 104,
-                      height: 104,
-                      borderRadius: 52,
-                      placeholder: Icon(
-                        Icons.person,
-                        size: 52,
-                        color: AppColors.brandOrange,
+                    child: Container(
+                      width: 108,
+                      height: 108,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        shape: BoxShape.circle,
+                        border: Border.all(color: AppColors.brandOrange, width: 2.5),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.08),
+                            blurRadius: 16,
+                            offset: const Offset(0, 6),
+                          )
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: UploadImagePreview(
+                        localPath: _photoPath,
+                        width: 108,
+                        height: 108,
+                        borderRadius: 54,
+                        placeholder: Container(
+                          color: AppColors.brandOrange.withValues(alpha: 0.08),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 54,
+                            color: AppColors.brandOrange,
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                  IconButton.filled(
-                    style: IconButton.styleFrom(backgroundColor: AppColors.brandOrange),
-                    onPressed: _pickPhoto,
-                    icon: const Icon(Icons.camera_alt, color: Colors.white, size: 20),
+                  Positioned(
+                    right: -2,
+                    bottom: -2,
+                    child: Material(
+                      color: AppColors.brandOrange,
+                      shape: const CircleBorder(),
+                      elevation: 3,
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: _pickPhoto,
+                        child: const Padding(
+                          padding: EdgeInsets.all(8),
+                          child: Icon(
+                            Icons.camera_alt_rounded,
+                            size: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -103,41 +171,71 @@ class _ProfileOnboardingScreenState extends ConsumerState<ProfileOnboardingScree
             Center(
               child: TextButton(
                 onPressed: _pickPhoto,
-                child: Text('profile_onboarding_photo_hint'.tr()),
+                style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
+                child: Text(
+                  'profile_onboarding_photo_hint'.tr(),
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
               ),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _firstName,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: 'profile_first_name'.tr(),
-                border: const OutlineInputBorder(),
+            const SizedBox(height: 24),
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  color: Colors.black.withValues(alpha: 0.04),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.02),
+                    blurRadius: 16,
+                    offset: const Offset(0, 6),
+                  )
+                ],
+              ),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: [
+                  TextField(
+                    controller: _firstName,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(
+                      hintText: 'profile_first_name'.tr(),
+                      filled: true,
+                      fillColor: AppColors.bg,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _lastName,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: InputDecoration(
+                      hintText: 'profile_family_name'.tr(),
+                      filled: true,
+                      fillColor: AppColors.bg,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  TextField(
+                    controller: _email,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: InputDecoration(
+                      hintText: 'profile_onboarding_email_optional'.tr(),
+                      filled: true,
+                      fillColor: AppColors.bg,
+                    ),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _lastName,
-              textCapitalization: TextCapitalization.words,
-              decoration: InputDecoration(
-                labelText: 'profile_family_name'.tr(),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _email,
-              keyboardType: TextInputType.emailAddress,
-              decoration: InputDecoration(
-                labelText: 'profile_onboarding_email_optional'.tr(),
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 32),
             PrimaryButton(
               label: 'profile_onboarding_continue'.tr(),
               icon: Icons.check_circle_outline,
               onPressed: _submit,
+              isLoading: _saving,
             ),
           ],
         ),
