@@ -11,8 +11,11 @@ import '../../features/onboarding/driver_onboarding_screen.dart';
 import '../../features/profile/profile_setup_screen.dart';
 import '../state/driver_app_state.dart';
 
+final rootNavigatorKey = GlobalKey<NavigatorState>();
+
 final appRouterProvider = Provider<GoRouter>((ref) {
   final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     redirect: (context, state) {
       final appState = ref.read(driverAppStateProvider);

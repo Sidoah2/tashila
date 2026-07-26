@@ -536,6 +536,18 @@ class AppStateNotifier extends Notifier<AppState> {
     await _syncUserFromServer();
   }
 
+  Future<void> updateCustomerProfile({
+    String? firstName,
+    String? lastName,
+    String? email,
+  }) async {
+    await saveProfileSetup(
+      firstName: firstName ?? state.firstName,
+      lastName: lastName ?? state.lastName,
+      email: email ?? state.email,
+    );
+  }
+
   Future<void> uploadProfilePhoto(String localPath) async {
     final path = localPath.trim();
     if (path.isEmpty) return;
@@ -738,11 +750,21 @@ class AppStateNotifier extends Notifier<AppState> {
 
   void dismissNoDriversFound() {
     _pollTimer?.cancel();
+    _tripTimer?.cancel();
+    final tripId = state.currentTripId;
+    if (tripId != null && tripId.isNotEmpty) {
+      _tripSocket?.leaveTrip(tripId);
+    }
     state = state.copyWith(
       tripStage: TripStage.idle,
       tripStartTimeNull: true,
       currentTripIdNull: true,
       currentTripStatus: '',
+      driverName: '',
+      driverPhone: '',
+      driverPlate: '',
+      driverVehicleColor: '',
+      driverVehicleModel: '',
       clearDriverLocation: true,
     );
   }

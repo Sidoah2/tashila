@@ -349,3 +349,39 @@ async def remove_push_token(driver_id: str) -> None:
     await get_database()[PUSH_TOKENS_COLLECTION].delete_one(
         {"ownerId": driver_id, "role": DRIVER_ROLE},
     )
+
+
+async def delete_driver(driver_id: str) -> None:
+    driver = await _find_driver(driver_id)
+    if driver is None:
+        raise NotFoundError("Driver not found")
+
+    active = await get_database()[TRIPS_COLLECTION].find_one(
+        {
+            "driverId": driver_id,
+            "status": {
+                "$in": [
+                    "accepted",
+                    "headingToPickup",
+                    "inProgress",
+                    "awaitingCash",
+                ],
+            },
+        },
+    )
+    if active is not None:
+        raise ConflictError("Cannot delete account with an active trip")
+
+    await remove_push_token(driver_id)
+    await get_database()[DRIVERS_COLLECTION].update_one(
+        {"_id": ObjectId(driver_id)},
+        {
+            "$set": {
+                "status": "deleted",
+                "availability": "offline",
+                "updatedAt": datetime.now(timezone.utc),
+                "phone": f"deleted_{driver_id}",
+            },
+        },
+    )
+

@@ -55,6 +55,7 @@
   "trip_idle": "Ready to start",
   "driver_contact": "Call driver",
   "confirm_cash": "Confirm cash payment",
+  "cash": "Cash",
   "rate_driver": "Rate the driver",
   "optional_comment": "Optional comment",
   "rating_skip": "Skip for now",

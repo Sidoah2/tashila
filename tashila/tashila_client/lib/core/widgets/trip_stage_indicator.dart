@@ -1,6 +1,7 @@
+import 'dart:math' as math;
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:tashila_client/core/formatting/app_format.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
 
@@ -35,35 +36,56 @@ class TripStageIndicator extends StatelessWidget {
       'trip_stage_arrived',
     ];
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        for (var i = 0; i < keys.length; i++) ...[
-          if (i > 0)
-            Padding(
-              padding: EdgeInsets.only(top: compact ? 10 : 13),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 200),
-                height: compact ? 2 : 3,
-                width: compact ? 6 : 8,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final stepWidth = constraints.maxWidth / keys.length;
+        return Stack(
+          alignment: Alignment.topCenter,
+          children: [
+            // Background line (inactive timeline track)
+            Positioned(
+              top: compact ? 12 : 15,
+              left: stepWidth / 2,
+              right: stepWidth / 2,
+              child: Container(
+                height: 2,
                 decoration: BoxDecoration(
-                  color: idx >= i
-                      ? AppColors.brandOrange
-                      : AppColors.textSecondary.withValues(alpha: 0.25),
-                  borderRadius: BorderRadius.circular(2),
+                  color: Colors.grey.shade200,
+                  borderRadius: BorderRadius.circular(1),
                 ),
               ),
             ),
-          Expanded(
-            child: _StageStep(
-              label: keys[i].tr(),
-              index: i,
-              activeIndex: idx,
-              compact: compact,
+            // Active timeline track (growing line)
+            if (idx > 0)
+              Positioned(
+                top: compact ? 12 : 15,
+                left: stepWidth / 2,
+                width: stepWidth * math.min(idx, keys.length - 1),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  height: 2.5,
+                  decoration: BoxDecoration(
+                    color: AppColors.brandOrange,
+                    borderRadius: BorderRadius.circular(1.5),
+                  ),
+                ),
+              ),
+            // Nodes & Labels
+            Row(
+              children: List.generate(keys.length, (i) {
+                return Expanded(
+                  child: _StageStep(
+                    label: keys[i].tr(),
+                    index: i,
+                    activeIndex: idx,
+                    compact: compact,
+                  ),
+                );
+              }),
             ),
-          ),
-        ],
-      ],
+          ],
+        );
+      },
     );
   }
 }
@@ -86,50 +108,51 @@ class _StageStep extends StatelessWidget {
     final past = activeIndex > index;
     final current = activeIndex == index;
     final dim = compact ? 24.0 : 30.0;
-    final fontSize = compact ? 11.0 : 13.0;
     final iconSize = compact ? 14.0 : 16.0;
 
     final Widget circleChild;
     final BoxDecoration decoration;
+
     if (past) {
-      circleChild = Icon(Icons.check, color: Colors.white, size: iconSize);
+      circleChild = Icon(Icons.check_rounded, color: Colors.white, size: iconSize - 2);
       decoration = const BoxDecoration(
         shape: BoxShape.circle,
         color: AppColors.brandOrange,
       );
     } else if (current) {
-      circleChild = Text(
-        ltrNumber('${index + 1}'),
-        style: TextStyle(
+      circleChild = Container(
+        width: compact ? 8 : 10,
+        height: compact ? 8 : 10,
+        decoration: const BoxDecoration(
           color: Colors.white,
-          fontWeight: FontWeight.w700,
-          fontSize: fontSize,
-        ),
-      );
-      decoration = const BoxDecoration(
-        shape: BoxShape.circle,
-        color: AppColors.brandOrange,
-      );
-    } else {
-      circleChild = Text(
-        ltrNumber('${index + 1}'),
-        style: TextStyle(
-          color: AppColors.textSecondary.withValues(alpha: 0.85),
-          fontWeight: FontWeight.w600,
-          fontSize: fontSize,
+          shape: BoxShape.circle,
         ),
       );
       decoration = BoxDecoration(
         shape: BoxShape.circle,
+        color: AppColors.brandOrange,
+        boxShadow: [
+          BoxShadow(
+            color: AppColors.brandOrange.withValues(alpha: 0.35),
+            blurRadius: 10,
+            spreadRadius: 3,
+          )
+        ],
+      );
+    } else {
+      circleChild = const SizedBox.shrink();
+      decoration = BoxDecoration(
+        shape: BoxShape.circle,
         color: Colors.white,
         border: Border.all(
-          color: AppColors.textSecondary.withValues(alpha: 0.35),
-          width: compact ? 1.5 : 2,
+          color: Colors.black.withValues(alpha: 0.08),
+          width: 2,
         ),
       );
     }
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Container(
           width: dim,
@@ -138,22 +161,23 @@ class _StageStep extends StatelessWidget {
           alignment: Alignment.center,
           child: circleChild,
         ),
-        SizedBox(height: compact ? 4 : 6),
-        Text(
-          label,
-          textAlign: TextAlign.center,
-          maxLines: compact ? 2 : 3,
-          overflow: TextOverflow.ellipsis,
-          style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                fontSize: (Theme.of(context).textTheme.labelSmall?.fontSize ??
-                        11) -
-                    (compact ? 1 : 0.5),
-                fontWeight: current ? FontWeight.w700 : FontWeight.w500,
-                height: compact ? 1.1 : 1.2,
-                color: current || past
-                    ? AppColors.textPrimary
-                    : AppColors.textSecondary,
-              ),
+        const SizedBox(height: 8),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  fontSize: compact ? 10 : 11.5,
+                  fontWeight: current ? FontWeight.w800 : FontWeight.w600,
+                  height: 1.2,
+                  color: current || past
+                      ? AppColors.textPrimary
+                      : AppColors.textSecondary.withValues(alpha: 0.7),
+                ),
+          ),
         ),
       ],
     );

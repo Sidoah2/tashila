@@ -29,66 +29,94 @@ class TruckTypeCard extends StatelessWidget {
         ? 'truck_max_load_700kg'
         : 'truck_max_load_1400kg';
 
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 6 : 10,
-            vertical: compact ? 8 : 12,
-          ),
-          decoration: BoxDecoration(
-            color: selected ? AppColors.brandOrange.withValues(alpha: 0.12) : Colors.white,
-            borderRadius: BorderRadius.circular(compact ? 12 : 16),
-            border: Border.all(
-              color: selected ? AppColors.brandOrange : AppColors.textSecondary.withValues(alpha: 0.25),
-              width: selected ? 2 : 1.5,
+    return TweenAnimationBuilder<double>(
+      tween: Tween<double>(begin: 1.0, end: selected ? 1.03 : 1.0),
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeOutBack,
+      builder: (context, scale, child) {
+        return Transform.scale(
+          scale: scale,
+          child: child,
+        );
+      },
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(compact ? 14 : 18),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            padding: EdgeInsets.symmetric(
+              horizontal: compact ? 8 : 12,
+              vertical: compact ? 10 : 16,
             ),
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                height: compact ? 44 : 68,
-                child: Image.asset(
-                  asset,
-                  fit: BoxFit.contain,
-                  filterQuality: FilterQuality.high,
-                  gaplessPlayback: true,
+            decoration: BoxDecoration(
+              color: selected ? Colors.white : Colors.white.withValues(alpha: 0.9),
+              borderRadius: BorderRadius.circular(compact ? 14 : 18),
+              border: Border.all(
+                color: selected ? AppColors.brandOrange : Colors.black.withValues(alpha: 0.05),
+                width: selected ? 2.2 : 1.5,
+              ),
+              boxShadow: selected
+                  ? [
+                      BoxShadow(
+                        color: AppColors.brandOrange.withValues(alpha: 0.15),
+                        blurRadius: 16,
+                        offset: const Offset(0, 8),
+                      )
+                    ]
+                  : [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 4),
+                      )
+                    ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  height: compact ? 48 : 72,
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Image.asset(
+                    asset,
+                    fit: BoxFit.contain,
+                    filterQuality: FilterQuality.high,
+                    gaplessPlayback: true,
+                  ),
                 ),
-              ),
-              SizedBox(height: compact ? 4 : 8),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: (compact
-                        ? theme.textTheme.labelMedium
-                        : theme.textTheme.titleSmall)
-                    ?.copyWith(
-                      fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                      color: selected ? AppColors.brandOrange : AppColors.textPrimary,
-                      fontSize: compact ? 12 : null,
-                    ),
-              ),
-              SizedBox(height: compact ? 4 : 6),
-              Text(
-                loadKey.tr(),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.textSecondary,
-                      fontWeight: FontWeight.w600,
-                      height: 1.2,
-                      fontSize: compact ? 10 : null,
-                    ),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: (compact
+                          ? theme.textTheme.labelMedium
+                          : theme.textTheme.titleSmall)
+                      ?.copyWith(
+                        fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
+                        color: selected ? AppColors.brandOrange : AppColors.textPrimary,
+                        fontSize: compact ? 13 : 14,
+                        letterSpacing: -0.2,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  loadKey.tr(),
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: theme.textTheme.labelSmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w600,
+                        height: 1.1,
+                        fontSize: compact ? 9.5 : 11,
+                      ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

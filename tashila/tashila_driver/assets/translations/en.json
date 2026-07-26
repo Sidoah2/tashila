@@ -250,5 +250,8 @@
   "socket_connect_failed": "Could not connect to live trip updates. Offers may be delayed.",
   "offer_pickup_distance": "{km} km to pickup",
   "waiting_for_offer_title": "Listening for trips",
-  "waiting_for_offer_subtitle": "New trips appear here as cards with a live countdown on each one."
+  "waiting_for_offer_subtitle": "New trips appear here as cards with a live countdown on each one.",
+  "driver_select_city": "Select City / Location",
+  "driver_city_label": "Driver Location",
+  "driver_city_updated": "Location set to {city}"
 }

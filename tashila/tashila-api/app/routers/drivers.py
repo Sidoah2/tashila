@@ -115,6 +115,12 @@ async def register_push_token(body: PushTokenRequest, driver: dict = _driver_aut
     return await driver_service.upsert_push_token(driver["id"], body)
 
 
+@router.delete("/me", status_code=204, response_class=Response)
+async def delete_me(driver: dict = _driver_auth) -> Response:
+    await driver_service.delete_driver(driver["id"])
+    return Response(status_code=204)
+
+
 @router.delete("/me/push-token", status_code=204, response_class=Response)
 async def delete_push_token(driver: dict = _driver_auth) -> Response:
     await driver_service.remove_push_token(driver["id"])

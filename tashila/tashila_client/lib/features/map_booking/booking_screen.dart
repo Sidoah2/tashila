@@ -13,160 +13,388 @@ import 'package:tashila_client/core/formatting/app_format.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
 import 'package:tashila_client/core/widgets/primary_button.dart';
-import 'package:tashila_client/core/widgets/truck_type_card.dart';
 import 'package:tashila_client/features/map_booking/location_search_screen.dart';
 
-class BookingScreen extends ConsumerWidget {
+class BookingScreen extends ConsumerStatefulWidget {
   const BookingScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<BookingScreen> createState() => _BookingScreenState();
+}
+
+class _BookingScreenState extends ConsumerState<BookingScreen> {
+  bool _booking = false;
+
+  void _openLocationSearch(BuildContext context, {required bool isPickup}) {
+    Navigator.of(context).push<void>(
+      MaterialPageRoute<void>(
+        builder: (_) => LocationSearchScreen(isPickup: isPickup),
+      ),
+    );
+  }
+
+  Widget _modernLocationRow(
+    BuildContext context, {
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 4),
+        child: Row(
+          children: [
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 11,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    value.isNotEmpty ? value : 'search_address_hint'.tr(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: value.isNotEmpty
+                          ? AppColors.textPrimary
+                          : AppColors.textSecondary.withValues(alpha: 0.5),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+              size: 20,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final state = ref.watch(appStateProvider);
+    final theme = Theme.of(context);
+
     return Scaffold(
       body: Stack(
         children: [
-          const Positioned.fill(
-            child: _BookingMapLayer(),
-          ),
+          const Positioned.fill(child: _BookingMapLayer()),
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.all(14),
+              padding: const EdgeInsets.fromLTRB(16, 10, 16, 106),
               child: Column(
                 children: [
-                  Card(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      child: Column(
-                        children: [
-                          _locationRow(
-                            context,
-                            icon: Icons.radio_button_checked,
-                            label: 'pickup'.tr(),
-                            value: state.pickup,
-                            onTap: () => _openLocationSearch(context, isPickup: true),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 20,
+                          offset: const Offset(0, 8),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
+                    child: Row(
+                      children: [
+                        Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.circle,
+                              size: 10,
+                              color: Colors.green,
+                            ),
+                            Container(
+                              width: 1.5,
+                              height: 32,
+                              color: Colors.grey.shade300,
+                            ),
+                            const Icon(
+                              Icons.stop,
+                              size: 10,
+                              color: AppColors.brandOrange,
+                            ),
+                          ],
+                        ),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: Column(
+                            children: [
+                              _modernLocationRow(
+                                context,
+                                title: 'pickup'.tr(),
+                                value: state.pickup,
+                                onTap: () => _openLocationSearch(
+                                  context,
+                                  isPickup: true,
+                                ),
+                              ),
+                              const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 4),
+                                child: Divider(height: 1, thickness: 0.5),
+                              ),
+                              _modernLocationRow(
+                                context,
+                                title: 'dropoff'.tr(),
+                                value: state.dropoff,
+                                onTap: () => _openLocationSearch(
+                                  context,
+                                  isPickup: false,
+                                ),
+                              ),
+                            ],
                           ),
-                          const Divider(height: 6),
-                          _locationRow(
-                            context,
-                            icon: Icons.trip_origin,
-                            label: 'dropoff'.tr(),
-                            value: state.dropoff,
-                            onTap: () => _openLocationSearch(context, isPickup: false),
-                          ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                   const Spacer(),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(
-                      maxHeight: MediaQuery.sizeOf(context).height * 0.36,
-                    ),
-                    child: SingleChildScrollView(
-                      child: Container(
-                    padding: const EdgeInsets.all(14),
+                  Container(
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: const [
+                      borderRadius: BorderRadius.circular(22),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.04),
+                        width: 1.5,
+                      ),
+                      boxShadow: [
                         BoxShadow(
-                          color: Colors.black12,
-                          blurRadius: 12,
-                          offset: Offset(0, -1),
+                          color: Colors.black.withValues(alpha: 0.035),
+                          blurRadius: 18,
+                          offset: const Offset(0, 6),
                         ),
                       ],
                     ),
+                    padding: const EdgeInsets.all(14),
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Text('truck_type'.tr(), style: Theme.of(context).textTheme.titleMedium),
-                        const SizedBox(height: 8),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: TruckType.values.map((type) {
-                            final selected = type == state.selectedTruck;
-                            return Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 3),
-                                child: TruckTypeCard(
-                                  type: type,
-                                  selected: selected,
-                                  compact: true,
-                                  onTap: () =>
-                                      ref.read(appStateProvider.notifier).setTruckType(type),
-                                ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('estimated_price'.tr()),
-                            Text(
-                              formatTripPrice(state.estimatedPrice),
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Icon(
-                              Icons.info_outline,
-                              size: 18,
-                              color: AppColors.brandOrange.withValues(alpha: 0.9),
-                            ),
-                            const SizedBox(width: 8),
-                            Expanded(
-                              child: Text(
-                                'booking_delay_charges_notice'.tr(),
-                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                      color: AppColors.textSecondary,
-                                      height: 1.35,
-                                    ),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 10),
-                        if (!state.canCreateTransportRequest)
-                          Padding(
-                            padding: const EdgeInsets.only(bottom: 8),
-                            child: Text(
-                              'service_area_unavailable'.tr(),
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: Colors.red.shade800,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                        // Segmented Vehicle Type Switcher
+                        Container(
+                          height: 52,
+                          decoration: BoxDecoration(
+                            color: AppColors.bg,
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                              color: Colors.black.withValues(alpha: 0.02),
                             ),
                           ),
-                        PrimaryButton(
-                          label: 'create_request'.tr(),
-                          onPressed: state.canCreateTransportRequest
-                              ? () async {
-                                  final ok = await ref
+                          padding: const EdgeInsets.all(4),
+                          child: Row(
+                            children: TruckType.values.map((type) {
+                              final selected = type == state.selectedTruck;
+                              final label = type == TruckType.singleCabine
+                                  ? 'single_cabine'.tr()
+                                  : 'double_cabine'.tr();
+                              final asset = type == TruckType.singleCabine
+                                  ? 'assets/images/singlecabin_icon.png'
+                                  : 'assets/images/doublecabin_icon.png';
+                              final load = type == TruckType.singleCabine
+                                  ? '700kg'
+                                  : '1400kg';
+
+                              return Expanded(
+                                child: GestureDetector(
+                                  onTap: () => ref
                                       .read(appStateProvider.notifier)
-                                      .createTransportRequest();
-                                  if (!context.mounted) return;
-                                  if (ok) {
-                                    context.go('/trip');
-                                  } else if (ref.read(appStateProvider).isLoggedIn) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('create_trip_failed'.tr()),
-                                      ),
-                                    );
-                                  }
-                                }
-                              : null,
-                          icon: Icons.local_shipping,
+                                      .setTruckType(type),
+                                  child: AnimatedContainer(
+                                    duration: const Duration(milliseconds: 200),
+                                    decoration: BoxDecoration(
+                                      color: selected
+                                          ? Colors.white
+                                          : Colors.transparent,
+                                      borderRadius: BorderRadius.circular(10),
+                                      boxShadow: selected
+                                          ? [
+                                              BoxShadow(
+                                                color: Colors.black.withValues(
+                                                  alpha: 0.04,
+                                                ),
+                                                blurRadius: 6,
+                                                offset: const Offset(0, 2),
+                                              ),
+                                            ]
+                                          : [],
+                                    ),
+                                    alignment: Alignment.center,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        Image.asset(
+                                          asset,
+                                          height: 24,
+                                          fit: BoxFit.contain,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              label,
+                                              style: TextStyle(
+                                                fontWeight: selected
+                                                    ? FontWeight.w800
+                                                    : FontWeight.w600,
+                                                color: selected
+                                                    ? AppColors.brandOrange
+                                                    : AppColors.textPrimary,
+                                                fontSize: 12,
+                                              ),
+                                            ),
+                                            Text(
+                                              load,
+                                              style: TextStyle(
+                                                color: AppColors.textSecondary,
+                                                fontSize: 9,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }).toList(),
+                          ),
                         ),
+                        const SizedBox(height: 12),
+                        // Cash payment badge & Request button side-by-side
+                        Row(
+                          children: [
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                height: 52,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.bg,
+                                  borderRadius: BorderRadius.circular(14),
+                                ),
+                                child: Row(
+                                  children: [
+                                    const Icon(
+                                      Icons.payments_outlined,
+                                      color: AppColors.brandOrange,
+                                      size: 20,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Expanded(
+                                      child: Column(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            'cash'.tr(),
+                                            style: theme.textTheme.labelSmall
+                                                ?.copyWith(
+                                                  color:
+                                                      AppColors.textSecondary,
+                                                  fontWeight: FontWeight.w600,
+                                                  fontSize: 9,
+                                                ),
+                                          ),
+                                          Text(
+                                            formatTripPrice(
+                                              state.estimatedPrice,
+                                            ),
+                                            style: theme.textTheme.titleMedium
+                                                ?.copyWith(
+                                                  fontWeight: FontWeight.w900,
+                                                  color: AppColors.brandOrange,
+                                                  fontSize: 14,
+                                                  height: 1.1,
+                                                ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              flex: 5,
+                              child: SizedBox(
+                                height: 52,
+                                child: PrimaryButton(
+                                  label: 'create_request'.tr(),
+                                  isLoading: _booking,
+                                  onPressed: state.canCreateTransportRequest
+                                      ? () async {
+                                          setState(() => _booking = true);
+                                          var ok = false;
+                                          try {
+                                            ok = await ref
+                                                .read(appStateProvider.notifier)
+                                                .createTransportRequest();
+                                          } catch (_) {}
+                                          if (!mounted) return;
+                                          setState(() => _booking = false);
+                                          if (ok) {
+                                            context.go('/trip');
+                                          } else if (ref
+                                              .read(appStateProvider)
+                                              .isLoggedIn) {
+                                            ScaffoldMessenger.of(
+                                              context,
+                                            ).showSnackBar(
+                                              SnackBar(
+                                                content: Text(
+                                                  'create_trip_failed'.tr(),
+                                                ),
+                                              ),
+                                            );
+                                          }
+                                        }
+                                      : null,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (!state.canCreateTransportRequest) ...[
+                          const SizedBox(height: 8),
+                          Text(
+                            'service_area_unavailable'.tr(),
+                            textAlign: TextAlign.center,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.red.shade800,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
                       ],
-                    ),
-                  ),
                     ),
                   ),
                 ],
@@ -177,37 +405,6 @@ class BookingScreen extends ConsumerWidget {
       ),
     );
   }
-}
-
-void _openLocationSearch(BuildContext context, {required bool isPickup}) {
-  Navigator.of(context).push<void>(
-    MaterialPageRoute<void>(
-      builder: (_) => LocationSearchScreen(isPickup: isPickup),
-    ),
-  );
-}
-
-Widget _locationRow(
-  BuildContext context, {
-  required IconData icon,
-  required String label,
-  required String value,
-  required VoidCallback onTap,
-}) {
-  return ListTile(
-    onTap: onTap,
-    dense: true,
-    contentPadding: const EdgeInsets.symmetric(horizontal: 4),
-    leading: Icon(icon, size: 14, color: AppColors.brandOrange),
-    title: Text(
-      value,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: const TextStyle(fontWeight: FontWeight.w600),
-    ),
-    subtitle: Text(label, style: const TextStyle(fontSize: 12)),
-    trailing: const Icon(Icons.edit_location_alt_outlined, size: 18),
-  );
 }
 
 class _BookingMapLayer extends ConsumerStatefulWidget {
@@ -290,10 +487,7 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
         alignment: Alignment.center,
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            'map_disabled_message'.tr(),
-            textAlign: TextAlign.center,
-          ),
+          child: Text('map_disabled_message'.tr(), textAlign: TextAlign.center),
         ),
       );
     }
@@ -314,13 +508,17 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
             Marker(
               markerId: const MarkerId('pickup'),
               position: pickupMarker,
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueGreen),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueGreen,
+              ),
               infoWindow: InfoWindow(title: 'pickup'.tr()),
             ),
             Marker(
               markerId: const MarkerId('dropoff'),
               position: dropoffMarker,
-              icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
+              icon: BitmapDescriptor.defaultMarkerWithHue(
+                BitmapDescriptor.hueOrange,
+              ),
               infoWindow: InfoWindow(title: 'dropoff'.tr()),
             ),
           },
@@ -332,8 +530,24 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
             });
           },
         ),
+        if (_mapReady)
+          Positioned(
+            right: 16,
+            bottom: MediaQuery.sizeOf(context).height * 0.40 + 36,
+            child: FloatingActionButton(
+              mini: true,
+              backgroundColor: Colors.white,
+              foregroundColor: AppColors.brandOrange,
+              shape: const CircleBorder(),
+              elevation: 4,
+              onPressed: () => _fitCamera(pins.$1, pins.$2, pins.$3, pins.$4),
+              child: const Icon(Icons.gps_fixed, size: 20),
+            ),
+          ),
         if (!_mapReady)
-          const Center(child: CircularProgressIndicator(color: AppColors.brandOrange)),
+          const Center(
+            child: CircularProgressIndicator(color: AppColors.brandOrange),
+          ),
       ],
     );
   }

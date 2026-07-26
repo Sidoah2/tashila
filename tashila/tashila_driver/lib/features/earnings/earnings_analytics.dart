@@ -62,12 +62,14 @@ class EarningsAnalytics {
     final range = _periodRange(anchor, period);
     final previous = _periodRange(_shiftedAnchor(now, period, pageOffset + 1), period);
 
-    final periodTrips = allTrips
+    final validTrips = allTrips.where((t) => !t.isCancelled && t.isCompleted).toList();
+
+    final periodTrips = validTrips
         .where((t) => !t.completedAt.isBefore(range.start) && t.completedAt.isBefore(range.end))
         .toList()
       ..sort((a, b) => b.completedAt.compareTo(a.completedAt));
 
-    final previousTrips = allTrips
+    final previousTrips = validTrips
         .where((t) => !t.completedAt.isBefore(previous.start) && t.completedAt.isBefore(previous.end))
         .toList();
 

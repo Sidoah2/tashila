@@ -85,22 +85,11 @@ class _ClientRatingSheetContentState
 
     if (_submitted) {
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
             Icon(Icons.check_circle_rounded, size: 56, color: AppColors.success),
             const SizedBox(height: 12),
             Text(
@@ -157,23 +146,12 @@ class _ClientRatingSheetContentState
 
     return SingleChildScrollView(
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 40,
-                height: 5,
-                margin: const EdgeInsets.only(bottom: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary.withValues(alpha: 0.28),
-                  borderRadius: BorderRadius.circular(999),
-                ),
-              ),
-            ),
-            Icon(Icons.star_rounded, size: 36, color: AppColors.brandOrange),
+            Icon(Icons.star_rounded, size: 40, color: AppColors.brandOrange),
             const SizedBox(height: 8),
             Text(
               'rate_client'.tr(),
