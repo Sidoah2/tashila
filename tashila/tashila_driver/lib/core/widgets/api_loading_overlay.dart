@@ -10,18 +10,21 @@ class ApiOverlayManager {
     if (_overlayEntry != null) return;
     _activeCancelToken = cancelToken;
 
+    final overlayState =
+        Overlay.maybeOf(context) ??
+        Navigator.maybeOf(context, rootNavigator: true)?.overlay;
+
+    if (overlayState == null) return;
+
     _overlayEntry = OverlayEntry(
       builder: (ctx) => ApiLoadingOverlay(
         onCancel: () {
           cancel();
-          if (Navigator.of(ctx).canPop()) {
-            Navigator.of(ctx).pop();
-          }
         },
       ),
     );
 
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    overlayState.insert(_overlayEntry!);
   }
 
   static void hide() {
@@ -78,7 +81,10 @@ class ApiLoadingOverlay extends StatelessWidget {
             // Center animated Tashila brand text loader
             Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 28,
+                  vertical: 24,
+                ),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -92,9 +98,7 @@ class ApiLoadingOverlay extends StatelessWidget {
                 ),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
-                  children: const [
-                    TashilaTextLoader(),
-                  ],
+                  children: const [TashilaTextLoader()],
                 ),
               ),
             ),

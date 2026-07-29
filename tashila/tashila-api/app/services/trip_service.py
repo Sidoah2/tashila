@@ -164,6 +164,7 @@ async def _get_client_info(client_id: str) -> dict[str, Any]:
         "phone": user.get("phone"),
         "name": user.get("name"),
         "avatarUrl": user.get("avatarUrl"),
+        "rating": user.get("rating", 5.0),
     }
 
 
@@ -707,6 +708,23 @@ async def rate_client(trip_id: str, driver_id: str, rating: int, comment: str | 
             },
         },
     )
+
+    client_id = trip.get("clientId")
+    if client_id:
+        try:
+            pipeline = [
+                {"$match": {"clientId": client_id, "clientRating": {"$ne": None}}},
+                {"$group": {"_id": None, "avgRating": {"$avg": "$clientRating"}}},
+            ]
+            agg = await get_database()[TRIPS_COLLECTION].aggregate(pipeline).to_list(1)
+            if agg:
+                await get_database()[USERS_COLLECTION].update_one(
+                    {"_id": ObjectId(client_id)},
+                    {"$set": {"rating": round(agg[0]["avgRating"], 2), "updatedAt": now}},
+                )
+        except Exception:
+            pass
+
     return await _find_trip(trip_id)  # type: ignore[return-value]
 
 

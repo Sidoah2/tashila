@@ -74,6 +74,7 @@ class DriverAppState {
     this.tripStartedAt,
     this.driverLocation,
     this.error,
+    this.infoMessage,
     this.isBusy = false,
   });
 
@@ -95,6 +96,7 @@ class DriverAppState {
       (a, b) => a.expiresAt.isBefore(b.expiresAt) ? a : b,
     );
   }
+
   final TripRequest? currentRequest;
   final TripStatus tripStatus;
   final List<TripRecord> tripHistory;
@@ -102,6 +104,7 @@ class DriverAppState {
   final DateTime? tripStartedAt;
   final LatLng? driverLocation;
   final String? error;
+  final String? infoMessage;
   final bool isBusy;
 
   bool get needsProfileSetup => !(profile?.isReadyForDashboard ?? false);
@@ -143,6 +146,8 @@ class DriverAppState {
     LatLng? driverLocation,
     String? error,
     bool clearError = false,
+    String? infoMessage,
+    bool clearInfoMessage = false,
     bool? isBusy,
   }) {
     return DriverAppState(
@@ -150,8 +155,7 @@ class DriverAppState {
       adminCreated: adminCreated ?? this.adminCreated,
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
       seenOnboarding: seenOnboarding ?? this.seenOnboarding,
-      profileSetupComplete:
-          profileSetupComplete ?? this.profileSetupComplete,
+      profileSetupComplete: profileSetupComplete ?? this.profileSetupComplete,
       phone: phone ?? this.phone,
       profile: clearProfile ? null : (profile ?? this.profile),
       availability: availability ?? this.availability,
@@ -171,7 +175,8 @@ class DriverAppState {
           ? null
           : (tripStartedAt ?? this.tripStartedAt),
       driverLocation: driverLocation ?? this.driverLocation,
-      error: clearError ? null : error,
+      error: clearError ? null : (error ?? this.error),
+      infoMessage: clearInfoMessage ? null : (infoMessage ?? this.infoMessage),
       isBusy: isBusy ?? this.isBusy,
     );
   }
@@ -348,6 +353,10 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         ((dropoff['lat'] as num?) ?? 0).toDouble(),
         ((dropoff['lng'] as num?) ?? 0).toDouble(),
       ),
+      clientRating:
+          ((client['rating'] as num?) ?? (trip['clientRating'] as num?))?.toDouble(),
+      clientAvatar:
+          client['avatarUrl'] as String? ?? trip['clientAvatar'] as String?,
     );
   }
 
@@ -392,7 +401,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void _startActiveTripPolling() {
     _activeTripPollTimer?.cancel();
-    _activeTripPollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+    _activeTripPollTimer = Timer.periodic(const Duration(seconds: 3), (
+      _,
+    ) async {
       if (state.currentRequest == null) {
         _stopActiveTripPolling();
         return;
@@ -462,6 +473,32 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void clearError() => _setState(state.copyWith(clearError: true));
 
+  Future<void> updateProfile({
+    required String name,
+    required String vehicleModel,
+    required String vehicleColor,
+    required String vehiclePlate,
+  }) async {
+    _setState(state.copyWith(isBusy: true, clearError: true));
+    try {
+      final updatedProfile = (state.profile ?? DriverProfile.empty()).copyWith(
+        name: name,
+        vehicleModel: vehicleModel,
+        vehicleColor: vehicleColor,
+        vehiclePlate: vehiclePlate,
+      );
+      try {
+        await _profileRepository.saveProfile(updatedProfile);
+      } catch (_) {}
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(kProfile, jsonEncode(updatedProfile.toJson()));
+      _setState(state.copyWith(profile: updatedProfile, isBusy: false));
+    } catch (e) {
+      _setState(state.copyWith(isBusy: false, error: e.toString()));
+      rethrow;
+    }
+  }
+
   Future<void> requestOtp(String phone) async {
     _setState(state.copyWith(isBusy: true, clearError: true, phone: phone));
     try {
@@ -514,18 +551,25 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   Future<void> logout() async {
     _requestPollTimer?.cancel();
+    _offerCountdownTimer?.cancel();
     _locationTimer?.cancel();
     await _driverSocket?.disconnect();
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
+    await prefs.setBool(kSeenOnboarding, true);
     await ref.read(apiClientProvider).clearTokens();
     _setState(
       const DriverAppState(
         bootstrapped: true,
-        seenOnboarding: false,
+        isAuthenticated: false,
+        seenOnboarding: true,
         profile: null,
       ),
     );
+  }
+
+  void clearInfoMessage() {
+    _setState(state.copyWith(clearInfoMessage: true));
   }
 
   /// Clears local driver data and signs out, but keeps marketing onboarding seen
@@ -546,11 +590,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await prefs.setBool(kSeenOnboarding, true);
     }
     _setState(
-      DriverAppState(
-        bootstrapped: true,
-        seenOnboarding: seen,
-        profile: null,
-      ),
+      DriverAppState(bootstrapped: true, seenOnboarding: seen, profile: null),
     );
   }
 
@@ -582,7 +622,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(state.copyWith(isBusy: true, clearError: true));
     final current = state.profile ?? DriverProfile.empty();
     final nextTruck = truckType?.trim();
-    final truckChanged = nextTruck != null &&
+    final truckChanged =
+        nextTruck != null &&
         nextTruck.isNotEmpty &&
         nextTruck != current.truckType.trim();
     final merged = truckChanged
@@ -677,7 +718,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final updated = profile.copyWith(
       name: me['name'] as String? ?? profile.name,
       phone: me['phone'] as String? ?? profile.phone,
-      truckType: migrateTruckType(me['truckType'] as String? ?? profile.truckType),
+      truckType: migrateTruckType(
+        me['truckType'] as String? ?? profile.truckType,
+      ),
       documentsApproved: (me['approvalStatus'] as String?) == 'approved',
       avatarUrl: me['avatarUrl'] as String? ?? profile.avatarUrl,
       vehiclePlate: me['vehiclePlate'] as String? ?? profile.vehiclePlate,
@@ -692,10 +735,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(kProfileSetupComplete, profileComplete);
     _setState(
-      state.copyWith(
-        profile: updated,
-        profileSetupComplete: profileComplete,
-      ),
+      state.copyWith(profile: updated, profileSetupComplete: profileComplete),
     );
   }
 
@@ -728,13 +768,12 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Future<void> setAvailability(AvailabilityStatus status) async {
     if (status == AvailabilityStatus.online &&
         !(state.profile?.documentsApproved ?? false)) {
-      _setState(
-        state.copyWith(error: 'documents_not_approved_online'.tr()),
-      );
+      _setState(state.copyWith(error: 'documents_not_approved_online'.tr()));
       return;
     }
-    final apiStatus =
-        status == AvailabilityStatus.online ? 'online' : 'offline';
+    final apiStatus = status == AvailabilityStatus.online
+        ? 'online'
+        : 'offline';
     try {
       await _apiClient.put<Map<String, dynamic>>(
         '/drivers/me/availability',
@@ -880,10 +919,21 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       },
       onOfferExpired: (data) {
         final tripId = data['tripId'] as String?;
+        final now = DateTime.now().toUtc();
         if (tripId != null && tripId.isNotEmpty) {
+          final matching = state.incomingOffers
+              .where((o) => o.request.id == tripId)
+              .firstOrNull;
+          if (matching != null && matching.expiresAt.isAfter(now)) {
+            return;
+          }
           _clearActiveOffer(tripId: tripId);
         } else {
-          _clearActiveOffer();
+          final anyValid =
+              state.incomingOffers.any((o) => o.expiresAt.isAfter(now));
+          if (!anyValid) {
+            _clearActiveOffer();
+          }
         }
         if (state.availability == AvailabilityStatus.online &&
             state.currentRequest == null) {
@@ -908,9 +958,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       },
     );
     if (!connected && online) {
-      _setState(
-        state.copyWith(error: 'socket_connect_failed'.tr()),
-      );
+      _setState(state.copyWith(error: 'socket_connect_failed'.tr()));
     }
     _driverSocket!.setOnline(online);
   }
@@ -937,9 +985,12 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         return;
       }
       if (state.incomingOffers.isNotEmpty) {
-        final offer = await _tripRepository.fetchCurrentOffer();
-        if (offer == null) {
-          _setState(state.copyWith(clearIncomingOffers: true));
+        final now = DateTime.now().toUtc();
+        final nonExpired = state.incomingOffers
+            .where((o) => o.expiresAt.isAfter(now))
+            .toList(growable: false);
+        if (nonExpired.length != state.incomingOffers.length) {
+          _setState(state.copyWith(incomingOffers: nonExpired));
         }
         return;
       }
@@ -984,12 +1035,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         ),
       );
       final loc = LatLng(position.latitude, position.longitude);
-      _setState(
-        state.copyWith(
-          driverLocation: loc,
-          clearError: true,
-        ),
-      );
+      _setState(state.copyWith(driverLocation: loc, clearError: true));
       if (sendToServer) {
         try {
           await _apiClient.put<Map<String, dynamic>>(
@@ -1016,11 +1062,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   Future<void> refreshNearbyRequests() async {
     if (state.availability == AvailabilityStatus.offline) {
-      _setState(
-        state.copyWith(
-          error: 'driver_offline_requests_hint'.tr(),
-        ),
-      );
+      _setState(state.copyWith(error: 'driver_offline_requests_hint'.tr()));
       return;
     }
     if (state.currentRequest != null) return;
@@ -1052,10 +1094,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     if (errorCode != null) {
       _clearActiveOffer();
       _setState(
-        state.copyWith(
-          error: _acceptErrorMessage(errorCode),
-          isBusy: false,
-        ),
+        state.copyWith(error: _acceptErrorMessage(errorCode), isBusy: false),
       );
       return false;
     }
@@ -1101,10 +1140,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     if (!ok) {
       await _resyncActiveTripFromServer();
       _setState(
-        state.copyWith(
-          error: 'Could not update trip status.',
-          isBusy: false,
-        ),
+        state.copyWith(error: 'Could not update trip status.', isBusy: false),
       );
       return;
     }
@@ -1141,7 +1177,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(state.copyWith(isBusy: true));
     final ok = await _tripRepository.updateTripStatus(tripId, 'awaitingCash');
     if (!ok) {
-      _setState(state.copyWith(error: 'Could not complete trip.', isBusy: false));
+      _setState(
+        state.copyWith(error: 'Could not complete trip.', isBusy: false),
+      );
       return;
     }
     _setState(
@@ -1162,7 +1200,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(state.copyWith(isBusy: true));
     final ok = await _tripRepository.updateTripStatus(request.id, 'completed');
     if (!ok) {
-      _setState(state.copyWith(error: 'Could not confirm payment.', isBusy: false));
+      _setState(
+        state.copyWith(error: 'Could not confirm payment.', isBusy: false),
+      );
       return;
     }
 
@@ -1192,8 +1232,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         incomingOffers: tripId == null
             ? state.incomingOffers
             : state.incomingOffers
-                .where((o) => o.request.id != tripId)
-                .toList(growable: false),
+                  .where((o) => o.request.id != tripId)
+                  .toList(growable: false),
       ),
     );
   }
@@ -1209,7 +1249,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       return false;
     }
 
-    final tripId = state.currentRequest?.id ??
+    final tripId =
+        state.currentRequest?.id ??
         (state.tripHistory.isNotEmpty ? state.tripHistory.first.id : null);
     if (tripId == null) return false;
 
@@ -1220,9 +1261,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       comment: fullComment.isEmpty ? null : fullComment,
     );
     if (!ok) {
-      _setState(
-        state.copyWith(error: 'rating_submit_failed'.tr()),
-      );
+      _setState(state.copyWith(error: 'rating_submit_failed'.tr()));
       return false;
     }
 
@@ -1256,9 +1295,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(state.copyWith(isBusy: true, clearError: true));
     final ok = await _tripRepository.cancelTrip(tripId);
     if (!ok) {
-      _setState(
-        state.copyWith(error: 'Could not cancel trip.', isBusy: false),
-      );
+      _setState(state.copyWith(error: 'Could not cancel trip.', isBusy: false));
       return;
     }
     _driverSocket?.leaveTrip(tripId);
