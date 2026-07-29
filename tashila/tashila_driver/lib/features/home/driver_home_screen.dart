@@ -139,15 +139,12 @@ class DriverHomeScreen extends ConsumerWidget {
       },
       child: Scaffold(
         backgroundColor: Colors.white,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            _MapLayer(),
-            // ── TOP FLOATING HEADER BAR (White Rounded Container) ──
-            Positioned(
-              top: MediaQuery.of(context).padding.top + 8,
-              left: 14,
-              right: 14,
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(80),
+          child: SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
               child: Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -276,7 +273,7 @@ class DriverHomeScreen extends ConsumerWidget {
                     InkWell(
                       onTap:
                           isIdlePhase &&
-                              state.availability == AvailabilityStatus.online
+                          state.availability == AvailabilityStatus.online
                           ? () => notifier.refreshNearbyRequests()
                           : null,
                       borderRadius: BorderRadius.circular(18),
@@ -302,6 +299,13 @@ class DriverHomeScreen extends ConsumerWidget {
                 ),
               ),
             ),
+          ),
+        ),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            _MapLayer(),
+
             // ── GPS TARGET LOCATOR BUTTON ──
             Positioned(
               bottom: 90,
@@ -338,7 +342,7 @@ class DriverHomeScreen extends ConsumerWidget {
             // ── IDLE PHASE CARDS (STATUS + WAITING) ──
             if (isIdlePhase)
               Positioned(
-                top: MediaQuery.of(context).padding.top + 76,
+                top: MediaQuery.of(context).padding.top + kToolbarHeight + 16,
                 left: 14,
                 right: 14,
                 child: Column(
@@ -353,7 +357,7 @@ class DriverHomeScreen extends ConsumerWidget {
                         color: state.availability == AvailabilityStatus.online
                             ? const Color(0xFFDCFCE7)
                             : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(22),
                         border: Border.all(
                           color: state.availability == AvailabilityStatus.online
                               ? const Color(0xFF86EFAC)
@@ -373,8 +377,7 @@ class DriverHomeScreen extends ConsumerWidget {
                                   fontSize: 13,
                                   fontWeight: FontWeight.bold,
                                   color:
-                                      state.availability ==
-                                          AvailabilityStatus.online
+                                      state.availability == AvailabilityStatus.online
                                       ? const Color(0xFF166534)
                                       : Colors.grey.shade700,
                                 ),
@@ -387,8 +390,7 @@ class DriverHomeScreen extends ConsumerWidget {
                                     height: 10,
                                     decoration: BoxDecoration(
                                       color:
-                                          state.availability ==
-                                              AvailabilityStatus.online
+                                          state.availability == AvailabilityStatus.online
                                           ? const Color(0xFF22C55E)
                                           : Colors.grey,
                                       shape: BoxShape.circle,
@@ -398,16 +400,14 @@ class DriverHomeScreen extends ConsumerWidget {
                                   Text(
                                     !documentsApproved
                                         ? 'documents_not_approved_online'.tr()
-                                        : state.availability ==
-                                              AvailabilityStatus.online
+                                        : state.availability == AvailabilityStatus.online
                                         ? 'online'.tr()
                                         : 'offline'.tr(),
                                     style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.w800,
                                       color:
-                                          state.availability ==
-                                              AvailabilityStatus.online
+                                          state.availability == AvailabilityStatus.online
                                           ? const Color(0xFF15803D)
                                           : Colors.grey.shade700,
                                     ),
@@ -419,8 +419,7 @@ class DriverHomeScreen extends ConsumerWidget {
                           ElevatedButton.icon(
                             onPressed: documentsApproved
                                 ? () => notifier.setAvailability(
-                                    state.availability ==
-                                            AvailabilityStatus.online
+                                    state.availability == AvailabilityStatus.online
                                         ? AvailabilityStatus.offline
                                         : AvailabilityStatus.online,
                                   )
@@ -442,8 +441,7 @@ class DriverHomeScreen extends ConsumerWidget {
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  state.availability ==
-                                      AvailabilityStatus.online
+                                  state.availability == AvailabilityStatus.online
                                   ? const Color(0xFF22C55E)
                                   : Colors.grey.shade600,
                               elevation: 0,
