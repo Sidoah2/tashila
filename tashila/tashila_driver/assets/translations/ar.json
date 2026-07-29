@@ -44,6 +44,8 @@
   "availability_label": "الحالة",
   "online": "متصل",
   "offline": "غير متصل",
+  "waiting_for_offers_title": "في انتظار الرحلات",
+  "waiting_for_offers_subtitle": "تظهر الرحلات الجديدة هنا كبطاقات مع عد تنازلي حي على كل بطاقة.",
   "refresh_requests": "تحديث الطلبات القريبة",
   "requests_panel_heading": "طلبات الرحلات",
   "requests_deck_title": "طلبات الرحلات",
