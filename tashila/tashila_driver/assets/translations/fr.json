@@ -264,5 +264,11 @@
   "ignore": "Ignorer",
   "total_price_label": "Prix Total Final",
   "dzd_currency": "DZD",
-  "trip_duration": "Durée du trajet"
+  "trip_duration": "Durée du trajet",
+  "total_balance": "Solde total",
+  "daily": "Quotidien",
+  "monthly": "Mensuel",
+  "yearly": "Annuel",
+  "order_completed": "Course terminée",
+  "documents_approved": "Documents approuvés"
 }
