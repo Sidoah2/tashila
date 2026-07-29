@@ -930,7 +930,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
     required String buttonText,
     required VoidCallback onButtonPressed,
   }) {
-    final ratingVal = request.clientRating ?? 4.5;
+    final ratingVal = request.clientRating ?? 5.0;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -965,7 +965,8 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                       width: 72,
                       height: 80,
                       color: AppColors.brandOrange.withValues(alpha: 0.12),
-                      child: request.clientAvatar != null &&
+                      child:
+                          request.clientAvatar != null &&
                               request.clientAvatar!.trim().isNotEmpty
                           ? Image.network(
                               request.clientAvatar!,

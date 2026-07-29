@@ -159,12 +159,28 @@ async def _get_client_info(client_id: str) -> dict[str, Any]:
     user = await get_database()[USERS_COLLECTION].find_one({"_id": user_oid})
     if user is None:
         return {"id": client_id}
+
+    rating = user.get("rating")
+    if rating is None:
+        try:
+            pipeline = [
+                {"$match": {"clientId": client_id, "clientRating": {"$ne": None}}},
+                {"$group": {"_id": None, "avgRating": {"$avg": "$clientRating"}}},
+            ]
+            agg = await get_database()[TRIPS_COLLECTION].aggregate(pipeline).to_list(1)
+            if agg and agg[0].get("avgRating") is not None:
+                rating = round(float(agg[0]["avgRating"]), 2)
+            else:
+                rating = 5.0
+        except Exception:
+            rating = 5.0
+
     return {
         "id": str(user["_id"]),
         "phone": user.get("phone"),
         "name": user.get("name"),
         "avatarUrl": user.get("avatarUrl"),
-        "rating": user.get("rating", 5.0),
+        "rating": rating,
     }
 
 
