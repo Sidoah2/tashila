@@ -138,60 +138,334 @@ class DriverHomeScreen extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        drawer: const DriverDrawer(),
         backgroundColor: Colors.white,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          elevation: 0,
-          centerTitle: true,
-          leading: Builder(
-            builder: (drawerCtx) => IconButton(
-              icon: const Icon(
-                Icons.menu_rounded,
-                color: AppColors.textPrimary,
-                size: 24,
-              ),
-              onPressed: () => Scaffold.of(drawerCtx).openDrawer(),
-            ),
-          ),
-          title: const Text(
-            'Home',
-            style: TextStyle(
-              color: AppColors.textPrimary,
-              fontWeight: FontWeight.w800,
-              fontSize: 18,
-            ),
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(
-                Icons.power_settings_new_rounded,
-                color: state.availability == AvailabilityStatus.online
-                    ? Colors.green
-                    : Colors.grey.shade400,
-                size: 24,
-              ),
-              tooltip: state.availability == AvailabilityStatus.online
-                  ? 'go_offline'.tr()
-                  : 'go_online'.tr(),
-              onPressed: () => notifier.setAvailability(
-                state.availability == AvailabilityStatus.online
-                    ? AvailabilityStatus.offline
-                    : AvailabilityStatus.online,
-              ),
-            ),
-          ],
-        ),
         body: Stack(
           fit: StackFit.expand,
           children: [
             _MapLayer(),
-            if (isIdlePhase && showWaitingForOffer)
-              const Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                child: WaitingForOfferCard(),
+            // ── TOP FLOATING HEADER BAR (White Rounded Container) ──
+            Positioned(
+              top: MediaQuery.of(context).padding.top + 8,
+              left: 14,
+              right: 14,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(24),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.08),
+                      blurRadius: 16,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    // App Title Orange Badge
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.brandOrange,
+                        borderRadius: BorderRadius.circular(18),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const Icon(
+                            Icons.local_shipping_rounded,
+                            color: Colors.white,
+                            size: 17,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            'app_title'.tr(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+
+                    // Location Dropdown Selector Pill
+                    InkWell(
+                      onTap: () => _showCitySelectionSheet(context, ref),
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 7,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandOrange.withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(18),
+                          border: Border.all(
+                            color: AppColors.brandOrange.withValues(alpha: 0.2),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.location_on_rounded,
+                              color: AppColors.brandOrange,
+                              size: 17,
+                            ),
+                            const SizedBox(width: 4),
+                            Icon(
+                              Icons.keyboard_arrow_down_rounded,
+                              color: Colors.grey.shade700,
+                              size: 17,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+
+                    const Spacer(),
+
+                    // Earnings Pill
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.brandOrange.withValues(alpha: 0.06),
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: AppColors.brandOrange.withValues(alpha: 0.2),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            formatTripPrice(
+                              state.platformEarnings?.totalEarnedDzd ?? 0,
+                            ),
+                            style: const TextStyle(
+                              color: AppColors.brandOrange,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 12.5,
+                            ),
+                          ),
+                          const SizedBox(width: 5),
+                          const Icon(
+                            Icons.account_balance_wallet_rounded,
+                            color: AppColors.brandOrange,
+                            size: 15,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+
+                    // Refresh Button
+                    InkWell(
+                      onTap:
+                          isIdlePhase &&
+                              state.availability == AvailabilityStatus.online
+                          ? () => notifier.refreshNearbyRequests()
+                          : null,
+                      borderRadius: BorderRadius.circular(18),
+                      child: Container(
+                        padding: const EdgeInsets.all(7),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandOrange.withValues(alpha: 0.08),
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: AppColors.brandOrange.withValues(
+                              alpha: 0.25,
+                            ),
+                          ),
+                        ),
+                        child: const Icon(
+                          Icons.refresh_rounded,
+                          color: AppColors.brandOrange,
+                          size: 17,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            // ── GPS TARGET LOCATOR BUTTON ──
+            Positioned(
+              bottom: 90,
+              right: 16,
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.grey.shade200),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.12),
+                      blurRadius: 10,
+                      offset: const Offset(0, 3),
+                    ),
+                  ],
+                ),
+                child: IconButton(
+                  icon: const Icon(
+                    Icons.my_location_rounded,
+                    color: AppColors.textPrimary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    final loc = state.driverLocation;
+                    if (loc != null) {
+                      notifier.refreshDriverLocation(sendToServer: false);
+                    }
+                  },
+                ),
+              ),
+            ),
+
+            // ── IDLE PHASE CARDS (STATUS + WAITING) ──
+            if (isIdlePhase)
+              Positioned(
+                top: MediaQuery.of(context).padding.top + 76,
+                left: 14,
+                right: 14,
+                child: Column(
+                  children: [
+                    // Status Card (Light Green Container)
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 14,
+                      ),
+                      decoration: BoxDecoration(
+                        color: state.availability == AvailabilityStatus.online
+                            ? const Color(0xFFDCFCE7)
+                            : Colors.grey.shade100,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: state.availability == AvailabilityStatus.online
+                              ? const Color(0xFF86EFAC)
+                              : Colors.grey.shade300,
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                'availability_label'.tr(),
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                  color:
+                                      state.availability ==
+                                          AvailabilityStatus.online
+                                      ? const Color(0xFF166534)
+                                      : Colors.grey.shade700,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Row(
+                                children: [
+                                  Container(
+                                    width: 10,
+                                    height: 10,
+                                    decoration: BoxDecoration(
+                                      color:
+                                          state.availability ==
+                                              AvailabilityStatus.online
+                                          ? const Color(0xFF22C55E)
+                                          : Colors.grey,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    !documentsApproved
+                                        ? 'documents_not_approved_online'.tr()
+                                        : state.availability ==
+                                              AvailabilityStatus.online
+                                        ? 'online'.tr()
+                                        : 'offline'.tr(),
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w800,
+                                      color:
+                                          state.availability ==
+                                              AvailabilityStatus.online
+                                          ? const Color(0xFF15803D)
+                                          : Colors.grey.shade700,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          ElevatedButton.icon(
+                            onPressed: documentsApproved
+                                ? () => notifier.setAvailability(
+                                    state.availability ==
+                                            AvailabilityStatus.online
+                                        ? AvailabilityStatus.offline
+                                        : AvailabilityStatus.online,
+                                  )
+                                : null,
+                            icon: const Icon(
+                              Icons.power_settings_new_rounded,
+                              size: 18,
+                              color: Colors.white,
+                            ),
+                            label: Text(
+                              state.availability == AvailabilityStatus.online
+                                  ? 'online'.tr()
+                                  : 'offline'.tr(),
+                              style: const TextStyle(
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13.5,
+                                color: Colors.white,
+                              ),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor:
+                                  state.availability ==
+                                      AvailabilityStatus.online
+                                  ? const Color(0xFF22C55E)
+                                  : Colors.grey.shade600,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 10,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    if (showWaitingForOffer) ...[
+                      const SizedBox(height: 12),
+                      const WaitingForOfferCard(),
+                    ],
+                  ],
+                ),
               ),
             if (!isIdlePhase && activeRequest != null)
               if (state.tripStatus == TripStatus.headingToClient ||
@@ -1195,15 +1469,6 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'loading_please_wait'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
-                              ),
-                            ),
                           ],
                         )
                       : Text(
@@ -1481,15 +1746,6 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                               child: CircularProgressIndicator(
                                 strokeWidth: 2.5,
                                 color: Colors.white,
-                              ),
-                            ),
-                            const SizedBox(width: 10),
-                            Text(
-                              'loading_please_wait'.tr(),
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontWeight: FontWeight.bold,
-                                fontSize: 15,
                               ),
                             ),
                           ],
@@ -1873,15 +2129,6 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                         child: CircularProgressIndicator(
                           strokeWidth: 2.5,
                           color: Colors.white,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Text(
-                        'loading_please_wait'.tr(),
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
                         ),
                       ),
                     ],
