@@ -10,18 +10,20 @@ class ApiOverlayManager {
     if (_overlayEntry != null) return;
     _activeCancelToken = cancelToken;
 
+    final overlayState = Overlay.maybeOf(context) ??
+        Navigator.maybeOf(context, rootNavigator: true)?.overlay;
+
+    if (overlayState == null) return;
+
     _overlayEntry = OverlayEntry(
       builder: (ctx) => ApiLoadingOverlay(
         onCancel: () {
           cancel();
-          if (Navigator.of(ctx).canPop()) {
-            Navigator.of(ctx).pop();
-          }
         },
       ),
     );
 
-    Overlay.of(context, rootOverlay: true).insert(_overlayEntry!);
+    overlayState.insert(_overlayEntry!);
   }
 
   static void hide() {

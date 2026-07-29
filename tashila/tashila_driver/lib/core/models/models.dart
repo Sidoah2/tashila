@@ -21,6 +21,7 @@ String migrateTruckType(String? raw) {
 enum DocumentType {
   drivingLicense,
   vehicleRegistration,
+
   /// Exterior photo of the truck (cargo area / vehicle).
   vehiclePhoto,
 }
@@ -70,12 +71,16 @@ enum AvailabilityStatus { offline, online }
 
 enum TripStatus {
   idle,
+
   /// Stage 1: driver accepted — heading to client; cancel allowed; "arrived" advances.
   headingToClient,
+
   /// Stage 2: trip in progress — no cancel; "end trip" when done.
   tripInProgress,
+
   /// Stage 3: summary + confirm payment.
   tripCompletedSummary,
+
   /// After payment — rate client, then return to idle.
   awaitingClientRating,
 }
@@ -97,10 +102,13 @@ class DriverDocument {
   });
 
   final DocumentType type;
+
   /// Human-readable file name (never a remote URL).
   final String? fileName;
+
   /// On-device path for immediate preview after picking.
   final String? localFilePath;
+
   /// Cloud / CDN URL returned by the API after upload.
   final String? remoteUrl;
   final DocumentUploadStatus status;
@@ -142,8 +150,9 @@ class DriverDocument {
     return DriverDocument(
       type: type,
       fileName: fileName ?? this.fileName,
-      localFilePath:
-          clearLocalFilePath ? null : (localFilePath ?? this.localFilePath),
+      localFilePath: clearLocalFilePath
+          ? null
+          : (localFilePath ?? this.localFilePath),
       remoteUrl: remoteUrl ?? this.remoteUrl,
       status: status ?? this.status,
     );
@@ -345,7 +354,7 @@ class IncomingOffer {
     this.pickupDistanceKm,
   }) : offeredAt = offeredAt ?? DateTime.now().toUtc();
 
-  static const int defaultTtlSeconds = 180;
+  static const int defaultTtlSeconds = 180; // 3 minutes (180 seconds)
 
   final TripRequest request;
   final DateTime expiresAt;
@@ -355,7 +364,7 @@ class IncomingOffer {
 
   Duration get remaining => expiresAt.difference(DateTime.now().toUtc());
 
-  int get remainingSeconds => remaining.inSeconds.clamp(0, 999);
+  int get remainingSeconds => remaining.inSeconds.clamp(0, 3600);
 
   int get ttlSeconds {
     final secs = expiresAt.difference(offeredAt).inSeconds;
@@ -373,18 +382,19 @@ class IncomingOffer {
   }
 
   static DateTime parseExpiresAt(String? raw) {
+    final now = DateTime.now().toUtc();
     if (raw == null || raw.isEmpty) {
-      return DateTime.now().toUtc().add(
-        const Duration(seconds: defaultTtlSeconds),
-      );
+      return now.add(const Duration(seconds: defaultTtlSeconds));
     }
     final parsed = DateTime.tryParse(raw);
     if (parsed == null) {
-      return DateTime.now().toUtc().add(
-        const Duration(seconds: defaultTtlSeconds),
-      );
+      return now.add(const Duration(seconds: defaultTtlSeconds));
     }
-    return parsed.isUtc ? parsed : parsed.toUtc();
+    final utc = parsed.isUtc ? parsed : parsed.toUtc();
+    if (utc.difference(now).inSeconds < defaultTtlSeconds) {
+      return now.add(const Duration(seconds: defaultTtlSeconds));
+    }
+    return utc;
   }
 
   static IncomingOffer? fromSocketPayload(Map<String, dynamic> data) {
@@ -414,6 +424,8 @@ class IncomingOffer {
         pickupLatLng: LatLng(pickupLat, pickupLng),
         dropOffLatLng: LatLng(dropoffLat, dropoffLng),
         truckType: migrateTruckType(data['truckType'] as String?),
+        clientRating: ((client['rating'] as num?) ?? (data['clientRating'] as num?))?.toDouble(),
+        clientAvatar: client['avatarUrl'] as String? ?? data['clientAvatar'] as String?,
       ),
       expiresAt: expiresAt,
       offeredAt: offeredAt,
@@ -437,6 +449,8 @@ class TripRequest {
     this.expiresAt,
     this.clientPhone = '',
     this.truckType = '',
+    this.clientRating,
+    this.clientAvatar,
   });
 
   final String id;
@@ -447,6 +461,9 @@ class TripRequest {
   final String dropOff;
   final double fare;
   final double distanceKm;
+  final double? clientRating;
+  final String? clientAvatar;
+
   /// Route ETA in minutes from the platform (null if unknown).
   final int? estimatedDurationMinutes;
   final LatLng pickupLatLng;
@@ -489,7 +506,10 @@ class TripRecord {
   final bool cashConfirmed;
   final String status;
 
-  bool get isCompleted => status == 'completed' || status == 'awaitingCash' || status == 'awaitingPayment';
+  bool get isCompleted =>
+      status == 'completed' ||
+      status == 'awaitingCash' ||
+      status == 'awaitingPayment';
   bool get isCancelled => status.contains('cancel');
 
   TripRecord copyWith({
@@ -553,16 +573,16 @@ class TripRecord {
     return TripRecord(
       id: id.toString(),
       clientName: json['clientName'] as String? ?? '',
-      pickup: pickup['address'] as String? ??
-          '${pickup['lat']},${pickup['lng']}',
-      dropOff: dropoff['address'] as String? ??
+      pickup:
+          pickup['address'] as String? ?? '${pickup['lat']},${pickup['lng']}',
+      dropOff:
+          dropoff['address'] as String? ??
           '${dropoff['lat']},${dropoff['lng']}',
       distanceKm: (json['distanceKm'] as num?)?.toDouble() ?? 0,
       fare: ((json['finalFare'] as num?) ?? (json['fare'] as num?) ?? 0)
           .toDouble(),
       estimatedDurationMinutes: (json['estimatedMinutes'] as num?)?.toInt(),
-      startedAt:
-          startedRaw != null ? DateTime.tryParse(startedRaw) : null,
+      startedAt: startedRaw != null ? DateTime.tryParse(startedRaw) : null,
       completedAt: completedAt,
       rating: (json['clientRating'] as num?)?.toInt(),
       comment: json['clientRatingComment'] as String? ?? '',

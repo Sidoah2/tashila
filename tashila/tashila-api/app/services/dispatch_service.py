@@ -154,6 +154,8 @@ def _offer_socket_payload(
         "client": {
             "name": client.get("name"),
             "phone": client.get("phone"),
+            "avatarUrl": client.get("avatarUrl"),
+            "rating": client.get("rating", 5.0),
         },
     }
 

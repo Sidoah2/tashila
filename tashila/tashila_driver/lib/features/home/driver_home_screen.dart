@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -14,8 +16,6 @@ import '../../core/formatting/app_format.dart';
 import '../../core/models/models.dart';
 import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
-import '../../core/widgets/rating_sheet_host.dart';
-import '../../core/widgets/trip_stage_indicator.dart';
 import 'trip_requests_deck.dart';
 import 'waiting_for_offer_card.dart';
 
@@ -25,7 +25,7 @@ String _estimatedDurationValue(int? minutes) {
 }
 
 Future<void> _openClientRatingBottomSheet(BuildContext context) async {
-  await showRequiredClientRatingSheet(context);
+  context.go('/rate-client');
 }
 
 class DriverHomeScreen extends ConsumerWidget {
@@ -48,6 +48,87 @@ class DriverHomeScreen extends ConsumerWidget {
         state.incomingOffers.isNotEmpty;
     final documentsApproved = state.profile?.documentsApproved ?? false;
 
+    ref.listen(driverAppStateProvider, (previous, next) {
+      if (next.infoMessage != null &&
+          next.infoMessage != previous?.infoMessage) {
+        showDialog(
+          context: context,
+          builder: (ctx) => Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 10,
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.orange.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.warning_amber_rounded,
+                      size: 32,
+                      color: AppColors.brandOrange,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'trip_cancelled_title'.tr(),
+                    style: const TextStyle(
+                      fontSize: 19,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    next.infoMessage!,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey.shade700,
+                      height: 1.35,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 20),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 46,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        notifier.clearInfoMessage();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.brandOrange,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                      ),
+                      child: Text(
+                        'ok'.tr(),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      }
+    });
+
     return PopScope(
       canPop: state.tripStatus != TripStatus.awaitingClientRating,
       onPopInvokedWithResult: (didPop, result) {
@@ -57,277 +138,100 @@ class DriverHomeScreen extends ConsumerWidget {
         }
       },
       child: Scaffold(
-        backgroundColor: Colors.black,
-        extendBodyBehindAppBar: true,
+        drawer: const DriverDrawer(),
+        backgroundColor: Colors.white,
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          centerTitle: true,
+          leading: Builder(
+            builder: (drawerCtx) => IconButton(
+              icon: const Icon(
+                Icons.menu_rounded,
+                color: AppColors.textPrimary,
+                size: 24,
+              ),
+              onPressed: () => Scaffold.of(drawerCtx).openDrawer(),
+            ),
+          ),
+          title: const Text(
+            'Home',
+            style: TextStyle(
+              color: AppColors.textPrimary,
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+            ),
+          ),
+          actions: [
+            IconButton(
+              icon: Icon(
+                Icons.power_settings_new_rounded,
+                color: state.availability == AvailabilityStatus.online
+                    ? Colors.green
+                    : Colors.grey.shade400,
+                size: 24,
+              ),
+              tooltip: state.availability == AvailabilityStatus.online
+                  ? 'go_offline'.tr()
+                  : 'go_online'.tr(),
+              onPressed: () => notifier.setAvailability(
+                state.availability == AvailabilityStatus.online
+                    ? AvailabilityStatus.offline
+                    : AvailabilityStatus.online,
+              ),
+            ),
+          ],
+        ),
         body: Stack(
           fit: StackFit.expand,
           children: [
             _MapLayer(),
-            // ── TOP HUD ──────────────────────────────────────────────────
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: SafeArea(
-                bottom: false,
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(14, 10, 14, 0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      // Brand header bar & City Selector
-                      _GlassCard(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        child: Row(
-                          children: [
-                            // Logo pill
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 6,
-                              ),
-                              decoration: BoxDecoration(
-                                gradient: const LinearGradient(
-                                  colors: [
-                                    AppColors.brandOrange,
-                                    Color(0xFFFF9E80),
-                                  ],
-                                ),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  const Icon(
-                                    Icons.local_shipping_rounded,
-                                    color: Colors.white,
-                                    size: 16,
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    'app_title'.tr(),
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 13,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            // City location selector
-                            Expanded(
-                              child: _DriverCityPill(
-                                location: state.driverLocation,
-                                onTap: () =>
-                                    _showCitySelectionSheet(context, ref),
-                              ),
-                            ),
-                            // Today's earnings mini badge
-                            if (state.tripHistory.isNotEmpty) ...[
-                              const SizedBox(width: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.brandOrange.withValues(
-                                    alpha: 0.1,
-                                  ),
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: AppColors.brandOrange.withValues(
-                                      alpha: 0.25,
-                                    ),
-                                  ),
-                                ),
-                                child: Row(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    const Icon(
-                                      Icons.account_balance_wallet_outlined,
-                                      size: 13,
-                                      color: AppColors.brandOrange,
-                                    ),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      dzdCurrency().format(
-                                        _todayEarnings(state.tripHistory),
-                                      ),
-                                      style: const TextStyle(
-                                        color: AppColors.brandOrange,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w800,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ],
-
-                            if (isIdlePhase &&
-                                state.availability ==
-                                    AvailabilityStatus.online) ...[
-                              const SizedBox(width: 4),
-                              _MapIconButton(
-                                icon: Icons.refresh_rounded,
-                                tooltip: 'refresh_requests'.tr(),
-                                onTap: () => notifier.refreshNearbyRequests(),
-                              ),
-                            ],
-                          ],
-                        ),
+            if (isIdlePhase && showWaitingForOffer)
+              const Positioned(
+                top: 0,
+                left: 0,
+                right: 0,
+                child: WaitingForOfferCard(),
+              ),
+            if (!isIdlePhase && activeRequest != null)
+              if (state.tripStatus == TripStatus.headingToClient ||
+                  state.tripStatus == TripStatus.tripInProgress ||
+                  state.tripStatus == TripStatus.tripCompletedSummary ||
+                  state.tripStatus == TripStatus.awaitingClientRating)
+                Positioned(
+                  left: 0,
+                  right: 0,
+                  bottom: 0,
+                  child: _ActiveTripPanel(
+                    request: activeRequest,
+                    state: state,
+                    notifier: notifier,
+                    compact: true,
+                  ),
+                )
+              else
+                Positioned(
+                  left: 24,
+                  right: 24,
+                  bottom: 20,
+                  child: _GlassCard(
+                    padding: EdgeInsets.zero,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
+                      child: _ActiveTripPanel(
+                        request: activeRequest,
+                        state: state,
+                        notifier: notifier,
+                        compact: true,
                       ),
-                      if (isIdlePhase) ...[
-                        const SizedBox(height: 8),
-                        // Availability container (Full width card, 0 overflow)
-                        _AvailabilityToggle(
-                          isOnline:
-                              state.availability == AvailabilityStatus.online,
-                          documentsApproved: documentsApproved,
-                          onChanged: (on) {
-                            if (!documentsApproved) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  backgroundColor: Colors.transparent,
-                                  elevation: 0,
-                                  behavior: SnackBarBehavior.floating,
-                                  content: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 16,
-                                      vertical: 12,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: Colors.orange.shade900.withValues(
-                                        alpha: 0.95,
-                                      ),
-                                      borderRadius: BorderRadius.circular(16),
-                                      border: Border.all(
-                                        color: Colors.orange.shade400,
-                                        width: 1.5,
-                                      ),
-                                    ),
-                                    child: Row(
-                                      children: [
-                                        const Icon(
-                                          Icons.info_outline_rounded,
-                                          color: Colors.white,
-                                          size: 20,
-                                        ),
-                                        const SizedBox(width: 10),
-                                        Expanded(
-                                          child: Text(
-                                            'documents_not_approved_online'
-                                                .tr(),
-                                            style: const TextStyle(
-                                              color: Colors.white,
-                                              fontWeight: FontWeight.w600,
-                                              fontSize: 13,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              );
-                              return;
-                            }
-                            notifier.setAvailability(
-                              on
-                                  ? AvailabilityStatus.online
-                                  : AvailabilityStatus.offline,
-                            );
-                          },
-                        ),
-                        if (showWaitingForOffer) ...[
-                          const SizedBox(height: 8),
-                          const WaitingForOfferCard(),
-                        ],
-                      ],
-                    ],
+                    ),
                   ),
                 ),
-              ),
-            ),
-            if (!isIdlePhase)
-              Positioned(
-                left: 14,
-                right: 14,
-                bottom: 104,
-                child: _GlassCard(
-                  padding: EdgeInsets.zero,
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      // Top orange gradient accent bar
-                      Container(
-                        height: 4,
-                        decoration: const BoxDecoration(
-                          gradient: LinearGradient(
-                            colors: [AppColors.brandOrange, Color(0xFFFF9E80)],
-                          ),
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            TripStageIndicator(
-                              status: state.tripStatus,
-                              compact: true,
-                            ),
-                            const SizedBox(height: 10),
-                            if (activeRequest != null)
-                              _ActiveTripPanel(
-                                request: activeRequest,
-                                state: state,
-                                notifier: notifier,
-                                compact: true,
-                              ),
-                            if (state.error != null) ...[
-                              const SizedBox(height: 6),
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 8,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.red.shade50,
-                                  borderRadius: BorderRadius.circular(10),
-                                  border: Border.all(
-                                    color: Colors.red.shade200,
-                                  ),
-                                ),
-                                child: Text(
-                                  state.error!,
-                                  style: TextStyle(
-                                    color: Colors.red.shade800,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
             if (showOffersDeck)
               Positioned(
-                left: 14,
-                right: 14,
-                bottom: 104,
+                left: 12,
+                right: 12,
+                bottom: 20,
                 child: TripRequestsDeck(
                   offers: state.incomingOffers,
                   notifier: notifier,
@@ -369,30 +273,24 @@ class _GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(20),
-      child: BackdropFilter(
-        filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: padding,
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.88),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: Colors.white.withValues(alpha: 0.6),
-              width: 1.5,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.08),
-                blurRadius: 24,
-                offset: const Offset(0, 6),
-              ),
-            ],
-          ),
-          child: child,
+    return Container(
+      padding: padding,
+      decoration: BoxDecoration(
+        color: Colors.white.withValues(alpha: 0.88),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.6),
+          width: 1.5,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 24,
+            offset: const Offset(0, 6),
+          ),
+        ],
       ),
+      child: child,
     );
   }
 }
@@ -971,7 +869,7 @@ class _DriverRouteEndpointsRow extends StatelessWidget {
   }
 }
 
-class _ActiveTripPanel extends StatelessWidget {
+class _ActiveTripPanel extends StatefulWidget {
   const _ActiveTripPanel({
     required this.request,
     required this.state,
@@ -984,156 +882,23 @@ class _ActiveTripPanel extends StatelessWidget {
   final DriverAppNotifier notifier;
   final bool compact;
 
-  static ButtonStyle _denseFilled(BuildContext context) {
-    return FilledButton.styleFrom(
-      visualDensity: VisualDensity.compact,
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      textStyle: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-    );
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final latestTrip = state.tripHistory.isNotEmpty
-        ? state.tripHistory.first
-        : null;
-    final gap = compact ? 6.0 : 12.0;
-    final gapSm = compact ? 4.0 : 8.0;
+  State<_ActiveTripPanel> createState() => _ActiveTripPanelState();
+}
 
-    final TripRecord? summaryRecord = switch (state.tripStatus) {
-      TripStatus.awaitingClientRating => latestTrip,
-      TripStatus.tripCompletedSummary => TripRecord(
-        id: request.id,
-        clientName: request.clientName,
-        pickup: request.pickup,
-        dropOff: request.dropOff,
-        distanceKm: request.distanceKm,
-        fare: request.fare,
-        estimatedDurationMinutes: request.estimatedDurationMinutes,
-        startedAt: state.tripStartedAt,
-        completedAt: DateTime.now(),
-      ),
-      _ => null,
-    };
+class _ActiveTripPanelState extends State<_ActiveTripPanel> {
+  bool _expanded = false;
 
-    final meta =
-        '${westernDigits(request.distanceKm.toStringAsFixed(1))} ${'km_unit'.tr()}'
-        '${request.estimatedDurationMinutes != null && request.estimatedDurationMinutes! > 0 ? ' · ${'trip_estimated_duration_inline'.tr(namedArgs: {'duration': _estimatedDurationValue(request.estimatedDurationMinutes)})}' : ''}';
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        if (summaryRecord != null) ...[
-          _TripConclusionCard(record: summaryRecord, compact: compact),
-          SizedBox(height: gap),
-        ],
-        if (state.tripStatus == TripStatus.headingToClient ||
-            state.tripStatus == TripStatus.tripInProgress ||
-            state.tripStatus == TripStatus.tripCompletedSummary ||
-            state.tripStatus == TripStatus.awaitingClientRating) ...[
-          _CompactClientRow(request: request, compact: compact),
-          SizedBox(height: gap),
-        ],
-        if (state.tripStatus != TripStatus.tripCompletedSummary &&
-            state.tripStatus != TripStatus.awaitingClientRating) ...[
-          _DriverRouteEndpointsRow(
-            pickup: request.pickup,
-            dropOff: request.dropOff,
-            onPickupTap: () => _openGoogleMapsLocation(request.pickupLatLng),
-            onDropoffTap: () => _openGoogleMapsLocation(request.dropOffLatLng),
-            compact: compact,
-          ),
-          SizedBox(height: gapSm),
-          Text(
-            meta,
-            textAlign: TextAlign.center,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-              fontSize: compact ? 11 : null,
-            ),
-          ),
-        ],
-        if (state.tripStatus == TripStatus.tripInProgress) ...[
-          SizedBox(height: compact ? 6 : 10),
-          _VehicleInfoLine(
-            truckType: state.profile?.truckType ?? '',
-            vehiclePlate: state.profile?.vehiclePlate ?? '',
-            vehicleColor: state.profile?.vehicleColor ?? '',
-            vehicleModel: state.profile?.vehicleModel ?? '',
-            compact: compact,
-          ),
-        ],
-        SizedBox(height: gap),
-        if (state.tripStatus == TripStatus.headingToClient)
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Expanded(
-                child: FilledButton.icon(
-                  style: _denseFilled(context),
-                  onPressed: notifier.confirmArrivedAtClient,
-                  icon: Icon(
-                    Icons.flag_circle_outlined,
-                    size: compact ? 18 : 20,
-                  ),
-                  label: Text(
-                    'driver_arrived_at_client'.tr(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ),
-              const SizedBox(width: 8),
-              Tooltip(
-                message: 'cancel_trip'.tr(),
-                child: Material(
-                  color: Colors.red.shade50,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    side: BorderSide(color: Colors.red.shade200),
-                  ),
-                  child: InkWell(
-                    onTap: notifier.cancelActiveTrip,
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: compact ? 42 : 46,
-                      height: compact ? 42 : 46,
-                      child: Icon(
-                        Icons.close_rounded,
-                        color: Colors.red.shade800,
-                        size: compact ? 22 : 24,
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          )
-        else if (state.tripStatus == TripStatus.tripInProgress)
-          FilledButton.icon(
-            style: _denseFilled(context),
-            onPressed: notifier.completeTrip,
-            icon: Icon(Icons.flag_outlined, size: compact ? 18 : 20),
-            label: Text('complete_trip'.tr()),
-          )
-        else if (state.tripStatus == TripStatus.tripCompletedSummary)
-          FilledButton.icon(
-            style: _denseFilled(context),
-            onPressed: notifier.confirmCashReceived,
-            icon: Icon(Icons.payments_outlined, size: compact ? 18 : 20),
-            label: Text('confirm_cash'.tr()),
-          )
-        else if (state.tripStatus == TripStatus.awaitingClientRating)
-          FilledButton.icon(
-            style: _denseFilled(context),
-            onPressed: () => _openClientRatingBottomSheet(context),
-            icon: Icon(Icons.star_rounded, size: compact ? 18 : 20),
-            label: Text('rate_client'.tr()),
-          ),
-      ],
-    );
+  String _formatTimer(DateTime? start) {
+    if (start == null) return '00:00:00';
+    final diff = DateTime.now().difference(start);
+    final hours = diff.inHours.toString().padLeft(2, '0');
+    final minutes = diff.inMinutes.remainder(60).toString().padLeft(2, '0');
+    final seconds = diff.inSeconds.remainder(60).toString().padLeft(2, '0');
+    if (diff.inHours > 0) {
+      return '$hours:$minutes:$seconds';
+    }
+    return '$minutes:$seconds';
   }
 
   Future<void> _openGoogleMapsLocation(LatLng location) async {
@@ -1141,6 +906,1002 @@ class _ActiveTripPanel extends StatelessWidget {
       'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}',
     );
     await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _callClient(String phone) async {
+    if (phone.trim().isEmpty) return;
+    final uri = Uri(scheme: 'tel', path: phone);
+    await launchUrl(uri);
+  }
+
+  Future<void> _smsClient(String phone) async {
+    if (phone.trim().isEmpty) return;
+    final uri = Uri(scheme: 'sms', path: phone);
+    await launchUrl(uri);
+  }
+
+  Widget _buildActiveTripStage({
+    required TripRequest request,
+    required DriverAppState state,
+    required DriverAppNotifier notifier,
+    String? addressLabel,
+    String? addressText,
+    bool showCallClient = true,
+    required String buttonText,
+    required VoidCallback onButtonPressed,
+  }) {
+    final ratingVal = request.clientRating ?? 4.5;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── TOP FLOATING CLIENT DETAILS CARD ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Directionality(
+              textDirection: ui.TextDirection.ltr,
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // ── LEFT SIDE: PROFILE PICTURE ──
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Container(
+                      width: 72,
+                      height: 80,
+                      color: AppColors.brandOrange.withValues(alpha: 0.12),
+                      child: request.clientAvatar != null &&
+                              request.clientAvatar!.trim().isNotEmpty
+                          ? Image.network(
+                              request.clientAvatar!,
+                              fit: BoxFit.cover,
+                              errorBuilder: (_, __, ___) => const Icon(
+                                Icons.person_rounded,
+                                size: 44,
+                                color: AppColors.brandOrange,
+                              ),
+                            )
+                          : const Icon(
+                              Icons.person_rounded,
+                              size: 44,
+                              color: AppColors.brandOrange,
+                            ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+
+                  // ── RIGHT SIDE: DETAILS & RATING (In app locale direction) ──
+                  Expanded(
+                    child: Directionality(
+                      textDirection: Directionality.of(context),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Client Name & Rating Badge Row
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  request.clientName.isNotEmpty
+                                      ? request.clientName
+                                      : 'client_label'.tr(),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 17,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+
+                          // 5 Stars Client Rating Row
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: List.generate(5, (index) {
+                              final starNum = index + 1;
+                              IconData iconData;
+                              Color iconColor;
+                              if (ratingVal >= starNum) {
+                                iconData = Icons.star_rounded;
+                                iconColor = const Color(0xFFFFB800);
+                              } else if (ratingVal >= starNum - 0.5) {
+                                iconData = Icons.star_half_rounded;
+                                iconColor = const Color(0xFFFFB800);
+                              } else {
+                                iconData = Icons.star_rounded;
+                                iconColor = Colors.grey.shade300;
+                              }
+                              return Icon(iconData, size: 18, color: iconColor);
+                            }),
+                          ),
+                          if (addressLabel != null && addressText != null) ...[
+                            const SizedBox(height: 8),
+                            // Location Address Label & Text
+                            Text(
+                              addressLabel,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              addressText,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ],
+                          if (showCallClient) ...[
+                            const SizedBox(height: 12),
+                            // Call Client Action Row
+                            Row(
+                              children: [
+                                // Call Client Button ("اتصال بالعميل")
+                                Expanded(
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap:
+                                          request.clientPhone.trim().isNotEmpty
+                                          ? () =>
+                                                _callClient(request.clientPhone)
+                                          : null,
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        height: 42,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF5F6F8),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            const Icon(
+                                              Icons.phone_rounded,
+                                              size: 16,
+                                              color: AppColors.brandOrange,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                'call_client'.tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── BOTTOM CONTAINER ROUNDED FROM TOP WITH BUTTON ──
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            MediaQuery.of(context).padding.bottom + 16,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(28),
+              topRight: Radius.circular(28),
+            ),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top Handle Bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Primary Action Button ("وصلت لموقع العميل" / "إكمال الرحلة")
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: state.isBusy ? null : onButtonPressed,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    disabledBackgroundColor: AppColors.brandOrange.withValues(
+                      alpha: 0.4,
+                    ),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: state.isBusy
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'loading_please_wait'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          buttonText,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTripCompletedSummaryStage({
+    required TripRequest request,
+    required DriverAppState state,
+    required DriverAppNotifier notifier,
+  }) {
+    final timerDisplay = state.tripStartedAt != null
+        ? _formatTimer(state.tripStartedAt)
+        : '${request.estimatedDurationMinutes ?? 15} min';
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        // ── TOP FLOATING TRIP SUMMARY CARD ──
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.grey.shade200),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 16,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── TOTAL FINAL PRICE BADGE ──
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 12,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandOrange.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(
+                      color: AppColors.brandOrange.withValues(alpha: 0.2),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'total_price_label'.tr(),
+                        style: const TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                        ),
+                      ),
+                      Text(
+                        formatTripPrice(request.fare),
+                        style: const TextStyle(
+                          fontSize: 22,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brandOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+
+                // ── TRIP TIME DURATION ──
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.access_time_rounded,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'trip_duration'.tr(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      timerDisplay,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Divider(color: Colors.grey.shade200, height: 1),
+                const SizedBox(height: 12),
+
+                // ── START LOCATION (PICKUP) ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'pickup_point_label'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            request.pickup,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+
+                // ── END LOCATION (DROPOFF) ──
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.only(top: 4),
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: AppColors.brandOrange,
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'dropoff_point_label'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            request.dropOff,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+        const SizedBox(height: 16),
+
+        // ── BOTTOM CONTAINER ROUNDED FROM TOP WITH CONFIRM BUTTON ──
+        Container(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            MediaQuery.of(context).padding.bottom + 16,
+          ),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(28),
+              topRight: Radius.circular(28),
+            ),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Top Handle Bar
+              Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(height: 16),
+              // Primary Action Button ("تأكيد استلام المبلغ")
+              SizedBox(
+                width: double.infinity,
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: state.isBusy ? null : notifier.confirmCashReceived,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    disabledBackgroundColor: AppColors.brandOrange.withValues(
+                      alpha: 0.4,
+                    ),
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: state.isBusy
+                      ? Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2.5,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Text(
+                              'loading_please_wait'.tr(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 15,
+                              ),
+                            ),
+                          ],
+                        )
+                      : Text(
+                          'confirm_cash'.tr(),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 17,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final request = widget.request;
+    final state = widget.state;
+    final notifier = widget.notifier;
+
+    if (state.tripStatus == TripStatus.headingToClient) {
+      return _buildActiveTripStage(
+        request: request,
+        state: state,
+        notifier: notifier,
+        addressLabel: "pickup_point_label".tr(),
+        addressText: request.pickup,
+        buttonText: 'driver_arrived_at_client'.tr(),
+        onButtonPressed: notifier.confirmArrivedAtClient,
+      );
+    }
+
+    if (state.tripStatus == TripStatus.tripInProgress) {
+      return _buildActiveTripStage(
+        request: request,
+        state: state,
+        notifier: notifier,
+        addressLabel: "dropoff_point_label".tr(),
+        addressText: request.dropOff,
+        buttonText: 'complete_trip'.tr(),
+        onButtonPressed: notifier.completeTrip,
+      );
+    }
+
+    if (state.tripStatus == TripStatus.tripCompletedSummary) {
+      return _buildTripCompletedSummaryStage(
+        request: request,
+        state: state,
+        notifier: notifier,
+      );
+    }
+
+    if (state.tripStatus == TripStatus.awaitingClientRating) {
+      return _buildActiveTripStage(
+        request: request,
+        state: state,
+        notifier: notifier,
+        addressLabel: null,
+        addressText: null,
+        showCallClient: false,
+        buttonText: 'rate_client'.tr(),
+        onButtonPressed: () => _openClientRatingBottomSheet(context),
+      );
+    }
+
+    final String buttonLabel;
+    final IconData buttonIcon;
+    final VoidCallback? onPrimaryPressed;
+
+    switch (state.tripStatus) {
+      case TripStatus.headingToClient:
+        buttonLabel = 'driver_arrived_at_client'.tr();
+        buttonIcon = Icons.navigation_rounded;
+        onPrimaryPressed = notifier.confirmArrivedAtClient;
+        break;
+      case TripStatus.tripInProgress:
+        buttonLabel = 'complete_trip'.tr();
+        buttonIcon = Icons.check_rounded;
+        onPrimaryPressed = notifier.completeTrip;
+        break;
+      case TripStatus.tripCompletedSummary:
+        buttonLabel = 'confirm_cash'.tr();
+        buttonIcon = Icons.payments_rounded;
+        onPrimaryPressed = notifier.confirmCashReceived;
+        break;
+      case TripStatus.awaitingClientRating:
+        buttonLabel = 'rate_client'.tr();
+        buttonIcon = Icons.star_rounded;
+        onPrimaryPressed = () => _openClientRatingBottomSheet(context);
+        break;
+      default:
+        buttonLabel = 'continue'.tr();
+        buttonIcon = Icons.arrow_forward_rounded;
+        onPrimaryPressed = null;
+    }
+
+    final timerDisplay = state.tripStartedAt != null
+        ? _formatTimer(state.tripStartedAt)
+        : '${request.estimatedDurationMinutes ?? 14} min';
+
+    final timerSubtitle = state.tripStartedAt != null
+        ? 'trip_duration'.tr()
+        : 'appointment_time'.tr();
+
+    final vehicleSummary = [
+      state.profile?.vehicleModel.trim(),
+      state.profile?.vehicleColor.trim(),
+      state.profile?.vehiclePlate.trim(),
+    ].where((s) => s != null && s.isNotEmpty).join(' · ');
+
+    final clientSubtitle = vehicleSummary.isNotEmpty
+        ? 'Pickup · $vehicleSummary'
+        : 'Pickup · ${request.pickup}';
+
+    final activeAddress = state.tripStatus == TripStatus.headingToClient
+        ? request.pickup
+        : request.dropOff;
+
+    final activeLatLng = state.tripStatus == TripStatus.headingToClient
+        ? request.pickupLatLng
+        : request.dropOffLatLng;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // ── CLIENT INFO ROW ──
+        Row(
+          children: [
+            Container(width: 1, height: 50, color: AppColors.brandOrange),
+            SizedBox(width: 8),
+            Expanded(
+              child: Row(
+                children: [
+                  Text(
+                    request.clientName.isNotEmpty
+                        ? request.clientName
+                        : 'Client',
+
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  Spacer(),
+                  // Circular Phone Call Button (Matching Screenshot)
+                  if (request.clientPhone.trim().isNotEmpty)
+                    Material(
+                      color: Colors.transparent,
+                      shape: const CircleBorder(),
+                      child: InkWell(
+                        customBorder: const CircleBorder(),
+                        onTap: () => _callClient(request.clientPhone),
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.black.withValues(alpha: 0.12),
+                            ),
+                          ),
+                          child: const Icon(
+                            Icons.phone_outlined,
+                            color: AppColors.brandOrange,
+                            size: 20,
+                          ),
+                        ),
+                      ),
+                    ),
+                  SizedBox(width: 4),
+                  CircleAvatar(
+                    radius: 22,
+                    backgroundColor: AppColors.brandOrange.withValues(
+                      alpha: 0.15,
+                    ),
+                    child: const Icon(
+                      Icons.person_rounded,
+                      color: AppColors.brandOrange,
+                      size: 22,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // ── ADDRESS LOCATION ROW ──
+        // ── VERTICAL ROUTE MAPS LINE (Matching Screenshot using Real Data) ──
+        Row(
+          children: [
+            Container(width: 1, height: 120, color: AppColors.brandOrange),
+            SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                spacing: 8,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'earnings_trip_detail_title'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+                  // Pickup Row (Black Pin + Real Pickup Address)
+                  InkWell(
+                    onTap: () => _openGoogleMapsLocation(request.pickupLatLng),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Text(
+                      request.pickup,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    "To".tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey.shade700,
+                    ),
+                  ),
+
+                  // Dropoff Row (Red Pin + Real Dropoff Address)
+                  InkWell(
+                    onTap: () => _openGoogleMapsLocation(request.dropOffLatLng),
+                    borderRadius: BorderRadius.circular(8),
+                    child: Text(
+                      request.dropOff,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade700,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+
+        // ── EXPANDABLE DETAILS SECTION (Matching Screenshot) ──
+        const SizedBox(height: 12),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 1,
+              height: _expanded ? 85 : 28,
+              color: AppColors.brandOrange,
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InkWell(
+                    onTap: () => setState(() => _expanded = !_expanded),
+                    borderRadius: BorderRadius.circular(6),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 2),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text(
+                            'appointment_details'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          Icon(
+                            _expanded
+                                ? Icons.keyboard_arrow_up_rounded
+                                : Icons.keyboard_arrow_down_rounded,
+                            color: Colors.grey.shade700,
+                            size: 22,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (_expanded) ...[
+                    const SizedBox(height: 10),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'distance'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        Text(
+                          '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'price'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                        Text(
+                          dzdCurrency().format(request.fare),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 14),
+        InkWell(
+          onTap: state.isBusy ? null : onPrimaryPressed,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 52,
+            decoration: BoxDecoration(
+              color: state.isBusy
+                  ? AppColors.brandOrange.withValues(alpha: 0.65)
+                  : AppColors.brandOrange,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: AppColors.brandOrange.withValues(alpha: 0.3),
+                  blurRadius: 14,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            alignment: Alignment.center,
+            child: state.isBusy
+                ? Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Text(
+                        'loading_please_wait'.tr(),
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 15,
+                        ),
+                      ),
+                    ],
+                  )
+                : Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        buttonLabel,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w800,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
+          ),
+        ),
+      ],
+    );
   }
 }
 
@@ -1154,25 +1915,23 @@ class _CompactClientRow extends StatelessWidget {
   Widget build(BuildContext context) {
     final r = compact ? 18.0 : 22.0;
     final pad = compact
-        ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8)
-        : const EdgeInsets.symmetric(horizontal: 12, vertical: 10);
-    return Material(
-      color: AppColors.brandOrange.withValues(alpha: 0.08),
-      borderRadius: BorderRadius.circular(compact ? 12 : 14),
+        ? const EdgeInsets.symmetric(horizontal: 12, vertical: 10)
+        : const EdgeInsets.symmetric(horizontal: 14, vertical: 12);
+    return Container(
       child: Padding(
         padding: pad,
         child: Row(
           children: [
             CircleAvatar(
               radius: r,
-              backgroundColor: AppColors.brandOrange.withValues(alpha: 0.2),
+              backgroundColor: AppColors.brandOrange.withValues(alpha: 0.15),
               child: Icon(
-                Icons.person,
+                Icons.person_rounded,
                 color: AppColors.brandOrange,
                 size: compact ? 20 : 24,
               ),
             ),
-            SizedBox(width: compact ? 8 : 12),
+            SizedBox(width: compact ? 10 : 14),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1181,22 +1940,22 @@ class _CompactClientRow extends StatelessWidget {
                     request.clientName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        (compact
-                                ? Theme.of(context).textTheme.titleSmall
-                                : Theme.of(context).textTheme.titleSmall)
-                            ?.copyWith(fontWeight: FontWeight.w800),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
                   if (request.clientPhone.trim().isNotEmpty) ...[
-                    SizedBox(height: compact ? 2 : 4),
+                    const SizedBox(height: 2),
                     Text(
                       request.clientPhone,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
                         color: AppColors.textSecondary,
                         fontWeight: FontWeight.w600,
-                        fontSize: compact ? 11 : null,
+                        fontSize: 12.5,
                       ),
                     ),
                   ],
@@ -1206,7 +1965,7 @@ class _CompactClientRow extends StatelessWidget {
             if (request.clientPhone.trim().isNotEmpty)
               IconButton(
                 onPressed: () => _callClient(request.clientPhone),
-                icon: Icon(Icons.phone, size: compact ? 20 : 24),
+                icon: const Icon(Icons.phone_rounded, size: 20),
                 color: AppColors.brandOrange,
                 tooltip: 'call_client'.tr(),
                 visualDensity: VisualDensity.compact,
@@ -1298,92 +2057,109 @@ class _TripConclusionCard extends StatelessWidget {
   }
 
   Widget _buildCompactLayout(BuildContext context) {
-    final theme = Theme.of(context);
-    return Card(
-      color: AppColors.brandOrange.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(
-          color: AppColors.brandOrange.withValues(alpha: 0.5),
-          width: 1,
-        ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(10),
+        padding: const EdgeInsets.all(14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.route_rounded,
-                  color: AppColors.brandOrange,
-                  size: 20,
+                Container(
+                  padding: const EdgeInsets.all(6),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandOrange.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.route_rounded,
+                    color: AppColors.brandOrange,
+                    size: 18,
+                  ),
                 ),
-                const SizedBox(width: 6),
+                const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     'trip_summary_title'.tr(),
-                    style: theme.textTheme.titleSmall?.copyWith(
+                    style: const TextStyle(
                       fontWeight: FontWeight.w800,
+                      fontSize: 15,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
                 Text(
                   dzdCurrency().format(record.fare),
-                  style: theme.textTheme.titleSmall?.copyWith(
+                  style: const TextStyle(
                     fontWeight: FontWeight.w900,
+                    fontSize: 17,
                     color: AppColors.brandOrange,
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _compactKV(
-                    context,
-                    'trip_summary_duration_label'.tr(),
-                    _formatDuration(record.startedAt, record.completedAt),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                color: AppColors.bg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _compactKV(
+                      context,
+                      'trip_summary_duration_label'.tr(),
+                      _formatDuration(record.startedAt, record.completedAt),
+                    ),
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  width: 1,
-                  height: 40,
-                  color: AppColors.textSecondary.withValues(alpha: 0.15),
-                ),
-                Expanded(
-                  child: _compactKV(
-                    context,
-                    'trip_summary_distance_label'.tr(),
-                    '${westernDigits(record.distanceKm.toStringAsFixed(1))} ${'trip_summary_km_unit'.tr()}',
+                  Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 12),
+                    width: 1,
+                    height: 32,
+                    color: Colors.black.withValues(alpha: 0.08),
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: _compactKV(
+                      context,
+                      'trip_summary_distance_label'.tr(),
+                      '${westernDigits(record.distanceKm.toStringAsFixed(1))} ${'trip_summary_km_unit'.tr()}',
+                    ),
+                  ),
+                ],
+              ),
             ),
             if (record.estimatedDurationMinutes != null) ...[
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 '${'trip_estimated_duration_label'.tr()}: ${_estimatedDurationValue(record.estimatedDurationMinutes)}',
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
+                style: const TextStyle(
                   color: AppColors.textSecondary,
                   fontWeight: FontWeight.w600,
+                  fontSize: 12,
                 ),
               ),
             ],
-            const SizedBox(height: 6),
-            Divider(
-              height: 1,
-              color: AppColors.brandOrange.withValues(alpha: 0.22),
-            ),
-            const SizedBox(height: 6),
+            const SizedBox(height: 10),
+            Divider(height: 1, color: Colors.black.withValues(alpha: 0.06)),
+            const SizedBox(height: 10),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -1396,7 +2172,7 @@ class _TripConclusionCard extends StatelessWidget {
                   ),
                 ),
                 Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
+                  padding: const EdgeInsets.only(top: 8, left: 6, right: 6),
                   child: Icon(
                     Directionality.of(context) == ui.TextDirection.rtl
                         ? Icons.arrow_back_rounded
@@ -1858,4 +2634,404 @@ class _DriverCityPill extends StatelessWidget {
       ),
     );
   }
+}
+
+// ─── DriverDrawer ─────────────────────────────────────────────────────────────
+
+class DriverDrawer extends ConsumerWidget {
+  const DriverDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(driverAppStateProvider);
+    final profile = state.profile;
+    final currentRoute = GoRouterState.of(context).matchedLocation;
+
+    return Drawer(
+      backgroundColor: Colors.white,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      child: SafeArea(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.fromLTRB(20, 24, 20, 20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border(
+                  bottom: BorderSide(
+                    color: Colors.black.withValues(alpha: 0.08),
+                  ),
+                ),
+              ),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: AppColors.brandOrange.withValues(
+                      alpha: 0.15,
+                    ),
+                    child: Text(
+                      (profile?.name ?? 'D').characters.first.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.brandOrange,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profile?.name.isNotEmpty == true
+                              ? profile!.name
+                              : 'Inconnu',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          profile?.phone.isNotEmpty == true
+                              ? profile!.phone
+                              : state.phone,
+                          style: const TextStyle(
+                            fontSize: 12.5,
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Drawer Items with Active State & Divider Lines (Matching Screenshot)
+            Expanded(
+              child: ListView(
+                padding: EdgeInsets.zero,
+                children: [
+                  _DrawerTile(
+                    icon: Icons.home_outlined,
+                    title: 'Home',
+                    isActive: currentRoute == '/home',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.go('/home');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.local_shipping_outlined,
+                    title: 'Orders',
+                    isActive: currentRoute == '/orders',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/orders');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.person_outline_rounded,
+                    title: 'Profile',
+                    isActive:
+                        currentRoute == '/profile-view' ||
+                        currentRoute == '/profile-edit',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/profile-view');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.account_balance_wallet_outlined,
+                    title: 'Wallet',
+                    isActive: currentRoute == '/earnings',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/earnings');
+                    },
+                  ),
+                  _buildDivider(),
+                  // _DrawerTile(
+                  //   icon: Icons.account_balance_outlined,
+                  //   title: 'Bank Details',
+                  //   isActive: false,
+                  //   onTap: () {
+                  //     Navigator.pop(context);
+                  //     context.push('/profile-view');
+                  //   },
+                  // ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.translate_outlined,
+                    title: 'Language',
+                    isActive: currentRoute == '/language',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/language');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.phone_outlined,
+                    title: 'Contact Us',
+                    isActive: currentRoute == '/support',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/support');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.article_outlined,
+                    title: 'Terms and Condition',
+                    isActive: currentRoute == '/terms',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/terms');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.shield_outlined,
+                    title: 'Privacy Policy',
+                    isActive: currentRoute == '/privacy',
+                    onTap: () {
+                      Navigator.pop(context);
+                      context.push('/privacy');
+                    },
+                  ),
+                  _buildDivider(),
+                  _DrawerTile(
+                    icon: Icons.logout_rounded,
+                    title: 'Log out',
+                    isActive: false,
+                    onTap: () {
+                      final notifier = ref.read(
+                        driverAppStateProvider.notifier,
+                      );
+                      Navigator.pop(context);
+                      _confirmDriverLogout(context, notifier);
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDivider() => Padding(
+    padding: const EdgeInsets.symmetric(vertical: 2),
+    child: Divider(height: 1, color: Colors.black.withValues(alpha: 0.05)),
+  );
+
+  Future<void> _confirmDriverLogout(
+    BuildContext context,
+    DriverAppNotifier notifier,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.5),
+      builder: (ctx) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        backgroundColor: Colors.white,
+        elevation: 12,
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Hero Red Logout Icon Header
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppColors.brandOrange.withValues(alpha: 0.3),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  Icons.logout_rounded,
+                  size: 32,
+                  color: AppColors.brandOrange,
+                ),
+              ),
+              const SizedBox(height: 18),
+
+              // Title
+              Text(
+                'logout_confirm_title'.tr(),
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                  color: AppColors.textPrimary,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 10),
+
+              // Description
+              Text(
+                'logout_confirm_desc'.tr(),
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, false),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.grey.shade100,
+                          foregroundColor: Colors.grey.shade800,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          side: BorderSide(color: Colors.grey.shade300),
+                        ),
+                        child: Text(
+                          'cancel'.tr(),
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.grey.shade800,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: SizedBox(
+                      height: 48,
+                      child: ElevatedButton(
+                        onPressed: () => Navigator.pop(ctx, true),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.brandOrange,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                        ),
+                        child: Text(
+                          'logout'.tr(),
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w800,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (confirmed == true) {
+      await notifier.logout();
+      if (context.mounted) {
+        context.go('/login');
+      }
+    }
+  }
+}
+
+class _DrawerTile extends StatelessWidget {
+  const _DrawerTile({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+    this.isActive = false,
+  });
+
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+  final bool isActive;
+
+  @override
+  Widget build(BuildContext context) {
+    final activeColor = AppColors.brandOrange;
+    final inactiveColor = AppColors.textSecondary;
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 0, horizontal: 8),
+      child: ListTile(
+        dense: false,
+        contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 2),
+
+        leading: Icon(
+          icon,
+          color: isActive ? activeColor : inactiveColor,
+          size: 22,
+        ),
+        title: Text(
+          title,
+          style: TextStyle(
+            color: isActive ? activeColor : AppColors.textPrimary,
+            fontWeight: isActive ? FontWeight.w800 : FontWeight.w600,
+            fontSize: 14.5,
+          ),
+        ),
+        onTap: onTap,
+      ),
+    );
+  }
+}
+
+class _DottedLinePainter extends CustomPainter {
+  _DottedLinePainter({required this.color});
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 2
+      ..strokeCap = StrokeCap.round;
+
+    const dashHeight = 4.0;
+    const dashSpace = 4.0;
+    double startY = 0;
+    while (startY < size.height) {
+      canvas.drawLine(
+        Offset(0, startY),
+        Offset(0, math.min(startY + dashHeight, size.height)),
+        paint,
+      );
+      startY += dashHeight + dashSpace;
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
