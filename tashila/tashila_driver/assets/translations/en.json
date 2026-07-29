@@ -271,5 +271,11 @@
   "ignore": "Ignore",
   "total_price_label": "Total Final Price",
   "dzd_currency": "DZD",
-  "trip_duration": "Trip duration"
+  "trip_duration": "Trip duration",
+  "total_balance": "Total Balance",
+  "daily": "Daily",
+  "monthly": "Monthly",
+  "yearly": "Yearly",
+  "order_completed": "Trip Completed",
+  "documents_approved": "Documents Approved"
 }

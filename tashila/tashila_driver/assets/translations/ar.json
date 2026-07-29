@@ -271,5 +271,11 @@
   "ignore": "تجاهل",
   "total_price_label": "السعر الإجمالي النهائي",
   "dzd_currency": "د.ج",
-  "trip_duration": "مدة الرحلة"
+  "trip_duration": "مدة الرحلة",
+  "total_balance": "إجمالي الرصيد",
+  "daily": "يومي",
+  "monthly": "شهري",
+  "yearly": "سنوي",
+  "order_completed": "الرحلة مكتملة",
+  "documents_approved": "تمت الموافقة على المستندات"
 }

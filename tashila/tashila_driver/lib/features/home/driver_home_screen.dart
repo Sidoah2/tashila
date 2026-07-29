@@ -162,6 +162,7 @@ class DriverHomeScreen extends ConsumerWidget {
                   ],
                 ),
                 child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     // App Title Orange Badge
                     Container(
@@ -193,7 +194,6 @@ class DriverHomeScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 8),
 
                     // Location Dropdown Selector Pill
                     InkWell(
@@ -219,18 +219,10 @@ class DriverHomeScreen extends ConsumerWidget {
                               color: AppColors.brandOrange,
                               size: 17,
                             ),
-                            const SizedBox(width: 4),
-                            Icon(
-                              Icons.keyboard_arrow_down_rounded,
-                              color: Colors.grey.shade700,
-                              size: 17,
-                            ),
                           ],
                         ),
                       ),
                     ),
-
-                    const Spacer(),
 
                     // Earnings Pill
                     Container(
@@ -267,13 +259,12 @@ class DriverHomeScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 6),
 
                     // Refresh Button
                     InkWell(
                       onTap:
                           isIdlePhase &&
-                          state.availability == AvailabilityStatus.online
+                              state.availability == AvailabilityStatus.online
                           ? () => notifier.refreshNearbyRequests()
                           : null,
                       borderRadius: BorderRadius.circular(18),
@@ -306,165 +297,333 @@ class DriverHomeScreen extends ConsumerWidget {
           children: [
             _MapLayer(),
 
-            // ── GPS TARGET LOCATOR BUTTON ──
-            Positioned(
-              bottom: 90,
-              right: 16,
-              child: Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.grey.shade200),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.12),
-                      blurRadius: 10,
-                      offset: const Offset(0, 3),
-                    ),
-                  ],
-                ),
-                child: IconButton(
-                  icon: const Icon(
-                    Icons.my_location_rounded,
-                    color: AppColors.textPrimary,
-                    size: 20,
-                  ),
-                  onPressed: () {
-                    final loc = state.driverLocation;
-                    if (loc != null) {
-                      notifier.refreshDriverLocation(sendToServer: false);
-                    }
-                  },
-                ),
-              ),
-            ),
-
-            // ── IDLE PHASE CARDS (STATUS + WAITING) ──
-            if (isIdlePhase)
-              Positioned(
-                top: MediaQuery.of(context).padding.top + kToolbarHeight + 16,
-                left: 14,
-                right: 14,
+            SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.all(12),
                 child: Column(
                   children: [
-                    // Status Card (Light Green Container)
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 14,
-                      ),
-                      decoration: BoxDecoration(
-                        color: state.availability == AvailabilityStatus.online
-                            ? const Color(0xFFDCFCE7)
-                            : Colors.grey.shade100,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: state.availability == AvailabilityStatus.online
-                              ? const Color(0xFF86EFAC)
-                              : Colors.grey.shade300,
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisSize: MainAxisSize.min,
+                    if (isIdlePhase) ...[
+                      Directionality(
+                        textDirection: ui.TextDirection.ltr,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 14,
+                          ),
+                          decoration: BoxDecoration(
+                            color:
+                                state.availability == AvailabilityStatus.online
+                                ? const Color(0xFFDCFCE7)
+                                : Colors.grey.shade100,
+                            borderRadius: BorderRadius.circular(22),
+                            border: Border.all(
+                              color:
+                                  state.availability ==
+                                      AvailabilityStatus.online
+                                  ? const Color(0xFF86EFAC)
+                                  : Colors.grey.shade300,
+                              width: 1.5,
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(
-                                'availability_label'.tr(),
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.bold,
-                                  color:
-                                      state.availability == AvailabilityStatus.online
-                                      ? const Color(0xFF166534)
-                                      : Colors.grey.shade700,
+                              // Left side: ON/OFF Button
+                              InkWell(
+                                onTap: documentsApproved
+                                    ? () => notifier.setAvailability(
+                                        state.availability ==
+                                                AvailabilityStatus.online
+                                            ? AvailabilityStatus.offline
+                                            : AvailabilityStatus.online,
+                                      )
+                                    : null,
+                                borderRadius: BorderRadius.circular(16),
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color:
+                                        state.availability ==
+                                            AvailabilityStatus.online
+                                        ? const Color(0xFF22C55E)
+                                        : Colors.grey.shade600,
+                                    borderRadius: BorderRadius.circular(16),
+                                    boxShadow: [
+                                      if (state.availability ==
+                                          AvailabilityStatus.online)
+                                        BoxShadow(
+                                          color: const Color(
+                                            0xFF22C55E,
+                                          ).withValues(alpha: 0.25),
+                                          blurRadius: 8,
+                                          offset: const Offset(0, 2),
+                                        ),
+                                    ],
+                                  ),
+                                  child: Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Icon(
+                                        Icons.power_settings_new_rounded,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Text(
+                                        state.availability ==
+                                                AvailabilityStatus.online
+                                            ? 'online'.tr()
+                                            : 'offline'.tr(),
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12.5,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                              const SizedBox(height: 4),
-                              Row(
+
+                              // Right side: State Label info
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Container(
-                                    width: 10,
-                                    height: 10,
-                                    decoration: BoxDecoration(
-                                      color:
-                                          state.availability == AvailabilityStatus.online
-                                          ? const Color(0xFF22C55E)
-                                          : Colors.grey,
-                                      shape: BoxShape.circle,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 6),
                                   Text(
-                                    !documentsApproved
-                                        ? 'documents_not_approved_online'.tr()
-                                        : state.availability == AvailabilityStatus.online
-                                        ? 'online'.tr()
-                                        : 'offline'.tr(),
+                                    'availability_label'.tr(),
                                     style: TextStyle(
                                       fontSize: 14,
-                                      fontWeight: FontWeight.w800,
+                                      fontWeight: FontWeight.bold,
                                       color:
-                                          state.availability == AvailabilityStatus.online
-                                          ? const Color(0xFF15803D)
+                                          state.availability ==
+                                              AvailabilityStatus.online
+                                          ? const Color(0xFF166534)
                                           : Colors.grey.shade700,
                                     ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      Text(
+                                        !documentsApproved
+                                            ? 'documents_not_approved_online'
+                                                  .tr()
+                                            : state.availability ==
+                                                  AvailabilityStatus.online
+                                            ? 'online'.tr()
+                                            : 'offline'.tr(),
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              state.availability ==
+                                                  AvailabilityStatus.online
+                                              ? const Color(0xFF15803D)
+                                              : Colors.grey.shade600,
+                                        ),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      Container(
+                                        width: 8,
+                                        height: 8,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              state.availability ==
+                                                  AvailabilityStatus.online
+                                              ? const Color(0xFF22C55E)
+                                              : Colors.grey.shade400,
+                                          shape: BoxShape.circle,
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ],
                               ),
                             ],
                           ),
-                          ElevatedButton.icon(
-                            onPressed: documentsApproved
-                                ? () => notifier.setAvailability(
-                                    state.availability == AvailabilityStatus.online
-                                        ? AvailabilityStatus.offline
-                                        : AvailabilityStatus.online,
-                                  )
-                                : null,
-                            icon: const Icon(
-                              Icons.power_settings_new_rounded,
-                              size: 18,
-                              color: Colors.white,
-                            ),
-                            label: Text(
-                              state.availability == AvailabilityStatus.online
-                                  ? 'online'.tr()
-                                  : 'offline'.tr(),
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13.5,
-                                color: Colors.white,
-                              ),
-                            ),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  state.availability == AvailabilityStatus.online
-                                  ? const Color(0xFF22C55E)
-                                  : Colors.grey.shade600,
-                              elevation: 0,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 10,
-                              ),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(14),
-                              ),
-                            ),
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
-
+                    ],
                     if (showWaitingForOffer) ...[
-                      const SizedBox(height: 12),
+                      const SizedBox(height: 8),
                       const WaitingForOfferCard(),
                     ],
+                    const Spacer(),
                   ],
                 ),
               ),
+            ),
+
+            // ── GPS TARGET LOCATOR BUTTON ──
+            // Positioned(
+            //   bottom: 90,
+            //   right: 16,
+            //   child: Container(
+            //     decoration: BoxDecoration(
+            //       color: Colors.white,
+            //       shape: BoxShape.circle,
+            //       border: Border.all(color: Colors.grey.shade200),
+            //       boxShadow: [
+            //         BoxShadow(
+            //           color: Colors.black.withValues(alpha: 0.12),
+            //           blurRadius: 10,
+            //           offset: const Offset(0, 3),
+            //         ),
+            //       ],
+            //     ),
+            //     child: IconButton(
+            //       icon: const Icon(
+            //         Icons.my_location_rounded,
+            //         color: AppColors.textPrimary,
+            //         size: 20,
+            //       ),
+            //       onPressed: () {
+            //         final loc = state.driverLocation;
+            //         if (loc != null) {
+            //           notifier.refreshDriverLocation(sendToServer: false);
+            //         }
+            //       },
+            //     ),
+            //   ),
+            // ),
+
+            // ── IDLE PHASE CARDS (STATUS + WAITING) ──
+            // if (isIdlePhase)
+            //   Positioned(
+            //     top: MediaQuery.of(context).padding.top + kToolbarHeight + 16,
+            //     left: 14,
+            //     right: 14,
+            //     child: Column(
+            //       children: [
+            //         // Status Card (Light Green Container)
+            //         Container(
+            //           padding: const EdgeInsets.symmetric(
+            //             horizontal: 16,
+            //             vertical: 14,
+            //           ),
+            //           decoration: BoxDecoration(
+            //             color: state.availability == AvailabilityStatus.online
+            //                 ? const Color(0xFFDCFCE7)
+            //                 : Colors.grey.shade100,
+            //             borderRadius: BorderRadius.circular(22),
+            //             border: Border.all(
+            //               color: state.availability == AvailabilityStatus.online
+            //                   ? const Color(0xFF86EFAC)
+            //                   : Colors.grey.shade300,
+            //             ),
+            //           ),
+            //           child: Row(
+            //             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            //             children: [
+            //               Column(
+            //                 crossAxisAlignment: CrossAxisAlignment.start,
+            //                 mainAxisSize: MainAxisSize.min,
+            //                 children: [
+            //                   Text(
+            //                     'availability_label'.tr(),
+            //                     style: TextStyle(
+            //                       fontSize: 13,
+            //                       fontWeight: FontWeight.bold,
+            //                       color:
+            //                           state.availability ==
+            //                               AvailabilityStatus.online
+            //                           ? const Color(0xFF166534)
+            //                           : Colors.grey.shade700,
+            //                     ),
+            //                   ),
+            //                   const SizedBox(height: 4),
+            //                   Row(
+            //                     children: [
+            //                       Container(
+            //                         width: 10,
+            //                         height: 10,
+            //                         decoration: BoxDecoration(
+            //                           color:
+            //                               state.availability ==
+            //                                   AvailabilityStatus.online
+            //                               ? const Color(0xFF22C55E)
+            //                               : Colors.grey,
+            //                           shape: BoxShape.circle,
+            //                         ),
+            //                       ),
+            //                       const SizedBox(width: 6),
+            //                       Text(
+            //                         !documentsApproved
+            //                             ? 'documents_not_approved_online'.tr()
+            //                             : state.availability ==
+            //                                   AvailabilityStatus.online
+            //                             ? 'online'.tr()
+            //                             : 'offline'.tr(),
+            //                         style: TextStyle(
+            //                           fontSize: 14,
+            //                           fontWeight: FontWeight.w800,
+            //                           color:
+            //                               state.availability ==
+            //                                   AvailabilityStatus.online
+            //                               ? const Color(0xFF15803D)
+            //                               : Colors.grey.shade700,
+            //                         ),
+            //                       ),
+            //                     ],
+            //                   ),
+            //                 ],
+            //               ),
+            //               ElevatedButton.icon(
+            //                 onPressed: documentsApproved
+            //                     ? () => notifier.setAvailability(
+            //                         state.availability ==
+            //                                 AvailabilityStatus.online
+            //                             ? AvailabilityStatus.offline
+            //                             : AvailabilityStatus.online,
+            //                       )
+            //                     : null,
+            //                 icon: const Icon(
+            //                   Icons.power_settings_new_rounded,
+            //                   size: 18,
+            //                   color: Colors.white,
+            //                 ),
+            //                 label: Text(
+            //                   state.availability == AvailabilityStatus.online
+            //                       ? 'online'.tr()
+            //                       : 'offline'.tr(),
+            //                   style: const TextStyle(
+            //                     fontWeight: FontWeight.w800,
+            //                     fontSize: 13.5,
+            //                     color: Colors.white,
+            //                   ),
+            //                 ),
+            //                 style: ElevatedButton.styleFrom(
+            //                   backgroundColor:
+            //                       state.availability ==
+            //                           AvailabilityStatus.online
+            //                       ? const Color(0xFF22C55E)
+            //                       : Colors.grey.shade600,
+            //                   elevation: 0,
+            //                   padding: const EdgeInsets.symmetric(
+            //                     horizontal: 16,
+            //                     vertical: 10,
+            //                   ),
+            //                   shape: RoundedRectangleBorder(
+            //                     borderRadius: BorderRadius.circular(14),
+            //                   ),
+            //                 ),
+            //               ),
+            //             ],
+            //           ),
+            //         ),
+
+            //         if (showWaitingForOffer) ...[
+            //           const SizedBox(height: 12),
+            //           const WaitingForOfferCard(),
+            //         ],
+            //       ],
+            //     ),
+            //   ),
             if (!isIdlePhase && activeRequest != null)
               if (state.tripStatus == TripStatus.headingToClient ||
                   state.tripStatus == TripStatus.tripInProgress ||
@@ -1417,13 +1576,6 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
               topRight: Radius.circular(28),
             ),
             border: Border.all(color: Colors.grey.shade200),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.1),
-                blurRadius: 20,
-                offset: const Offset(0, -4),
-              ),
-            ],
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -2131,18 +2283,13 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                       ),
                     ],
                   )
-                : Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        buttonLabel,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
+                : Text(
+                    buttonLabel,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                      fontSize: 16,
+                    ),
                   ),
           ),
         ),
