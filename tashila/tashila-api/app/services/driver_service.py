@@ -8,7 +8,7 @@ from bson.errors import InvalidId
 from fastapi import UploadFile
 
 from app.core.database import get_database
-from app.core.exceptions import ForbiddenError, NotFoundError, ValidationError
+from app.core.exceptions import ConflictError, ForbiddenError, NotFoundError, ValidationError
 from app.core.redis import publish
 from app.models.driver import (
     DriverProfileSetup,
@@ -131,6 +131,8 @@ async def update_driver(driver_id: str, data: DriverUpdate) -> dict[str, Any]:
     payload = data.model_dump(exclude_unset=True)
     if "name" in payload:
         updates["name"] = payload["name"]
+    if "email" in payload:
+        updates["email"] = payload["email"]
     if "avatarUrl" in payload:
         updates["avatarUrl"] = payload["avatarUrl"]
     if "truckType" in payload:
@@ -163,6 +165,7 @@ async def complete_profile(driver_id: str, data: DriverProfileSetup) -> dict[str
         {
             "$set": {
                 "name": data.name,
+                "email": data.email,
                 "truckType": data.truckType,
                 "vehiclePlate": data.vehiclePlate,
                 "vehicleColor": data.vehicleColor,
