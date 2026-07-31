@@ -354,7 +354,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         ((dropoff['lng'] as num?) ?? 0).toDouble(),
       ),
       clientRating:
-          ((client['rating'] as num?) ?? (trip['clientRating'] as num?))?.toDouble(),
+          ((client['rating'] as num?) ?? (trip['clientRating'] as num?))
+              ?.toDouble(),
       clientAvatar:
           client['avatarUrl'] as String? ?? trip['clientAvatar'] as String?,
       startedAt: trip['startedAt'] != null
@@ -935,8 +936,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           }
           _clearActiveOffer(tripId: tripId);
         } else {
-          final anyValid =
-              state.incomingOffers.any((o) => o.expiresAt.isAfter(now));
+          final anyValid = state.incomingOffers.any(
+            (o) => o.expiresAt.isAfter(now),
+          );
           if (!anyValid) {
             _clearActiveOffer();
           }
@@ -1195,7 +1197,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       state.copyWith(
         tripStatus: TripStatus.tripCompletedSummary,
         currentRequest: state.currentRequest?.copyWith(
-          completedAt: DateTime.now(),
+          completedAt:
+              state.currentRequest?.startedAt?.add(
+                DateTime.now().difference(
+                  state.tripStartedAt ?? DateTime.now(),
+                ),
+              ) ??
+              DateTime.now(),
         ),
         isBusy: false,
         clearError: true,
