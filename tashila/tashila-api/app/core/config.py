@@ -29,7 +29,7 @@ class Settings(BaseSettings):
     max_otp_attempts: int = 5
     otp_window_seconds: int = 600
 
-    offer_ttl_seconds: int = 30
+    offer_ttl_seconds: int = 180
     max_dispatch_candidates: int = 5
     # Short retry when geo query returns nobody (driver may come online momentarily).
     dispatch_no_candidate_grace_seconds: int = 8

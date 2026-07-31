@@ -32,6 +32,7 @@ class DriverDoc(BaseModel):
 
     id: str = Field(alias="_id")
     phone: str
+    email: str | None = None
     name: str | None = None
     avatarUrl: str | None = None
     truckType: str
@@ -54,6 +55,7 @@ class DriverResponse(BaseModel):
 
     id: str = Field(alias="_id")
     phone: str
+    email: str | None = None
     name: str | None = None
     avatarUrl: str | None = None
     truckType: str
@@ -72,6 +74,7 @@ class DriverProfileSetup(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     name: str
+    email: str | None = None
     truckType: str
     vehiclePlate: str
     vehicleColor: str
@@ -82,6 +85,7 @@ class DriverUpdate(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     name: str | None = None
+    email: str | None = None
     avatarUrl: str | None = None
     truckType: str | None = None
     vehiclePlate: str | None = None
