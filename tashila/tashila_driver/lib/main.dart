@@ -9,7 +9,6 @@ import 'core/models/models.dart';
 import 'core/router/app_router.dart';
 import 'core/state/driver_app_state.dart';
 import 'core/theme/app_theme.dart';
-import 'core/widgets/rating_sheet_host.dart';
 import 'package:device_preview/device_preview.dart';
 
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
@@ -75,10 +74,10 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
     );
   }
 
-  Future<void> _showClientRatingSheet() async {
-    if (!mounted) return;
-    await showRequiredClientRatingSheet(context);
-  }
+  // Future<void> _showClientRatingSheet() async {
+  //   if (!mounted) return;
+  //   await showRequiredClientRatingSheet(context);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -88,7 +87,7 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
           next.tripStatus == TripStatus.awaitingClientRating) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          _showClientRatingSheet();
+          router.go('/rate-client');
         });
       }
     });

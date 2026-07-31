@@ -424,8 +424,11 @@ class IncomingOffer {
         pickupLatLng: LatLng(pickupLat, pickupLng),
         dropOffLatLng: LatLng(dropoffLat, dropoffLng),
         truckType: migrateTruckType(data['truckType'] as String?),
-        clientRating: ((client['rating'] as num?) ?? (data['clientRating'] as num?))?.toDouble(),
-        clientAvatar: client['avatarUrl'] as String? ?? data['clientAvatar'] as String?,
+        clientRating:
+            ((client['rating'] as num?) ?? (data['clientRating'] as num?))
+                ?.toDouble(),
+        clientAvatar:
+            client['avatarUrl'] as String? ?? data['clientAvatar'] as String?,
       ),
       expiresAt: expiresAt,
       offeredAt: offeredAt,
@@ -451,6 +454,8 @@ class TripRequest {
     this.truckType = '',
     this.clientRating,
     this.clientAvatar,
+    this.startedAt,
+    this.completedAt,
   });
 
   final String id;
@@ -469,6 +474,47 @@ class TripRequest {
   final LatLng pickupLatLng;
   final LatLng dropOffLatLng;
   final DateTime? expiresAt;
+  final DateTime? startedAt;
+  final DateTime? completedAt;
+
+  TripRequest copyWith({
+    String? id,
+    String? clientName,
+    String? clientPhone,
+    String? truckType,
+    String? pickup,
+    String? dropOff,
+    double? fare,
+    double? distanceKm,
+    double? clientRating,
+    String? clientAvatar,
+    int? estimatedDurationMinutes,
+    LatLng? pickupLatLng,
+    LatLng? dropOffLatLng,
+    DateTime? expiresAt,
+    DateTime? startedAt,
+    DateTime? completedAt,
+  }) {
+    return TripRequest(
+      id: id ?? this.id,
+      clientName: clientName ?? this.clientName,
+      clientPhone: clientPhone ?? this.clientPhone,
+      truckType: truckType ?? this.truckType,
+      pickup: pickup ?? this.pickup,
+      dropOff: dropOff ?? this.dropOff,
+      fare: fare ?? this.fare,
+      distanceKm: distanceKm ?? this.distanceKm,
+      clientRating: clientRating ?? this.clientRating,
+      clientAvatar: clientAvatar ?? this.clientAvatar,
+      estimatedDurationMinutes:
+          estimatedDurationMinutes ?? this.estimatedDurationMinutes,
+      pickupLatLng: pickupLatLng ?? this.pickupLatLng,
+      dropOffLatLng: dropOffLatLng ?? this.dropOffLatLng,
+      expiresAt: expiresAt ?? this.expiresAt,
+      startedAt: startedAt ?? this.startedAt,
+      completedAt: completedAt ?? this.completedAt,
+    );
+  }
 }
 
 class TripRecord {
@@ -649,6 +695,7 @@ class DriverPlatformEarnings {
   static DriverPlatformEarnings fromJson(Map<String, dynamic>? json) {
     if (json == null) return const DriverPlatformEarnings();
     double read(String key) => (json[key] as num?)?.toDouble() ?? 0;
+
     return DriverPlatformEarnings(
       totalEarnedDzd: read('totalEarnedDzd'),
       platformDueDzd: read('platformDueDzd'),

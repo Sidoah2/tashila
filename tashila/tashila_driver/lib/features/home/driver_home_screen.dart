@@ -140,158 +140,7 @@ class DriverHomeScreen extends ConsumerWidget {
       child: Scaffold(
         backgroundColor: Colors.white,
         extendBodyBehindAppBar: true,
-        appBar: PreferredSize(
-          preferredSize: const Size.fromHeight(80),
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 10,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.08),
-                      blurRadius: 16,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    // App Title Orange Badge
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandOrange,
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(
-                            Icons.local_shipping_rounded,
-                            color: Colors.white,
-                            size: 17,
-                          ),
-                          const SizedBox(width: 5),
-                          Text(
-                            'app_title'.tr(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 13,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
 
-                    // Location Dropdown Selector Pill
-                    InkWell(
-                      onTap: () => _showCitySelectionSheet(context, ref),
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10,
-                          vertical: 7,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandOrange.withValues(alpha: 0.06),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: AppColors.brandOrange.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.location_on_rounded,
-                              color: AppColors.brandOrange,
-                              size: 17,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // Earnings Pill
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 10,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandOrange.withValues(alpha: 0.06),
-                        borderRadius: BorderRadius.circular(18),
-                        border: Border.all(
-                          color: AppColors.brandOrange.withValues(alpha: 0.2),
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            formatTripPrice(
-                              state.platformEarnings?.totalEarnedDzd ?? 0,
-                            ),
-                            style: const TextStyle(
-                              color: AppColors.brandOrange,
-                              fontWeight: FontWeight.w900,
-                              fontSize: 12.5,
-                            ),
-                          ),
-                          const SizedBox(width: 5),
-                          const Icon(
-                            Icons.account_balance_wallet_rounded,
-                            color: AppColors.brandOrange,
-                            size: 15,
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    // Refresh Button
-                    InkWell(
-                      onTap:
-                          isIdlePhase &&
-                              state.availability == AvailabilityStatus.online
-                          ? () => notifier.refreshNearbyRequests()
-                          : null,
-                      borderRadius: BorderRadius.circular(18),
-                      child: Container(
-                        padding: const EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: AppColors.brandOrange.withValues(alpha: 0.08),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.brandOrange.withValues(
-                              alpha: 0.25,
-                            ),
-                          ),
-                        ),
-                        child: const Icon(
-                          Icons.refresh_rounded,
-                          color: AppColors.brandOrange,
-                          size: 17,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ),
         body: Stack(
           fit: StackFit.expand,
           children: [
@@ -660,9 +509,9 @@ class DriverHomeScreen extends ConsumerWidget {
                 ),
             if (showOffersDeck)
               Positioned(
-                left: 12,
-                right: 12,
-                bottom: 20,
+                left: 0,
+                right: 0,
+                bottom: 0,
                 child: TripRequestsDeck(
                   offers: state.incomingOffers,
                   notifier: notifier,
@@ -1494,9 +1343,10 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                             const SizedBox(height: 12),
                             // Call Client Action Row
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                // Call Client Button ("اتصال بالعميل")
                                 Expanded(
+                                  flex: 2,
                                   child: Material(
                                     color: Colors.transparent,
                                     child: InkWell(
@@ -1534,6 +1384,48 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                                               fit: BoxFit.scaleDown,
                                               child: Text(
                                                 'call_client'.tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 13,
+                                                  fontWeight: FontWeight.bold,
+                                                  color: Colors.black,
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 10),
+                                Expanded(
+                                  child: Material(
+                                    color: Colors.transparent,
+                                    child: InkWell(
+                                      onTap: () {},
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Container(
+                                        height: 42,
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFFF5F6F8),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
+                                          border: Border.all(
+                                            color: Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          children: [
+                                            FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                'cancel'.tr(),
                                                 style: const TextStyle(
                                                   fontSize: 13,
                                                   fontWeight: FontWeight.bold,
@@ -1643,9 +1535,22 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
     required DriverAppState state,
     required DriverAppNotifier notifier,
   }) {
-    final timerDisplay = state.tripStartedAt != null
-        ? _formatTimer(state.tripStartedAt)
-        : '${request.estimatedDurationMinutes ?? 15} min';
+    final String timerDisplay;
+    if (request.startedAt != null && request.completedAt != null) {
+      final diff = request.completedAt!.difference(request.startedAt!);
+      final hours = diff.inHours.toString().padLeft(2, '0');
+      final minutes = diff.inMinutes.remainder(60).toString().padLeft(2, '0');
+      final seconds = diff.inSeconds.remainder(60).toString().padLeft(2, '0');
+      if (diff.inHours > 0) {
+        timerDisplay = '$hours:$minutes:$seconds';
+      } else {
+        timerDisplay = '$minutes:$seconds';
+      }
+    } else if (state.tripStartedAt != null) {
+      timerDisplay = _formatTimer(state.tripStartedAt);
+    } else {
+      timerDisplay = '${request.estimatedDurationMinutes ?? 15} min';
+    }
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -1709,7 +1614,34 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                 ),
                 const SizedBox(height: 14),
 
-                // ── TRIP TIME DURATION ──
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.route_rounded,
+                      size: 18,
+                      color: Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'trip_length_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.grey.shade600,
+                      ),
+                    ),
+                    const Spacer(),
+                    Text(
+                      '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
                 Row(
                   children: [
                     const Icon(
@@ -1901,7 +1833,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                           ],
                         )
                       : Text(
-                          'confirm_cash'.tr(),
+                          'rate_client'.tr(),
                           style: const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -1956,16 +1888,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
     }
 
     if (state.tripStatus == TripStatus.awaitingClientRating) {
-      return _buildActiveTripStage(
-        request: request,
-        state: state,
-        notifier: notifier,
-        addressLabel: null,
-        addressText: null,
-        showCallClient: false,
-        buttonText: 'rate_client'.tr(),
-        onButtonPressed: () => _openClientRatingBottomSheet(context),
-      );
+      return const SizedBox.shrink();
     }
 
     final String buttonLabel;
@@ -1984,8 +1907,8 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
         onPrimaryPressed = notifier.completeTrip;
         break;
       case TripStatus.tripCompletedSummary:
-        buttonLabel = 'confirm_cash'.tr();
-        buttonIcon = Icons.payments_rounded;
+        buttonLabel = 'rate_client'.tr();
+        buttonIcon = Icons.star_rounded;
         onPrimaryPressed = notifier.confirmCashReceived;
         break;
       case TripStatus.awaitingClientRating:

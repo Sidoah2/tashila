@@ -31,6 +31,7 @@ class TripDoc(BaseModel):
     cancelledReason: str | None = None
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updatedAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    startedAt: datetime | None = None
     completedAt: datetime | None = None
 
 
@@ -129,4 +130,5 @@ class TripResponse(BaseModel):
     cancelledReason: str | None = None
     createdAt: datetime
     updatedAt: datetime
+    startedAt: datetime | None = None
     completedAt: datetime | None = None

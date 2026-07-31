@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/formatting/app_format.dart';
+import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/primary_button.dart';
-import '../../core/state/driver_app_state.dart';
 
 const _goodTraitKeys = [
   'trait_good_punctual',
@@ -51,81 +51,122 @@ class _ClientRatingSheetContentState
   Future<void> _submit() async {
     if (!_canSubmit) return;
     setState(() => _submitting = true);
-    final ok = await ref.read(driverAppStateProvider.notifier).submitClientRating(
-      rating: _stars,
-      comment: _comment.text.trim(),
-      goodTraits: _goodSelected.map((k) => k.tr()).toList(),
-      badTraits: _badSelected.map((k) => k.tr()).toList(),
-    );
+    final ok = await ref
+        .read(driverAppStateProvider.notifier)
+        .submitClientRating(
+          rating: _stars,
+          comment: _comment.text.trim(),
+          goodTraits: _goodSelected.map((k) => k.tr()).toList(),
+          badTraits: _badSelected.map((k) => k.tr()).toList(),
+        );
     if (!mounted) return;
     setState(() {
       _submitting = false;
       if (ok) _submitted = true;
     });
+    if (ok) {
+      Future.delayed(const Duration(seconds: 1), () {
+        if (mounted) {
+          _finish();
+        }
+      });
+    }
     if (!ok) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('rating_submit_failed'.tr())),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('rating_submit_failed'.tr())));
     }
   }
 
   Future<void> _finish() async {
     if (_submitting) return;
     setState(() => _submitting = true);
-    await ref.read(driverAppStateProvider.notifier).completeClientRatingSession();
+    await ref
+        .read(driverAppStateProvider.notifier)
+        .completeClientRatingSession();
     if (!mounted) return;
-    Navigator.of(context).pop();
+    if (Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final fare = ref.watch(driverAppStateProvider).currentRequest?.fare ?? 0;
     final fareStr = formatTripPrice(fare);
 
     if (_submitted) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(24),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 24,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.check_circle_rounded, size: 56, color: AppColors.success),
-            const SizedBox(height: 12),
+            const Icon(
+              Icons.check_circle_rounded,
+              size: 56,
+              color: AppColors.success,
+            ),
+            const SizedBox(height: 14),
             Text(
               'rating_submitted_title'.tr(),
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               'driver_rating_submitted_message'.tr(),
               textAlign: TextAlign.center,
-              style: theme.textTheme.bodyMedium?.copyWith(
+              style: const TextStyle(
                 color: AppColors.textSecondary,
+                fontSize: 13,
                 height: 1.35,
               ),
             ),
             if (fare > 0) ...[
               const SizedBox(height: 16),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppColors.brandOrange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.brandOrange.withValues(alpha: 0.35)),
+                  border: Border.all(
+                    color: AppColors.brandOrange.withValues(alpha: 0.35),
+                  ),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'trip_fare_label'.tr(),
-                      style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                      ),
                     ),
                     Text(
                       fareStr,
-                      style: theme.textTheme.titleMedium?.copyWith(
+                      style: const TextStyle(
                         fontWeight: FontWeight.w900,
+                        fontSize: 16,
                         color: AppColors.brandOrange,
                       ),
                     ),
@@ -133,7 +174,7 @@ class _ClientRatingSheetContentState
                 ),
               ),
             ],
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             PrimaryButton(
               label: 'rating_done_button'.tr(),
               onPressed: _submitting ? null : _finish,
@@ -144,38 +185,71 @@ class _ClientRatingSheetContentState
       );
     }
 
-    return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 24),
+    return Container(
+      constraints: const BoxConstraints(maxHeight: 620),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 24,
+            offset: const Offset(0, 8),
+          ),
+        ],
+      ),
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Icon(Icons.star_rounded, size: 40, color: AppColors.brandOrange),
-            const SizedBox(height: 8),
+            // Top Orange Star Icon
+            const Center(
+              child: Icon(
+                Icons.star_rounded,
+                size: 38,
+                color: AppColors.brandOrange,
+              ),
+            ),
+            const SizedBox(height: 6),
+
+            // Title
             Text(
               'rate_client'.tr(),
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
+
+            // Orange Callout Notice Container (Matching Screenshot)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
               decoration: BoxDecoration(
-                color: AppColors.brandOrange.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.brandOrange.withValues(alpha: 0.25)),
+                color: const Color(0xFFFFF3E0),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: AppColors.brandOrange.withValues(alpha: 0.3),
+                ),
               ),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(Icons.info_outline_rounded, size: 18, color: AppColors.brandOrange),
-                  const SizedBox(width: 8),
+                  const Icon(
+                    Icons.info_outline_rounded,
+                    size: 18,
+                    color: AppColors.brandOrange,
+                  ),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       'rating_required_notice'.tr(),
-                      style: theme.textTheme.bodySmall?.copyWith(
+                      style: const TextStyle(
+                        fontSize: 12.5,
                         color: AppColors.textPrimary,
                         height: 1.35,
                       ),
@@ -185,6 +259,8 @@ class _ClientRatingSheetContentState
               ),
             ),
             const SizedBox(height: 16),
+
+            // 5-Star Selection Row
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: List.generate(5, (index) {
@@ -192,112 +268,182 @@ class _ClientRatingSheetContentState
                 final filled = n <= _stars;
                 return IconButton(
                   onPressed: () => setState(() => _stars = n),
-                  iconSize: 44,
-                  padding: const EdgeInsets.symmetric(horizontal: 6),
+                  iconSize: 38,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
                   icon: Icon(
                     filled ? Icons.star_rounded : Icons.star_outline_rounded,
-                    color:
-                        filled ? AppColors.brandOrange : AppColors.textSecondary,
+                    color: filled
+                        ? AppColors.brandOrange
+                        : Colors.grey.shade400,
                   ),
                 );
               }),
             ),
+
             Text(
               _stars == 0 ? 'rating_select_stars'.tr() : ltrNumber('$_stars/5'),
               textAlign: TextAlign.center,
-              style: theme.textTheme.titleSmall?.copyWith(
+              style: TextStyle(
+                fontSize: 13,
                 fontWeight: FontWeight.w700,
-                color: _stars == 0 ? AppColors.textSecondary : AppColors.brandOrange,
+                color: _stars == 0
+                    ? AppColors.textSecondary
+                    : AppColors.brandOrange,
               ),
             ),
             const SizedBox(height: 20),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                'rating_good_traits'.tr(),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+
+            // "What went well" Section Header
+            Text(
+              'rating_good_traits'.tr(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: _goodTraitKeys.map((key) {
                 final selected = _goodSelected.contains(key);
-                return FilterChip(
-                  label: Text(key.tr()),
-                  selected: selected,
-                  onSelected: (v) => setState(() {
-                    if (v) {
-                      _goodSelected.add(key);
-                    } else {
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    if (selected) {
                       _goodSelected.remove(key);
+                    } else {
+                      _goodSelected.add(key);
                     }
                   }),
-                  selectedColor: AppColors.success.withValues(alpha: 0.2),
-                  checkmarkColor: AppColors.success,
-                  labelStyle: TextStyle(
-                    color:
-                        selected ? AppColors.textPrimary : AppColors.textSecondary,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected
+                          ? AppColors.brandOrange.withValues(alpha: 0.12)
+                          : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: selected
+                            ? AppColors.brandOrange
+                            : Colors.black.withValues(alpha: 0.12),
+                      ),
+                    ),
+                    child: Text(
+                      key.tr(),
+                      style: TextStyle(
+                        color: selected
+                            ? AppColors.brandOrange
+                            : Colors.black87,
+                        fontSize: 13,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 18),
-            Align(
-              alignment: AlignmentDirectional.centerStart,
-              child: Text(
-                'rating_bad_traits'.tr(),
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+            const SizedBox(height: 20),
+
+            // "Could improve" Section Header
+            Text(
+              'rating_bad_traits'.tr(),
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
               ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Wrap(
               spacing: 8,
               runSpacing: 8,
               children: _badTraitKeys.map((key) {
                 final selected = _badSelected.contains(key);
-                return FilterChip(
-                  label: Text(key.tr()),
-                  selected: selected,
-                  onSelected: (v) => setState(() {
-                    if (v) {
-                      _badSelected.add(key);
-                    } else {
+                return GestureDetector(
+                  onTap: () => setState(() {
+                    if (selected) {
                       _badSelected.remove(key);
+                    } else {
+                      _badSelected.add(key);
                     }
                   }),
-                  selectedColor: Colors.red.shade50,
-                  checkmarkColor: Colors.red.shade700,
-                  side: BorderSide(
-                    color: selected
-                        ? Colors.red.shade300
-                        : AppColors.textSecondary.withValues(alpha: 0.35),
-                  ),
-                  labelStyle: TextStyle(
-                    color:
-                        selected ? Colors.red.shade900 : AppColors.textSecondary,
-                    fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: selected ? Colors.red.shade50 : Colors.white,
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                        color: selected
+                            ? Colors.red.shade300
+                            : Colors.black.withValues(alpha: 0.12),
+                      ),
+                    ),
+                    child: Text(
+                      key.tr(),
+                      style: TextStyle(
+                        color: selected ? Colors.red.shade800 : Colors.black87,
+                        fontSize: 13,
+                        fontWeight: selected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
+                      ),
+                    ),
                   ),
                 );
               }).toList(),
             ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _comment,
-              maxLines: 3,
-              decoration: InputDecoration(hintText: 'optional_comment'.tr()),
+            const SizedBox(height: 20),
+
+            // Optional Comment TextField
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.grey.shade50,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              child: TextField(
+                controller: _comment,
+                maxLines: 3,
+                decoration: InputDecoration(
+                  border: InputBorder.none,
+                  hintText: 'optional_comment'.tr(),
+                  hintStyle: const TextStyle(color: Colors.grey, fontSize: 13),
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            PrimaryButton(
-              label: _stars == 0 ? 'rating_stars_required'.tr() : 'submit'.tr(),
-              onPressed: _canSubmit ? _submit : null,
-              icon: Icons.send_outlined,
+            const SizedBox(height: 20),
+
+            // Primary Submit Button
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _canSubmit ? _submit : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                ),
+                child: Text(
+                  _stars == 0 ? 'rating_stars_required'.tr() : 'submit'.tr(),
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
             ),
           ],
         ),

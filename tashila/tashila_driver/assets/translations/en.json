@@ -164,6 +164,13 @@
   "rating_good_traits": "What went well",
   "rating_bad_traits": "Could improve",
   "optional_comment": "Optional comment",
+  "rating_poor": "Poor",
+  "rating_fair": "Fair",
+  "rating_good": "Good",
+  "rating_very_good": "Very Good",
+  "rating_excellent": "Excellent",
+  "rating_how_was_client": "How was your client?",
+  "rating_comment_hint": "Share optional details about the ride...",
   "rating_skip": "Skip for now",
   "rating_submit_failed": "Could not submit rating. Please try again.",
   "submit": "Submit",
@@ -277,5 +284,6 @@
   "monthly": "Monthly",
   "yearly": "Yearly",
   "order_completed": "Trip Completed",
+  "order_cancelled": "Trip Cancelled",
   "documents_approved": "Documents Approved"
 }

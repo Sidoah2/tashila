@@ -186,6 +186,8 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
       : estimateMinutes(distanceKm);
   final expiresAt = IncomingOffer.parseExpiresAt(m['expiresAt'] as String?);
   final client = m['client'] as Map<String, dynamic>? ?? {};
+  final startedAtStr = m['startedAt'] as String?;
+  final completedAtStr = m['completedAt'] as String?;
   return TripRequest(
     id: m['id'] as String? ?? m['tripId'] as String? ?? m['_id'] as String? ?? '',
     clientName: m['clientName'] as String? ?? client['name'] as String? ?? '',
@@ -200,6 +202,8 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
     dropOffLatLng: LatLng(dropoffLat, dropoffLng),
     expiresAt: expiresAt,
     truckType: migrateTruckType(m['truckType'] as String?),
+    startedAt: startedAtStr != null ? DateTime.tryParse(startedAtStr) : null,
+    completedAt: completedAtStr != null ? DateTime.tryParse(completedAtStr) : null,
   );
 }
 

@@ -166,6 +166,13 @@
   "rating_good_traits": "Points positifs",
   "rating_bad_traits": "A ameliorer",
   "optional_comment": "Commentaire optionnel",
+  "rating_poor": "Mauvais",
+  "rating_fair": "Passable",
+  "rating_good": "Bon",
+  "rating_very_good": "Très bon",
+  "rating_excellent": "Excellent",
+  "rating_how_was_client": "Comment était votre client ?",
+  "rating_comment_hint": "Partagez des détails facultatifs sur le trajet...",
   "rating_skip": "Passer pour l'instant",
   "rating_submit_failed": "Impossible d'envoyer la note. Réessayez.",
   "submit": "Envoyer",
@@ -270,5 +277,6 @@
   "monthly": "Mensuel",
   "yearly": "Annuel",
   "order_completed": "Course terminée",
+  "order_cancelled": "Course annulée",
   "documents_approved": "Documents approuvés"
 }

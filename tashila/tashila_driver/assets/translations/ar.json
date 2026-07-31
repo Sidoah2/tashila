@@ -164,6 +164,13 @@
   "rating_good_traits": "ما الذي كان جيدا",
   "rating_bad_traits": "ما الذي يحتاج تحسين",
   "optional_comment": "تعليق اختياري",
+  "rating_poor": "سيء",
+  "rating_fair": "مقبول",
+  "rating_good": "جيد",
+  "rating_very_good": "جيد جداً",
+  "rating_excellent": "ممتاز",
+  "rating_how_was_client": "كيف كان العميل؟",
+  "rating_comment_hint": "شارك تفاصيل اختيارية عن الرحلة...",
   "rating_skip": "تخطي الآن",
   "rating_submit_failed": "تعذر إرسال التقييم. حاول مرة أخرى.",
   "submit": "إرسال",
@@ -277,5 +284,6 @@
   "monthly": "شهري",
   "yearly": "سنوي",
   "order_completed": "الرحلة مكتملة",
+  "order_cancelled": "الرحلة ملغاة",
   "documents_approved": "تمت الموافقة على المستندات"
 }
