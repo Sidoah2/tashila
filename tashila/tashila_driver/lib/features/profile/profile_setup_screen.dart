@@ -184,7 +184,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                       child: Text(
                         MaterialLocalizations.of(ctx).closeButtonLabel,
@@ -287,7 +290,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                       child: Text(
                         MaterialLocalizations.of(ctx).closeButtonLabel,
@@ -368,7 +374,10 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                       ),
                       const Spacer(),
                       IconButton(
-                        icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textSecondary,
+                        ),
                         onPressed: () => Navigator.pop(ctx),
                       ),
                     ],
@@ -923,71 +932,135 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     autovalidateMode: _didAttemptSubmit
                         ? AutovalidateMode.onUserInteraction
                         : AutovalidateMode.disabled,
-                    child: Material(
-                      color: AppColors.card,
-                      elevation: 2,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          children: [
-                            TextFormField(
-                              controller: _nameController,
-                              decoration: InputDecoration(
-                                hintText: 'name_label'.tr(),
-                                filled: true,
-                                fillColor: AppColors.bg,
-                              ),
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'validation_required_name'.tr();
-                                }
-                                if (value.trim().length < 2) {
-                                  return 'validation_short_name'.tr();
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _emailController,
-                              keyboardType: TextInputType.emailAddress,
-                              decoration: InputDecoration(
-                                hintText: 'profile_onboarding_email_optional'
-                                    .tr(),
-                                filled: true,
-                                fillColor: AppColors.bg,
-                              ),
-                            ),
-                            const SizedBox(height: 12),
-                            TextFormField(
-                              controller: _phoneController,
-                              keyboardType: TextInputType.phone,
-                              readOnly: true,
-                              decoration: InputDecoration(
-                                hintText: 'phone_label'.tr(),
-                                filled: true,
-                                fillColor: AppColors.bg,
-                              ),
-                              validator: (value) {
-                                final raw = value?.trim() ?? '';
-                                if (raw.isEmpty) {
-                                  return 'validation_required_phone'.tr();
-                                }
-                                final digitsOnly = raw.replaceAll(
-                                  RegExp(r'[^0-9]'),
-                                  '',
-                                );
-                                if (digitsOnly.length < 8) {
-                                  return 'validation_invalid_phone'.tr();
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: Colors.black.withValues(alpha: 0.06),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        children: [
+                          TextFormField(
+                            controller: _nameController,
+                            decoration: InputDecoration(
+                              hintText: 'name_label'.tr(),
+                              filled: true,
+                              fillColor: AppColors.bg,
+                              prefixIcon: const Icon(
+                                Icons.person_outline_rounded,
+                                color: AppColors.brandOrange,
+                                size: 20,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.brandOrange,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'validation_required_name'.tr();
+                              }
+                              if (value.trim().length < 2) {
+                                return 'validation_short_name'.tr();
+                              }
+                              return null;
+                            },
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(height: 1, color: Colors.black12),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: InputDecoration(
+                              hintText: 'profile_onboarding_email_optional'
+                                  .tr(),
+                              filled: true,
+                              fillColor: AppColors.bg,
+                              prefixIcon: const Icon(
+                                Icons.email_outlined,
+                                color: AppColors.brandOrange,
+                                size: 20,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: const BorderSide(
+                                  color: AppColors.brandOrange,
+                                  width: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 12),
+                          const Divider(height: 1, color: Colors.black12),
+                          const SizedBox(height: 12),
+                          TextFormField(
+                            controller: _phoneController,
+                            keyboardType: TextInputType.phone,
+                            readOnly: true,
+                            decoration: InputDecoration(
+                              hintText: 'phone_label'.tr(),
+                              filled: true,
+                              fillColor: AppColors.bg,
+                              prefixIcon: const Icon(
+                                Icons.phone_iphone_rounded,
+                                color: AppColors.brandOrange,
+                                size: 20,
+                              ),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                              enabledBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(14),
+                                borderSide: BorderSide.none,
+                              ),
+                            ),
+                            validator: (value) {
+                              final raw = value?.trim() ?? '';
+                              if (raw.isEmpty) {
+                                return 'validation_required_phone'.tr();
+                              }
+                              final digitsOnly = raw.replaceAll(
+                                RegExp(r'[^0-9]'),
+                                '',
+                              );
+                              if (digitsOnly.length < 8) {
+                                return 'validation_invalid_phone'.tr();
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -995,44 +1068,90 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 if (_wizardStep == 1) ...[
                   _infoCallout(context, 'driver_verify_docs_callout'.tr()),
                   const SizedBox(height: 16),
-                  Material(
-                    color: AppColors.card,
-                    elevation: 2,
-                    borderRadius: BorderRadius.circular(16),
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.06),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
                     child: Column(
                       children: [
-                        for (final doc in profile.documents)
+                        for (var i = 0; i < profile.documents.length; i++) ...[
+                          if (i > 0)
+                            const Divider(height: 1, color: Colors.black12),
                           ListTile(
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 6,
+                            ),
                             leading: UploadImagePreview(
-                              localPath: doc.localFilePath,
-                              remoteUrl: doc.displayRemoteUrl,
+                              localPath: profile.documents[i].localFilePath,
+                              remoteUrl: profile.documents[i].displayRemoteUrl,
                               width: 52,
                               height: 52,
-                              borderRadius: 10,
-                              placeholder: Icon(
+                              borderRadius: 12,
+                              placeholder: const Icon(
                                 Icons.description_outlined,
                                 color: AppColors.brandOrange,
                               ),
                             ),
-                            title: Text(_docLabel(doc.type)),
+                            title: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    _docLabel(profile.documents[i].type),
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 14.5,
+                                    ),
+                                  ),
+                                ),
+                                if (profile.documents[i].hasUploadedImage)
+                                  const Icon(
+                                    Icons.check_circle_rounded,
+                                    color: Colors.green,
+                                    size: 18,
+                                  ),
+                              ],
+                            ),
                             subtitle: Text(
-                              doc.hasUploadedImage
-                                  ? (doc.displaySubtitle ?? 'doc_uploaded'.tr())
-                                  : _docSubtitle(doc.type),
+                              profile.documents[i].hasUploadedImage
+                                  ? (profile.documents[i].displaySubtitle ??
+                                        'doc_uploaded'.tr())
+                                  : _docSubtitle(profile.documents[i].type),
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12.5),
                             ),
                             trailing: TextButton(
                               onPressed: state.isBusy
                                   ? null
-                                  : () => _pickDocument(doc.type),
+                                  : () => _pickDocument(
+                                      profile.documents[i].type,
+                                    ),
+                              style: TextButton.styleFrom(
+                                foregroundColor: AppColors.brandOrange,
+                              ),
                               child: Text(
-                                doc.hasUploadedImage
+                                profile.documents[i].hasUploadedImage
                                     ? 'replace'.tr()
                                     : 'upload'.tr(),
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.w800,
+                                ),
                               ),
                             ),
                           ),
+                        ],
                       ],
                     ),
                   ),
@@ -1080,7 +1199,22 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     ),
                   ],
                   const SizedBox(height: 16),
-                  _ProfileCardContainer(
+                  Container(
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: Colors.black.withValues(alpha: 0.06),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 14,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    padding: const EdgeInsets.all(16),
                     child: Column(
                       children: [
                         TextField(
@@ -1092,7 +1226,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             filled: true,
                             fillColor: AppColors.bg,
                             prefixIcon: const Icon(
-                              Icons.directions_car_outlined,
+                              Icons.local_shipping_outlined,
                               color: AppColors.brandOrange,
                               size: 20,
                             ),
@@ -1119,6 +1253,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.black12),
+                        const SizedBox(height: 12),
                         TextField(
                           controller: _vehicleColorController,
                           scrollPadding: const EdgeInsets.only(bottom: 250),
@@ -1129,7 +1265,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             fillColor: AppColors.bg,
                             prefixIcon: const Icon(
                               Icons.palette_outlined,
-                              color: AppColors.textSecondary,
+                              color: AppColors.brandOrange,
                               size: 20,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -1155,6 +1291,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           textInputAction: TextInputAction.next,
                         ),
                         const SizedBox(height: 12),
+                        const Divider(height: 1, color: Colors.black12),
+                        const SizedBox(height: 12),
                         TextField(
                           controller: _vehiclePlateController,
                           scrollPadding: const EdgeInsets.only(bottom: 250),
@@ -1164,8 +1302,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             filled: true,
                             fillColor: AppColors.bg,
                             prefixIcon: const Icon(
-                              Icons.pin_outlined,
-                              color: AppColors.textSecondary,
+                              Icons.badge_outlined,
+                              color: AppColors.brandOrange,
                               size: 20,
                             ),
                             contentPadding: const EdgeInsets.symmetric(
@@ -1195,35 +1333,43 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                   ),
                   if (bottomAwaiting) ...[
                     const SizedBox(height: 20),
-                    Material(
-                      color: AppColors.card,
-                      elevation: 2,
-                      borderRadius: BorderRadius.circular(16),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'doc_review_title'.tr(),
-                              style: Theme.of(context).textTheme.titleMedium
-                                  ?.copyWith(fontWeight: FontWeight.w800),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'doc_review_body'.tr(),
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    height: 1.4,
-                                  ),
-                            ),
-                          ],
+                    Container(
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: AppColors.brandOrange.withValues(alpha: 0.3),
                         ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 14,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      padding: const EdgeInsets.all(16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'doc_review_title'.tr(),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(fontWeight: FontWeight.w800),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'doc_review_body'.tr(),
+                            style: Theme.of(context).textTheme.bodyMedium
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  height: 1.4,
+                                ),
+                          ),
+                        ],
                       ),
                     ),
                   ],
-                  const SizedBox(height: 280),
                 ],
               ],
             ),
@@ -1280,9 +1426,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
 
     if (inInitialSetup) {
-      return ColoredBox(
-        color: AppColors.bg,
-        child: SafeArea(
+      return Scaffold(
+        backgroundColor: AppColors.bg,
+        body: SafeArea(
           child: _buildVerificationWizard(
             context: context,
             state: state,
@@ -2148,7 +2294,7 @@ class _ProfileOverviewCard extends StatelessWidget {
           _statRow(
             context,
             label: 'profile_stat_total_earnings'.tr(),
-            value: money.format(totalEarnings),
+            value: money.format(platform.totalEarnedDzd),
             icon: Icons.payments_rounded,
             iconBg: AppColors.brandOrange.withValues(alpha: 0.1),
             iconColor: AppColors.brandOrange,
@@ -2441,7 +2587,9 @@ class _DeleteAccountDialogContentState
                         ),
                         const SizedBox(height: 16),
                         Text(
-                          'profile_delete_type_hint'.tr(namedArgs: {'word': word}),
+                          'profile_delete_type_hint'.tr(
+                            namedArgs: {'word': word},
+                          ),
                           style: theme.textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -2450,7 +2598,9 @@ class _DeleteAccountDialogContentState
                         ),
                         const SizedBox(height: 10),
                         Semantics(
-                          label: 'profile_delete_type_hint'.tr(namedArgs: {'word': word}),
+                          label: 'profile_delete_type_hint'.tr(
+                            namedArgs: {'word': word},
+                          ),
                           child: TextField(
                             controller: _ctrl,
                             decoration: InputDecoration(
@@ -2481,7 +2631,8 @@ class _DeleteAccountDialogContentState
                           contentPadding: EdgeInsets.zero,
                           value: _understood,
                           activeColor: Colors.red.shade700,
-                          onChanged: (v) => setState(() => _understood = v ?? false),
+                          onChanged: (v) =>
+                              setState(() => _understood = v ?? false),
                           title: Text(
                             'profile_delete_understand'.tr(),
                             style: theme.textTheme.bodyMedium?.copyWith(
@@ -2503,7 +2654,10 @@ class _DeleteAccountDialogContentState
                       onPressed: () => Navigator.pop(context),
                       style: TextButton.styleFrom(
                         foregroundColor: AppColors.textSecondary,
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 10,
+                        ),
                       ),
                       child: Text('profile_delete_account_cancel'.tr()),
                     ),
@@ -2519,7 +2673,10 @@ class _DeleteAccountDialogContentState
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 20,
+                          vertical: 12,
+                        ),
                       ),
                       child: Text(
                         'profile_delete_account_action'.tr(),
