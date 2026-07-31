@@ -679,10 +679,12 @@ async def advance_trip_status(trip_id: str, driver_id: str, new_status: str) -> 
 
     now = datetime.now(timezone.utc)
     updates: dict[str, Any] = {"status": new_status, "updatedAt": now}
+    if new_status == "inProgress":
+        updates["startedAt"] = now
     if new_status == "awaitingCash":
         updates["finalFare"] = float(trip.get("fare") or 0)
-    if new_status == "completed":
         updates["completedAt"] = now
+    if new_status == "completed":
         fare = float(trip.get("finalFare") or trip.get("fare") or 0)
         await _apply_trip_completion_earnings(driver_id, fare)
         from app.services import dispatch_service

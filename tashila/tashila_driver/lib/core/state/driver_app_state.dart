@@ -357,6 +357,12 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           ((client['rating'] as num?) ?? (trip['clientRating'] as num?))?.toDouble(),
       clientAvatar:
           client['avatarUrl'] as String? ?? trip['clientAvatar'] as String?,
+      startedAt: trip['startedAt'] != null
+          ? DateTime.tryParse(trip['startedAt'] as String)
+          : null,
+      completedAt: trip['completedAt'] != null
+          ? DateTime.tryParse(trip['completedAt'] as String)
+          : null,
     );
   }
 
@@ -1148,6 +1154,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       state.copyWith(
         tripStatus: TripStatus.tripInProgress,
         tripStartedAt: DateTime.now(),
+        currentRequest: state.currentRequest?.copyWith(
+          startedAt: DateTime.now(),
+        ),
         isBusy: false,
         clearError: true,
       ),
@@ -1185,6 +1194,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(
       state.copyWith(
         tripStatus: TripStatus.tripCompletedSummary,
+        currentRequest: state.currentRequest?.copyWith(
+          completedAt: DateTime.now(),
+        ),
         isBusy: false,
         clearError: true,
       ),
