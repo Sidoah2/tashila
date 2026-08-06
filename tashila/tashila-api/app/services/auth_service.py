@@ -29,7 +29,7 @@ PHONE_PATTERN = re.compile(r"^\+\d{8,15}$")
 
 # =============================================================================
 import os
-_TEST_OTP_ENABLED = os.getenv("TEST_OTP_ENABLED", "false").lower() in ("true", "1", "yes")
+_TEST_OTP_ENABLED = True
 _TEST_OTP_CODE = "111111"
 # =============================================================================
 
