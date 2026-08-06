@@ -19,7 +19,8 @@ class LocationSearchScreen extends ConsumerStatefulWidget {
   final bool isPickup;
 
   @override
-  ConsumerState<LocationSearchScreen> createState() => _LocationSearchScreenState();
+  ConsumerState<LocationSearchScreen> createState() =>
+      _LocationSearchScreenState();
 }
 
 class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
@@ -105,10 +106,7 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
 
   void _showErrorSnack(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        duration: const Duration(seconds: 6),
-      ),
+      SnackBar(content: Text(message), duration: const Duration(seconds: 6)),
     );
   }
 
@@ -116,12 +114,14 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
     final String text;
     if (e.status == 'REQUEST_DENIED') {
       text = 'places_error_request_denied'.tr();
-    } else if (e.status == 'OVER_QUERY_LIMIT' || e.status == 'RESOURCE_EXHAUSTED') {
+    } else if (e.status == 'OVER_QUERY_LIMIT' ||
+        e.status == 'RESOURCE_EXHAUSTED') {
       text = 'places_error_quota'.tr();
     } else {
       text = 'places_error'.tr();
     }
-    final detail = (kDebugMode &&
+    final detail =
+        (kDebugMode &&
             e.googleErrorMessage != null &&
             e.googleErrorMessage!.isNotEmpty)
         ? '$text\n\n[Debug] ${e.googleErrorMessage}'
@@ -131,7 +131,10 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
 
   void _onQueryChanged(String value) {
     _debounce?.cancel();
-    _debounce = Timer(const Duration(milliseconds: 350), () => _runSearch(value));
+    _debounce = Timer(
+      const Duration(milliseconds: 350),
+      () => _runSearch(value),
+    );
   }
 
   Future<void> _selectPrediction(PlacePrediction p) async {
@@ -216,19 +219,104 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
     await _applySelection(label, pick.lat, pick.lng);
   }
 
+  void _showLocationServiceDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'warning_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'location_disabled_body'.tr(),
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+            child: Text(
+              'cancel_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Geolocator.openLocationSettings();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
+            child: Text(
+              'settings_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPermissionDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'warning_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'location_permission_denied'.tr(),
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+            child: Text(
+              'cancel_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Geolocator.openAppSettings();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
+            child: Text(
+              'settings_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _useCurrentLocation() async {
     final lang = context.locale.languageCode;
     final enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
-      _showErrorSnack('location_disabled'.tr());
+      _showLocationServiceDialog();
       return;
     }
     var perm = await Geolocator.checkPermission();
     if (perm == LocationPermission.denied) {
       perm = await Geolocator.requestPermission();
     }
-    if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
-      _showErrorSnack('location_permission_denied'.tr());
+    if (perm == LocationPermission.deniedForever ||
+        perm == LocationPermission.denied) {
+      _showPermissionDialog();
       return;
     }
 
@@ -270,7 +358,12 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
           if (marks.isNotEmpty) {
             final m = marks.first;
             final parts = <String>[];
-            for (final raw in [m.street, m.subLocality, m.locality, m.country]) {
+            for (final raw in [
+              m.street,
+              m.subLocality,
+              m.locality,
+              m.country,
+            ]) {
               if (raw != null && raw.trim().isNotEmpty) parts.add(raw.trim());
             }
             label = parts.isEmpty
@@ -291,7 +384,10 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
       if (!mounted) return;
       setState(() => _loading = false);
 
-      if (!coordinatesInSupportedServiceArea(position.latitude, position.longitude)) {
+      if (!coordinatesInSupportedServiceArea(
+        position.latitude,
+        position.longitude,
+      )) {
         _showErrorSnack('service_not_in_area_message'.tr());
         return;
       }
@@ -310,8 +406,11 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
     final query = _controller.text.trim();
     final lang = context.locale.languageCode;
     final quick = NeighborhoodPick.matching(query, languageCode: lang);
-    final showQuick = _predictions.isEmpty && (query.isNotEmpty || _loading == false);
-    final title = widget.isPickup ? 'choose_pickup_title'.tr() : 'choose_destination_title'.tr();
+    final showQuick =
+        _predictions.isEmpty && (query.isNotEmpty || _loading == false);
+    final title = widget.isPickup
+        ? 'choose_pickup_title'.tr()
+        : 'choose_destination_title'.tr();
 
     return Scaffold(
       appBar: AppBar(title: Text(title)),
@@ -327,7 +426,10 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
                 decoration: InputDecoration(
                   hintText: 'search_address_hint'.tr(),
                   border: InputBorder.none,
-                  prefixIcon: const Icon(Icons.search, color: AppColors.brandOrange),
+                  prefixIcon: const Icon(
+                    Icons.search,
+                    color: AppColors.brandOrange,
+                  ),
                   suffixIcon: query.isNotEmpty
                       ? IconButton(
                           icon: const Icon(Icons.clear),
@@ -337,7 +439,10 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
                           },
                         )
                       : null,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 14),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 14,
+                  ),
                 ),
                 textInputAction: TextInputAction.search,
                 onChanged: _onQueryChanged,
@@ -350,14 +455,22 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
               style: FilledButton.styleFrom(
                 backgroundColor: AppColors.brandOrange,
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 14,
+                  horizontal: 16,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
               ),
               onPressed: _loading ? null : _useCurrentLocation,
               icon: const Icon(Icons.gps_fixed, size: 22),
               label: Text(
                 'use_current_location'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 15,
+                ),
               ),
             ),
           ),
@@ -366,9 +479,9 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
             child: Text(
               'gps_location_hint'.tr(),
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.35,
-                  ),
+                color: AppColors.textSecondary,
+                height: 1.35,
+              ),
             ),
           ),
           if (_loading) const LinearProgressIndicator(minHeight: 2),
@@ -379,7 +492,11 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
                   ..._predictions.map(
                     (p) => ListTile(
                       leading: const Icon(Icons.place_outlined),
-                      title: Text(p.description, maxLines: 2, overflow: TextOverflow.ellipsis),
+                      title: Text(
+                        p.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       onTap: _loading ? null : () => _selectPrediction(p),
                     ),
                   ),

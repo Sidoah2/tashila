@@ -265,5 +265,8 @@
   "finish_and_home": "Finish & Go Home",
   "warning_title": "Notice",
   "continue_button": "Continue",
-  "cancel_button": "Cancel"
+  "cancel_button": "Cancel",
+  "settings_button": "Settings",
+  "location_disabled_body": "Location services (GPS) are disabled. Please enable them in settings to continue.",
+  "link_error": "Sorry, could not open the link."
 }

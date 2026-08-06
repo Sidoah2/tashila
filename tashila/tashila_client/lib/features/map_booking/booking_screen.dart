@@ -357,37 +357,55 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                             context: context,
                                             builder: (ctx) => AlertDialog(
                                               backgroundColor: Colors.white,
-                                              surfaceTintColor: Colors.transparent,
+                                              surfaceTintColor:
+                                                  Colors.transparent,
                                               shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(20),
+                                                borderRadius:
+                                                    BorderRadius.circular(20),
                                               ),
                                               title: Text(
                                                 'warning_title'.tr(),
-                                                style: const TextStyle(fontWeight: FontWeight.w800),
+                                                style: const TextStyle(
+                                                  fontWeight: FontWeight.w800,
+                                                ),
                                               ),
                                               content: Text(
-                                                'booking_delay_charges_notice'.tr(),
-                                                style: const TextStyle(fontSize: 14, height: 1.4),
+                                                'booking_delay_charges_notice'
+                                                    .tr(),
+                                                style: const TextStyle(
+                                                  fontSize: 14,
+                                                  height: 1.4,
+                                                ),
                                               ),
                                               actions: [
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(ctx, false),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, false),
                                                   style: TextButton.styleFrom(
-                                                    foregroundColor: AppColors.textSecondary,
+                                                    foregroundColor:
+                                                        AppColors.textSecondary,
                                                   ),
                                                   child: Text(
                                                     'cancel_button'.tr(),
-                                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600,
+                                                    ),
                                                   ),
                                                 ),
                                                 TextButton(
-                                                  onPressed: () => Navigator.pop(ctx, true),
+                                                  onPressed: () =>
+                                                      Navigator.pop(ctx, true),
                                                   style: TextButton.styleFrom(
-                                                    foregroundColor: AppColors.brandOrange,
+                                                    foregroundColor:
+                                                        AppColors.brandOrange,
                                                   ),
                                                   child: Text(
                                                     'continue_button'.tr(),
-                                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w800,
+                                                    ),
                                                   ),
                                                 ),
                                               ],
@@ -488,12 +506,16 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
     }
 
     if (hasPickup && !hasDropoff) {
-      await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(pickupLat, pickupLng), 14.5));
+      await c.animateCamera(
+        CameraUpdate.newLatLngZoom(LatLng(pickupLat, pickupLng), 14.5),
+      );
       return;
     }
 
     if (!hasPickup && hasDropoff) {
-      await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(dropoffLat, dropoffLng), 14.5));
+      await c.animateCamera(
+        CameraUpdate.newLatLngZoom(LatLng(dropoffLat, dropoffLng), 14.5),
+      );
       return;
     }
 
@@ -521,12 +543,97 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
     await c.animateCamera(CameraUpdate.newLatLngBounds(bounds, 56));
   }
 
+  void _showLocationServiceDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'warning_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'location_disabled_body'.tr(),
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+            child: Text(
+              'cancel_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Geolocator.openLocationSettings();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
+            child: Text(
+              'settings_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPermissionDialog() {
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: Text(
+          'warning_title'.tr(),
+          style: const TextStyle(fontWeight: FontWeight.w800),
+        ),
+        content: Text(
+          'location_permission_denied'.tr(),
+          style: const TextStyle(fontSize: 14, height: 1.4),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            style: TextButton.styleFrom(
+              foregroundColor: AppColors.textSecondary,
+            ),
+            child: Text(
+              'cancel_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              Geolocator.openAppSettings();
+            },
+            style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
+            child: Text(
+              'settings_button'.tr(),
+              style: const TextStyle(fontWeight: FontWeight.w800),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Future<void> _moveToCurrentLocation() async {
     final c = _controller;
     if (c == null) return;
     try {
       final enabled = await Geolocator.isLocationServiceEnabled();
       if (!enabled) {
+        _showLocationServiceDialog();
         await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
         return;
       }
@@ -534,7 +641,9 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
       if (perm == LocationPermission.denied) {
         perm = await Geolocator.requestPermission();
       }
-      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+      if (perm == LocationPermission.deniedForever ||
+          perm == LocationPermission.denied) {
+        _showPermissionDialog();
         await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
         return;
       }
@@ -550,7 +659,9 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
         pos = await Geolocator.getLastKnownPosition();
       }
       if (pos != null) {
-        await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(pos.latitude, pos.longitude), 14.5));
+        await c.animateCamera(
+          CameraUpdate.newLatLngZoom(LatLng(pos.latitude, pos.longitude), 14.5),
+        );
       } else {
         await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
       }
