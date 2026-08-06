@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_api_headers/google_api_headers.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tashila_client/core/config/map_config.dart';
 
 final placesServiceProvider = Provider<PlacesService>((ref) {
@@ -143,6 +144,92 @@ class PlacesService {
       lng: lng,
     );
   }
+
+  Future<String?> reverseGeocode({
+    required double lat,
+    required double lng,
+    required String language,
+  }) async {
+    if (!MapConfig.canRenderGoogleMap) return null;
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        'https://maps.googleapis.com/maps/api/geocode/json',
+        queryParameters: {
+          'latlng': '$lat,$lng',
+          'key': MapConfig.mapApiKey,
+          'language': language,
+        },
+      );
+      final data = response.data;
+      if (data == null || data['status'] != 'OK') return null;
+      final results = data['results'] as List<dynamic>?;
+      if (results != null && results.isNotEmpty) {
+        final first = results.first as Map<String, dynamic>;
+        return first['formatted_address'] as String?;
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  Future<List<LatLng>> fetchDirections({
+    required double originLat,
+    required double originLng,
+    required double destLat,
+    required double destLng,
+  }) async {
+    if (!MapConfig.canRenderGoogleMap) return [];
+    try {
+      final response = await _dio.get<Map<String, dynamic>>(
+        'https://maps.googleapis.com/maps/api/directions/json',
+        queryParameters: {
+          'origin': '$originLat,$originLng',
+          'destination': '$destLat,$destLng',
+          'key': MapConfig.mapApiKey,
+        },
+      );
+      final data = response.data;
+      if (data == null || data['status'] != 'OK') return [];
+      final routes = data['routes'] as List<dynamic>?;
+      if (routes == null || routes.isEmpty) return [];
+      final firstRoute = routes.first as Map<String, dynamic>;
+      final overviewPolyline = firstRoute['overview_polyline'] as Map<String, dynamic>?;
+      final pointsStr = overviewPolyline?['points'] as String?;
+      if (pointsStr == null || pointsStr.isEmpty) return [];
+      return decodePolyline(pointsStr);
+    } catch (_) {
+      return [];
+    }
+  }
+}
+
+List<LatLng> decodePolyline(String encoded) {
+  List<LatLng> points = [];
+  int index = 0, len = encoded.length;
+  int lat = 0, lng = 0;
+
+  while (index < len) {
+    int b, shift = 0, result = 0;
+    do {
+      b = encoded.codeUnitAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+    lat += dlat;
+
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.codeUnitAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+    lng += dlng;
+
+    points.add(LatLng(lat / 1E5, lng / 1E5));
+  }
+  return points;
 }
 
 class PlacesException implements Exception {

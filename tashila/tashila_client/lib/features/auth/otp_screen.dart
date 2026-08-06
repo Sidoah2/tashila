@@ -175,7 +175,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          widget.phone,
+                          '\u200E${widget.phone}',
                           style: theme.textTheme.bodyMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,

@@ -4,6 +4,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_logger/easy_logger.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tashila_client/core/router/app_router.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_theme.dart';
@@ -23,7 +24,7 @@ Future<void> main() async {
     EasyLocalization(
       supportedLocales: _supportedLocales,
       path: 'assets/translations',
-      fallbackLocale: const Locale('en'),
+      fallbackLocale: const Locale('ar'),
       startLocale: const Locale('ar'),
       useOnlyLangCode: true,
       child: const ProviderScope(child: AppBootstrap()),
@@ -45,6 +46,16 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     Future.microtask(() async {
+      final prefs = await SharedPreferences.getInstance();
+      final savedLang = prefs.getString('lang');
+      if (savedLang == null) {
+        // First run: Force Arabic
+        await prefs.setString('lang', 'ar');
+        if (mounted) {
+          await context.setLocale(const Locale('ar'));
+        }
+      }
+
       await ref.read(appStateProvider.notifier).bootstrap();
       if (!mounted) return;
       final saved = ref.read(appStateProvider).locale;

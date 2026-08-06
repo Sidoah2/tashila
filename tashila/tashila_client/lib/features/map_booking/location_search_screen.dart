@@ -217,6 +217,7 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
   }
 
   Future<void> _useCurrentLocation() async {
+    final lang = context.locale.languageCode;
     final enabled = await Geolocator.isLocationServiceEnabled();
     if (!enabled) {
       _showErrorSnack('location_disabled'.tr());
@@ -233,57 +234,70 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
 
     setState(() => _loading = true);
     try {
-      final position = await Geolocator.getCurrentPosition();
-      String label;
+      Position? position;
       try {
-        final marks = await placemarkFromCoordinates(
-          position.latitude,
-          position.longitude,
+        position = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 8),
+          ),
         );
-        if (marks.isNotEmpty) {
-          final m = marks.first;
-          final parts = <String>[];
-          for (final raw in [m.street, m.subLocality, m.locality, m.country]) {
-            if (raw != null && raw.trim().isNotEmpty) parts.add(raw.trim());
-          }
-          label = parts.isEmpty
-              ? ltrNumber(
-                  '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
-                )
-              : parts.join(', ');
-        } else {
-          label = ltrNumber(
-            '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
-          );
-        }
       } catch (_) {
+        position = await Geolocator.getLastKnownPosition();
+      }
+
+      if (position == null) {
+        throw Exception("Could not retrieve location");
+      }
+
+      String? label;
+      final places = ref.read(placesServiceProvider);
+
+      try {
+        label = await places.reverseGeocode(
+          lat: position.latitude,
+          lng: position.longitude,
+          language: lang,
+        );
+      } catch (_) {}
+
+      if (label == null || label.trim().isEmpty) {
+        try {
+          final marks = await placemarkFromCoordinates(
+            position.latitude,
+            position.longitude,
+          );
+          if (marks.isNotEmpty) {
+            final m = marks.first;
+            final parts = <String>[];
+            for (final raw in [m.street, m.subLocality, m.locality, m.country]) {
+              if (raw != null && raw.trim().isNotEmpty) parts.add(raw.trim());
+            }
+            label = parts.isEmpty
+                ? ltrNumber(
+                    '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
+                  )
+                : parts.join(', ');
+          }
+        } catch (_) {}
+      }
+
+      if (label == null || label.trim().isEmpty) {
         label = ltrNumber(
           '${position.latitude.toStringAsFixed(5)}, ${position.longitude.toStringAsFixed(5)}',
         );
       }
+
       if (!mounted) return;
       setState(() => _loading = false);
+
       if (!coordinatesInSupportedServiceArea(position.latitude, position.longitude)) {
         _showErrorSnack('service_not_in_area_message'.tr());
         return;
       }
-      final snap = nearestSupportedNeighborhood(position.latitude, position.longitude);
-      if (snap != null &&
-          neighborhoodDistanceKm(
-                position.latitude,
-                position.longitude,
-                snap.lat,
-                snap.lng,
-              ) <=
-              4) {
-        await _applySelection(
-          snap.labelForLocale(context.locale.languageCode),
-          snap.lat,
-          snap.lng,
-        );
-      } else {
-        await _applySelection(label, position.latitude, position.longitude);
-      }
+
+      // Snapping to neighborhood is removed as requested so we get exact GPS coordinates
+      await _applySelection(label, position.latitude, position.longitude);
     } catch (_) {
       if (!mounted) return;
       setState(() => _loading = false);

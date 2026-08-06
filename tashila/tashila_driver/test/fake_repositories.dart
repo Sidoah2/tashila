@@ -81,7 +81,7 @@ class FakeTripRepository implements TripRepository {
   Future<IncomingOffer?> fetchCurrentOffer() async {
     return IncomingOffer(
       request: _request,
-      expiresAt: DateTime.now().toUtc().add(const Duration(seconds: 30)),
+      expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 10)),
     );
   }
 

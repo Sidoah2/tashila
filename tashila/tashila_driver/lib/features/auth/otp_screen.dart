@@ -9,6 +9,7 @@ import 'package:pinput/pinput.dart';
 import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/widgets/primary_button.dart';
+import '../../core/widgets/api_loading_overlay.dart';
 import 'auth_language_menu.dart';
 
 const _otpResendSeconds = 60;
@@ -67,9 +68,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
 
   Future<void> _verifyAndContinue() async {
     if (pin.text.length < 6) return;
+    ApiOverlayManager.show(context);
     final ok = await ref
         .read(driverAppStateProvider.notifier)
         .verifyOtp(pin.text);
+    ApiOverlayManager.hide();
     if (!mounted) return;
     if (ok) {
       final ready =
@@ -226,7 +229,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             Text(
-                              'otp_sent_to'.tr(namedArgs: {'phone': state.phone}),
+                              'otp_sent_to'.tr(namedArgs: {'phone': '\u200E${state.phone}\u200E'}),
                               style: theme.textTheme.bodyMedium?.copyWith(
                                 color: AppColors.textSecondary,
                                 fontWeight: FontWeight.w500,

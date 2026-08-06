@@ -41,10 +41,10 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
       bottomNavigationBar: SafeArea(
         top: false,
         child: Container(
-          margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          // margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(28),
+            // borderRadius: BorderRadius.circular(28),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.12),
@@ -120,8 +120,8 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
               color: isSelected
                   ? activeColor
                   : (hasActiveTrip && index != 0
-                      ? Colors.grey.shade300
-                      : inactiveColor),
+                        ? Colors.grey.shade300
+                        : inactiveColor),
               size: 24,
             ),
             const SizedBox(height: 4),
@@ -133,8 +133,8 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
                 color: isSelected
                     ? activeColor
                     : (hasActiveTrip && index != 0
-                        ? Colors.grey.shade300
-                        : inactiveColor),
+                          ? Colors.grey.shade300
+                          : inactiveColor),
               ),
             ),
             const SizedBox(height: 4),

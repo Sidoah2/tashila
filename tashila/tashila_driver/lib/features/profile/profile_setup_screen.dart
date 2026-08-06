@@ -21,6 +21,8 @@ import '../../core/utils/picked_image_io.dart';
 import '../../core/widgets/upload_image_preview.dart';
 import '../auth/auth_language_menu.dart';
 import 'local_profile_avatar.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import '../../core/config/app_social_links.dart';
 
 enum _MediaPickSource { camera, gallery, files }
 
@@ -312,6 +314,73 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Future<void> _openWhatsApp() async {
     final uri = Uri.parse('https://wa.me/$kSupportWhatsAppDigits');
+    if (!await canLaunchUrl(uri)) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  void _showEditEmailDialog(BuildContext context, String currentEmail) {
+    final controller = TextEditingController(text: currentEmail);
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: Colors.white,
+        title: Text('profile_onboarding_email_optional'.tr()),
+        content: TextField(
+          controller: controller,
+          keyboardType: TextInputType.emailAddress,
+          decoration: InputDecoration(
+            hintText: 'email@example.com',
+            border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(
+              context.locale.languageCode == 'ar'
+                  ? 'إلغاء'
+                  : (context.locale.languageCode == 'fr'
+                        ? 'Annuler'
+                        : 'Cancel'),
+            ),
+          ),
+          FilledButton(
+            onPressed: () async {
+              final newEmail = controller.text.trim();
+              Navigator.pop(ctx);
+              final state = ref.read(driverAppStateProvider);
+              final profile = state.profile ?? DriverProfile.empty();
+              await ref
+                  .read(driverAppStateProvider.notifier)
+                  .saveProfile(
+                    name: profile.name,
+                    phone: profile.phone,
+                    email: newEmail,
+                    truckType: profile.truckType,
+                    vehiclePlate: profile.vehiclePlate,
+                    vehicleColor: profile.vehicleColor,
+                    vehicleModel: profile.vehicleModel,
+                  );
+            },
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brandOrange,
+            ),
+            child: Text(
+              context.locale.languageCode == 'ar'
+                  ? 'حفظ'
+                  : (context.locale.languageCode == 'fr'
+                        ? 'Enregistrer'
+                        : 'Save'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _openSocialUrl(String url) async {
+    final uri = Uri.parse(url);
     if (!await canLaunchUrl(uri)) return;
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
@@ -1027,6 +1096,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             controller: _phoneController,
                             keyboardType: TextInputType.phone,
                             readOnly: true,
+                            textAlign: TextAlign.end,
+                            textDirection: ui.TextDirection.ltr,
                             decoration: InputDecoration(
                               hintText: 'phone_label'.tr(),
                               filled: true,
@@ -1554,7 +1625,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                                   if (profile.phone.trim().isNotEmpty) ...[
                                     const SizedBox(height: 2),
                                     Text(
-                                      profile.phone,
+                                      '\u200E${profile.phone}',
+                                      textAlign: TextAlign.end,
+                                      textDirection: ui.TextDirection.ltr,
                                       style: TextStyle(
                                         color: Colors.white.withValues(
                                           alpha: 0.85,
@@ -1642,133 +1715,142 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     iconColor: Colors.blue.shade700,
                   ),
                   _ProfileCardContainer(
-                    child: Form(
-                      key: _formKey,
-                      autovalidateMode: _didAttemptSubmit
-                          ? AutovalidateMode.onUserInteraction
-                          : AutovalidateMode.disabled,
-                      child: Column(
-                        children: [
-                          TextFormField(
-                            controller: _nameController,
-                            decoration: InputDecoration(
-                              hintText: 'name_label'.tr(),
-                              prefixIcon: Icon(
-                                Icons.person_outline_rounded,
-                                color: AppColors.brandOrange,
-                                size: 20,
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: AppColors.brandOrange.withValues(
+                                alpha: 0.1,
                               ),
-                              filled: true,
-                              fillColor: AppColors.bg,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(
-                                  color: AppColors.brandOrange,
-                                  width: 2,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.person_outline_rounded,
+                              color: AppColors.brandOrange,
+                              size: 20,
+                            ),
+                          ),
+                          title: Text(
+                            'name_label'.tr(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          subtitle: Text(
+                            profile.name,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.lock_outline_rounded,
+                            color: AppColors.textSecondary,
+                            size: 18,
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'driver_personal_info_locked'.tr(),
                                 ),
+                                backgroundColor: Colors.red.shade700,
                               ),
+                            );
+                          },
+                        ),
+                        _tileDivider(),
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: AppColors.brandOrange.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                            validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'validation_required_name'.tr();
-                              }
-                              if (value.trim().length < 2) {
-                                return 'validation_short_name'.tr();
-                              }
-                              return null;
-                            },
+                            child: const Icon(
+                              Icons.phone_outlined,
+                              color: AppColors.brandOrange,
+                              size: 20,
+                            ),
                           ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _emailController,
-                            keyboardType: TextInputType.emailAddress,
-                            decoration: InputDecoration(
-                              hintText: 'profile_onboarding_email_optional'
-                                  .tr(),
-                              prefixIcon: Icon(
-                                Icons.email_outlined,
-                                color: AppColors.textSecondary,
-                                size: 20,
-                              ),
-                              filled: true,
-                              fillColor: AppColors.bg,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(
-                                  color: AppColors.brandOrange,
-                                  width: 2,
+                          title: Text(
+                            'phone_label'.tr(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '\u200E${profile.phone}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.lock_outline_rounded,
+                            color: AppColors.textSecondary,
+                            size: 18,
+                          ),
+                          onTap: () {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  'driver_personal_info_locked'.tr(),
                                 ),
+                                backgroundColor: Colors.red.shade700,
                               ),
+                            );
+                          },
+                        ),
+                        _tileDivider(),
+                        ListTile(
+                          leading: Container(
+                            padding: const EdgeInsets.all(9),
+                            decoration: BoxDecoration(
+                              color: AppColors.brandOrange.withValues(
+                                alpha: 0.1,
+                              ),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(
+                              Icons.email_outlined,
+                              color: AppColors.brandOrange,
+                              size: 20,
                             ),
                           ),
-                          const SizedBox(height: 12),
-                          TextFormField(
-                            controller: _phoneController,
-                            keyboardType: TextInputType.phone,
-                            readOnly: true,
-                            decoration: InputDecoration(
-                              hintText: 'phone_label'.tr(),
-                              prefixIcon: Icon(
-                                Icons.phone_outlined,
-                                color: AppColors.textSecondary,
-                                size: 20,
-                              ),
-                              filled: true,
-                              fillColor: AppColors.bg,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 16,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: BorderSide.none,
-                              ),
+                          title: Text(
+                            'profile_onboarding_email_optional'.tr(),
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: AppColors.textSecondary,
                             ),
-                            validator: (value) {
-                              final raw = value?.trim() ?? '';
-                              if (raw.isEmpty) {
-                                return 'validation_required_phone'.tr();
-                              }
-                              final digitsOnly = raw.replaceAll(
-                                RegExp(r'[^0-9]'),
-                                '',
-                              );
-                              if (digitsOnly.length < 8) {
-                                return 'validation_invalid_phone'.tr();
-                              }
-                              return null;
-                            },
                           ),
-                        ],
-                      ),
+                          subtitle: Text(
+                            profile.email.isEmpty ? '—' : profile.email,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          trailing: const Icon(
+                            Icons.edit_outlined,
+                            color: AppColors.brandOrange,
+                            size: 18,
+                          ),
+                          onTap: () =>
+                              _showEditEmailDialog(context, profile.email),
+                        ),
+                      ],
                     ),
                   ),
                 ],
@@ -1949,22 +2031,22 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         _tileDivider(),
                         _profileTile(
                           context: context,
-                          icon: Icons.chat_bubble_rounded,
-                          iconBg: Colors.cyan.shade50,
-                          iconColor: const Color(0xFF00BFA5),
+                          icon: FontAwesomeIcons.whatsapp,
+                          iconBg: const Color(0xFFE8F5E9),
+                          iconColor: const Color(0xFF25D366),
                           title: 'profile_support_whatsapp'.tr(),
                           onTap: _openWhatsApp,
                         ),
                         _tileDivider(),
-                        _profileTile(
-                          context: context,
-                          icon: Icons.info_rounded,
-                          iconBg: Colors.purple.shade50,
-                          iconColor: Colors.purple.shade700,
-                          title: 'profile_about'.tr(),
-                          onTap: _showAboutTashilaDialog,
-                        ),
-                        _tileDivider(),
+                        // _profileTile(
+                        //   context: context,
+                        //   icon: Icons.info_rounded,
+                        //   iconBg: Colors.purple.shade50,
+                        //   iconColor: Colors.purple.shade700,
+                        //   title: 'profile_about h'.tr(),
+                        //   onTap: _showAboutTashilaDialog,
+                        // ),
+                        // _tileDivider(),
                         _profileTile(
                           context: context,
                           icon: Icons.delete_forever_rounded,
@@ -1973,9 +2055,69 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                           title: 'profile_delete_account'.tr(),
                           titleColor: Colors.red.shade800,
                           onTap: _showDeleteAccountDialog,
+                          isCircle: true,
                         ),
                         _tileDivider(),
                         const _DriverProfileVersionTile(),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          // Section: Follow Us (Social Links)
+          SliverPadding(
+            padding: const EdgeInsets.fromLTRB(20, 4, 20, 16),
+            sliver: SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _ProfileSectionHeader(
+                    title: 'profile_social_section'.tr(),
+                    icon: Icons.share_rounded,
+                    iconBg: Colors.indigo.shade50,
+                    iconColor: Colors.indigo.shade700,
+                  ),
+                  _ProfileCardContainer(
+                    padding: EdgeInsets.zero,
+                    child: Column(
+                      children: [
+                        _profileTile(
+                          context: context,
+                          icon: FontAwesomeIcons.facebook,
+                          iconBg: const Color(0xFFE8F0FE),
+                          iconColor: const Color(0xFF1877F2),
+                          title: 'profile_link_facebook'.tr(),
+                          onTap: () => _openSocialUrl(AppSocialLinks.facebook),
+                        ),
+                        _tileDivider(),
+                        _profileTile(
+                          context: context,
+                          icon: FontAwesomeIcons.tiktok,
+                          iconBg: Colors.grey.shade100,
+                          iconColor: Colors.black,
+                          title: 'profile_link_tiktok'.tr(),
+                          onTap: () => _openSocialUrl(AppSocialLinks.tiktok),
+                        ),
+                        _tileDivider(),
+                        _profileTile(
+                          context: context,
+                          icon: FontAwesomeIcons.instagram,
+                          iconBg: const Color(0xFFFDF0F2),
+                          iconColor: const Color(0xFFE1306C),
+                          title: 'profile_link_instagram'.tr(),
+                          onTap: () => _openSocialUrl(AppSocialLinks.instagram),
+                        ),
+                        _tileDivider(),
+                        _profileTile(
+                          context: context,
+                          icon: Icons.language_rounded,
+                          iconBg: Colors.purple.shade50,
+                          iconColor: Colors.purple.shade700,
+                          title: 'profile_link_website'.tr(),
+                          onTap: () => _openSocialUrl(AppSocialLinks.website),
+                        ),
                       ],
                     ),
                   ),
@@ -2029,13 +2171,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     required String title,
     Color? titleColor,
     required VoidCallback onTap,
+    bool isCircle = false,
   }) {
     return ListTile(
       leading: Container(
         padding: const EdgeInsets.all(9),
         decoration: BoxDecoration(
           color: iconBg,
-          borderRadius: BorderRadius.circular(12),
+          shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
+          borderRadius: isCircle ? null : BorderRadius.circular(12),
         ),
         child: Icon(icon, color: iconColor, size: 20),
       ),

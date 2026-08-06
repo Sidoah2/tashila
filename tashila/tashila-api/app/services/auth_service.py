@@ -28,10 +28,8 @@ from app.core.security import (
 PHONE_PATTERN = re.compile(r"^\+\d{8,15}$")
 
 # =============================================================================
-# TESTING ONLY — SMS OTP bypass. Comment out or delete this block for production.
-# While enabled, any phone + code 111111 authenticates (no real SMS required).
-# =============================================================================
-_TEST_OTP_ENABLED = True
+import os
+_TEST_OTP_ENABLED = os.getenv("TEST_OTP_ENABLED", "false").lower() in ("true", "1", "yes")
 _TEST_OTP_CODE = "111111"
 # =============================================================================
 

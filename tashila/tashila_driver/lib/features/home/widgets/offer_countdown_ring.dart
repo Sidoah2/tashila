@@ -30,8 +30,20 @@ class OfferCountdownRing extends StatelessWidget {
     final progressColor = critical
         ? const Color(0xFFD32F2F)
         : urgent
-            ? const Color(0xFFE65100)
-            : AppColors.brandOrange;
+        ? const Color(0xFFE65100)
+        : AppColors.brandOrange;
+
+    final String timeStr;
+    final String labelStr;
+    if (seconds >= 60) {
+      final m = seconds ~/ 60;
+      final s = seconds % 60;
+      timeStr = '$m:${s.toString().padLeft(2, '0')}';
+      labelStr = 'min';
+    } else {
+      timeStr = '$seconds';
+      labelStr = 's';
+    }
 
     return SizedBox(
       width: size,
@@ -52,9 +64,9 @@ class OfferCountdownRing extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                '$seconds',
+                timeStr,
                 style: TextStyle(
-                  fontSize: size * 0.28,
+                  fontSize: seconds >= 60 ? size * 0.22 : size * 0.28,
                   fontWeight: FontWeight.w900,
                   height: 1,
                   color: critical
@@ -63,7 +75,7 @@ class OfferCountdownRing extends StatelessWidget {
                 ),
               ),
               Text(
-                's',
+                labelStr,
                 style: TextStyle(
                   fontSize: size * 0.14,
                   fontWeight: FontWeight.w700,

@@ -25,14 +25,17 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   String completePhone = '';
   bool _isSending = false;
+  bool _isPhoneValid = false;
   late final TapGestureRecognizer _privacyTap;
   late final TapGestureRecognizer _termsTap;
 
   @override
   void initState() {
     super.initState();
-    _privacyTap = TapGestureRecognizer()..onTap = () => _openLegalUrl(_kPrivacyPolicyUrl);
-    _termsTap = TapGestureRecognizer()..onTap = () => _openLegalUrl(_kTermsOfServiceUrl);
+    _privacyTap = TapGestureRecognizer()
+      ..onTap = () => _openLegalUrl(_kPrivacyPolicyUrl);
+    _termsTap = TapGestureRecognizer()
+      ..onTap = () => _openLegalUrl(_kTermsOfServiceUrl);
   }
 
   @override
@@ -62,10 +65,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.bg,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-      ),
+      appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
       body: SafeArea(
         child: CustomScrollView(
           physics: const BouncingScrollPhysics(),
@@ -73,7 +73,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -90,11 +93,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               color: Colors.black.withValues(alpha: 0.08),
                               blurRadius: 20,
                               offset: const Offset(0, 8),
-                            )
+                            ),
                           ],
                         ),
                         child: ClipOval(
-                          child: Image.asset('assets/images/arabic_logo.jpeg', fit: BoxFit.cover),
+                          child: Image.asset(
+                            'assets/images/arabic_logo.jpeg',
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -124,37 +130,76 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         initialCountryCode: 'DZ',
                         dropdownIconPosition: IconPosition.trailing,
                         showCountryFlag: true,
+                        disableLengthCheck: true,
                         pickerDialogStyle: PickerDialogStyle(
                           backgroundColor: Colors.white,
                           countryNameStyle: theme.textTheme.bodyMedium,
                           countryCodeStyle: theme.textTheme.bodyMedium,
                         ),
-                        flagsButtonPadding: const EdgeInsets.symmetric(horizontal: 14),
-                        style: theme.textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600),
+                        flagsButtonPadding: const EdgeInsets.symmetric(
+                          horizontal: 14,
+                        ),
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
                         decoration: InputDecoration(
                           hintText: 'phone'.tr(),
                           filled: true,
                           fillColor: Colors.white,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 18,
+                          ),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.06), width: 1.5),
+                            borderSide: BorderSide(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              width: 1.5,
+                            ),
                           ),
                           enabledBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: BorderSide(color: Colors.black.withValues(alpha: 0.06), width: 1.5),
+                            borderSide: BorderSide(
+                              color: Colors.black.withValues(alpha: 0.06),
+                              width: 1.5,
+                            ),
                           ),
                           focusedBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: AppColors.brandOrange, width: 2),
+                            borderSide: const BorderSide(
+                              color: AppColors.brandOrange,
+                              width: 2,
+                            ),
                           ),
                           errorBorder: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(16),
-                            borderSide: const BorderSide(color: Colors.redAccent, width: 1.5),
+                            borderSide: const BorderSide(
+                              color: Colors.redAccent,
+                              width: 1.5,
+                            ),
                           ),
                         ),
+                        validator: (phone) {
+                          if (phone == null || phone.number.isEmpty) {
+                            return 'validation_required_phone'.tr();
+                          }
+                          final numStr = phone.number.trim();
+                          final isValid =
+                              (numStr.length == 10 && numStr.startsWith('0')) ||
+                              (numStr.length == 9 && !numStr.startsWith('0'));
+                          if (!isValid) {
+                            return 'validation_invalid_phone'.tr();
+                          }
+                          return null;
+                        },
                         onChanged: (phone) {
                           var number = phone.number.trim();
+                          final isValid =
+                              (number.length == 10 && number.startsWith('0')) ||
+                              (number.length == 9 && !number.startsWith('0'));
+                          setState(() {
+                            _isPhoneValid = isValid;
+                          });
                           if (number.startsWith('0')) {
                             number = number.substring(1);
                           }
@@ -175,7 +220,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 28),
                     PrimaryButton(
                       label: 'send_otp'.tr(),
-                      onPressed: _isSending
+                      onPressed: _isSending || !_isPhoneValid
                           ? null
                           : () async {
                               if (completePhone.isEmpty) return;
@@ -189,7 +234,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               } catch (_) {
                                 if (mounted) {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('send_otp_failed'.tr())),
+                                    SnackBar(
+                                      content: Text('send_otp_failed'.tr()),
+                                    ),
                                   );
                                 }
                               } finally {
@@ -231,4 +278,3 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 }
-

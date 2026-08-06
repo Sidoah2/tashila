@@ -1,66 +1,146 @@
 [
   {
-    "id": "tamanrasset_center",
-    "titleEn": "Tamanrasset Center",
-    "titleAr": "وسط تمنراست",
-    "lat": 22.785,
-    "lng": 5.523,
+    "id": "sersouf",
+    "titleEn": "Sersouf",
+    "titleAr": "حي سرسوف",
+    "lat": 22.7933252,
+    "lng": 5.5262232,
     "supported": true
   },
   {
-    "id": "tamanrasset_airport",
-    "titleEn": "Tamanrasset Airport",
-    "titleAr": "مطار تمنراست",
-    "lat": 22.812,
-    "lng": 5.451,
+    "id": "tahaggart",
+    "titleEn": "Tahaggart",
+    "titleAr": "حي تهقارت",
+    "lat": 22.7996081,
+    "lng": 5.5101186,
     "supported": true
   },
   {
-    "id": "abalessa",
-    "titleEn": "Abalessa",
-    "titleAr": "أباليسة",
-    "lat": 22.873,
-    "lng": 4.847,
+    "id": "tafsit",
+    "titleEn": "Tafsit",
+    "titleAr": "حي تافسيت",
+    "lat": 22.8010101,
+    "lng": 5.5302636,
     "supported": true
   },
   {
-    "id": "in_ghar",
-    "titleEn": "In Ghar",
-    "titleAr": "إين غار",
-    "lat": 27.108,
-    "lng": 1.808,
+    "id": "mouflon",
+    "titleEn": "Mouflon",
+    "titleAr": "حي موفلون",
+    "lat": 22.787566,
+    "lng": 5.5396971,
     "supported": true
   },
   {
-    "id": "in_salah",
-    "titleEn": "In Salah",
-    "titleAr": "إين صالح",
-    "lat": 27.197,
-    "lng": 2.483,
+    "id": "el_ksar",
+    "titleEn": "El Ksar",
+    "titleAr": "حي القصر",
+    "lat": 22.7866,
+    "lng": 5.5344,
     "supported": true
   },
   {
-    "id": "tazrouk",
-    "titleEn": "Tazrouk",
-    "titleAr": "تازروك",
-    "lat": 23.424,
-    "lng": 5.675,
+    "id": "el_hofra",
+    "titleEn": "El Hofra",
+    "titleAr": "حي الحفرة",
+    "lat": 22.776,
+    "lng": 5.525,
     "supported": true
   },
   {
-    "id": "idles",
-    "titleEn": "Idles",
-    "titleAr": "إدلس",
-    "lat": 23.817,
-    "lng": 5.917,
+    "id": "gata_el_oued",
+    "titleEn": "Gata El Oued",
+    "titleAr": "حي قطع الواد",
+    "lat": 22.782,
+    "lng": 5.521,
     "supported": true
   },
   {
-    "id": "in_amenas",
-    "titleEn": "In Amenas",
-    "titleAr": "إين أمenas",
-    "lat": 28.042,
-    "lng": 9.553,
-    "supported": false
+    "id": "imchouane",
+    "titleEn": "Imchouane",
+    "titleAr": "حي إمشوان",
+    "lat": 22.792,
+    "lng": 5.516,
+    "supported": true
+  },
+  {
+    "id": "metnatlat",
+    "titleEn": "Metnatlat",
+    "titleAr": "حي متناتلات",
+    "lat": 22.789,
+    "lng": 5.531,
+    "supported": true
+  },
+  {
+    "id": "taberkat",
+    "titleEn": "Taberkat",
+    "titleAr": "حي تبركات",
+    "lat": 22.773,
+    "lng": 5.528,
+    "supported": true
+  },
+  {
+    "id": "tahagouine",
+    "titleEn": "Tahagouine",
+    "titleAr": "حي تهقوين",
+    "lat": 22.796,
+    "lng": 5.535,
+    "supported": true
+  },
+  {
+    "id": "el_salam",
+    "titleEn": "El Salam",
+    "titleAr": "حي السلام",
+    "lat": 22.7755871,
+    "lng": 5.5195197,
+    "supported": true
+  },
+  {
+    "id": "adrian",
+    "titleEn": "Adrian",
+    "titleAr": "حي أدريان",
+    "lat": 22.783,
+    "lng": 5.545,
+    "supported": true
+  },
+  {
+    "id": "5_juillet",
+    "titleEn": "5 Juillet",
+    "titleAr": "حي 5 جويلية",
+    "lat": 22.7763103,
+    "lng": 5.5351093,
+    "supported": true
+  },
+  {
+    "id": "sorou",
+    "titleEn": "Sorou",
+    "titleAr": "حي صورو",
+    "lat": 22.784,
+    "lng": 5.551,
+    "supported": true
+  },
+  {
+    "id": "el_safsaf",
+    "titleEn": "El Safsaf",
+    "titleAr": "حي الصفصاف",
+    "lat": 22.771,
+    "lng": 5.514,
+    "supported": true
+  },
+  {
+    "id": "ankouf",
+    "titleEn": "Ankouf",
+    "titleAr": "حي أنكوّف",
+    "lat": 22.795,
+    "lng": 5.508,
+    "supported": true
+  },
+  {
+    "id": "quartier_des_femmes",
+    "titleEn": "Quartier des Femmes",
+    "titleAr": "حي النساء",
+    "lat": 22.788,
+    "lng": 5.526,
+    "supported": true
   }
 ]

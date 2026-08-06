@@ -31,7 +31,7 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          if (options.extra['silent'] != true) {
+          if (options.extra['showOverlay'] == true) {
             final cancelToken = options.cancelToken ?? CancelToken();
             options.cancelToken = cancelToken;
             final ctx = rootNavigatorKey.currentContext;
@@ -42,13 +42,13 @@ class ApiClient {
           handler.next(options);
         },
         onResponse: (response, handler) {
-          if (response.requestOptions.extra['silent'] != true) {
+          if (response.requestOptions.extra['showOverlay'] == true) {
             ApiOverlayManager.hide();
           }
           handler.next(response);
         },
         onError: (error, handler) async {
-          if (error.requestOptions.extra['silent'] != true) {
+          if (error.requestOptions.extra['showOverlay'] == true) {
             ApiOverlayManager.hide();
           }
           if (error.response?.statusCode == 401) {
@@ -113,27 +113,21 @@ class ApiClient {
   Future<Response<T>> get<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
-  }) =>
-      _dio.get<T>(path, queryParameters: queryParameters);
+  }) => _dio.get<T>(path, queryParameters: queryParameters);
 
   Future<Response<T>> post<T>(
     String path, {
     dynamic data,
     Map<String, dynamic>? queryParameters,
-  }) =>
-      _dio.post<T>(path, data: data, queryParameters: queryParameters);
+  }) => _dio.post<T>(path, data: data, queryParameters: queryParameters);
 
-  Future<Response<T>> put<T>(
-    String path, {
-    dynamic data,
-  }) =>
+  Future<Response<T>> put<T>(String path, {dynamic data}) =>
       _dio.put<T>(path, data: data);
 
   Future<Response<T>> delete<T>(
     String path, {
     Map<String, dynamic>? queryParameters,
-  }) =>
-      _dio.delete<T>(path, queryParameters: queryParameters);
+  }) => _dio.delete<T>(path, queryParameters: queryParameters);
 
   Future<Response<T>> uploadFile<T>(
     String path,

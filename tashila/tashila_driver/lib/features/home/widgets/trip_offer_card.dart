@@ -4,25 +4,17 @@ import 'package:flutter/material.dart';
 import '../../../core/formatting/app_format.dart';
 import '../../../core/models/models.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/primary_button.dart';
-import 'offer_countdown_ring.dart';
 
-String _durationPart(int? minutes) {
-  if (minutes == null || minutes <= 0) return '';
-  return 'trip_estimated_duration_inline'.tr(
-    namedArgs: {
-      'duration': '${westernDigits('$minutes')} ${'trip_unit_minutes'.tr()}',
-    },
-  );
-}
-
-/// Single trip request with an integrated live countdown ring.
-class TripOfferCard extends StatelessWidget {
+/// Single trip request offer card for driver waiting screen.
+/// Renders dynamic offer data in light mode with title on right & circular timer on left in AR locale,
+/// 2 metric capsules (trip length & gain), pickup/dropoff timeline, and Accept / Ignore buttons.
+class TripOfferCard extends StatefulWidget {
   const TripOfferCard({
     super.key,
     required this.offer,
     required this.onAccept,
     required this.onReject,
+    this.onRefresh,
     this.isPrimary = false,
     this.acceptEnabled = true,
     this.vehiclePlate = '',
@@ -33,328 +25,357 @@ class TripOfferCard extends StatelessWidget {
   final IncomingOffer offer;
   final VoidCallback onAccept;
   final VoidCallback onReject;
+  final VoidCallback? onRefresh;
   final bool isPrimary;
   final bool acceptEnabled;
   final String vehiclePlate;
   final String vehicleColor;
   final String vehicleModel;
 
-  String _truckLabel(String type) {
-    return type == kTruckDoubleCabin
-        ? 'truck_double_cabin'.tr()
-        : 'truck_single_cabin'.tr();
-  }
-
-  String _vehicleSummary() {
-    final parts = <String>[];
-    final model = vehicleModel.trim();
-    final color = vehicleColor.trim();
-    final plate = vehiclePlate.trim();
-    if (model.isNotEmpty) parts.add(model);
-    if (color.isNotEmpty) parts.add(color);
-    if (plate.isNotEmpty) parts.add(plate);
-    return parts.join(' · ');
-  }
-
   @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final request = offer.request;
-    final seconds = offer.remainingSeconds;
-    final critical = seconds <= 3;
-    final urgent = seconds <= 8;
+  State<TripOfferCard> createState() => _TripOfferCardState();
+}
 
-    final borderColor = critical
-        ? const Color(0xFFD32F2F)
-        : urgent
-        ? AppColors.brandOrange
-        : isPrimary
-        ? AppColors.brandOrange.withValues(alpha: 0.55)
-        : Colors.black.withValues(alpha: 0.08);
+class _TripOfferCardState extends State<TripOfferCard> {
+  bool _accepting = false;
+  bool _rejecting = false;
 
-    final meta = StringBuffer()
-      ..write(
-        '${westernDigits(request.distanceKm.toStringAsFixed(1))} ${'km_unit'.tr()}',
-      );
-    if (offer.pickupDistanceKm != null && offer.pickupDistanceKm! > 0) {
-      meta.write(
-        ' · ${'offer_pickup_distance'.tr(namedArgs: {'km': westernDigits(offer.pickupDistanceKm!.toStringAsFixed(1))})}',
-      );
+  Future<void> _handleAccept() async {
+    if (_accepting || _rejecting) return;
+    setState(() => _accepting = true);
+    try {
+      widget.onAccept();
+    } finally {
+      if (mounted) setState(() => _accepting = false);
     }
-    if (request.estimatedDurationMinutes != null &&
-        request.estimatedDurationMinutes! > 0) {
-      meta.write(' · ${_durationPart(request.estimatedDurationMinutes)}');
-    }
+  }
 
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
+  Future<void> _handleReject() async {
+    if (_accepting || _rejecting) return;
+    setState(() => _rejecting = true);
+    try {
+      widget.onReject();
+    } finally {
+      if (mounted) setState(() => _rejecting = false);
+    }
+  }
+
+  Widget _buildMetricCard({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 12),
       decoration: BoxDecoration(
-        color: isPrimary ? Colors.white : const Color(0xFFF8F8F8),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: borderColor, width: isPrimary ? 2 : 1),
-        boxShadow: [
-          if (isPrimary)
-            BoxShadow(
-              color: AppColors.brandOrange.withValues(alpha: 0.18),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            )
-          else
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.05),
-              blurRadius: 6,
-              offset: const Offset(0, 2),
-            ),
-        ],
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade200),
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(12, 12, 12, 10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                OfferCountdownRing(offer: offer, size: isPrimary ? 72 : 64),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          if (isPrimary) ...[
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 8,
-                                vertical: 3,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.brandOrange,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                'offer_card_priority'.tr(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w800,
-                                  fontSize: 10,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                          ],
-                          Expanded(
-                            child: Text(
-                              request.clientName,
-                              style: theme.textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w800,
-                              ),
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ),
-                          Text(
-                            dzdCurrency().format(request.fare),
-                            style: theme.textTheme.titleSmall?.copyWith(
-                              fontWeight: FontWeight.w900,
-                              color: AppColors.brandOrange,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      _RouteTimeline(
-                        pickup: request.pickup,
-                        dropOff: request.dropOff,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        meta.toString(),
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      if (request.truckType.isNotEmpty ||
-                          _vehicleSummary().isNotEmpty) ...[
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 6,
-                          runSpacing: 6,
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          children: [
-                            if (request.truckType.isNotEmpty)
-                              Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 8,
-                                  vertical: 4,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: AppColors.brandOrange.withValues(
-                                    alpha: 0.12,
-                                  ),
-                                  borderRadius: BorderRadius.circular(8),
-                                  border: Border.all(
-                                    color: AppColors.brandOrange.withValues(
-                                      alpha: 0.35,
-                                    ),
-                                  ),
-                                ),
-                                child: Text(
-                                  _truckLabel(request.truckType),
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    fontWeight: FontWeight.w800,
-                                    color: AppColors.brandOrange,
-                                  ),
-                                ),
-                              ),
-                            if (_vehicleSummary().isNotEmpty)
-                              Text(
-                                _vehicleSummary(),
-                                style: theme.textTheme.labelSmall?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                          ],
-                        ),
-                      ],
-                      if (urgent) ...[
-                        const SizedBox(height: 6),
-                        Text(
-                          critical
-                              ? 'offer_expires_critical'.tr()
-                              : 'offer_expires_soon'.tr(),
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: critical
-                                ? const Color(0xFFD32F2F)
-                                : const Color(0xFFE65100),
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 22, color: AppColors.brandOrange),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Colors.grey.shade600,
             ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: SizedBox(
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: onReject,
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFFC62828),
-                        side: const BorderSide(
-                          color: Color(0xFFE57373),
-                          width: 1.5,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        'reject'.tr(),
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 15,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                Expanded(
-                  flex: 2,
-                  child: PrimaryButton(
-                    label: seconds <= 0 ? 'offer_expired'.tr() : 'accept'.tr(),
-                    icon: Icons.check_rounded,
-                    onPressed: acceptEnabled && seconds > 0 ? onAccept : null,
-                  ),
-                ),
-              ],
+          ),
+          const SizedBox(height: 6),
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              value,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
-}
-
-class _RouteTimeline extends StatelessWidget {
-  const _RouteTimeline({required this.pickup, required this.dropOff});
-
-  final String pickup;
-  final String dropOff;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return IntrinsicHeight(
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            children: [
-              Container(
-                width: 8,
-                height: 8,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF43A047),
-                  shape: BoxShape.circle,
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  width: 2,
-                  margin: const EdgeInsets.symmetric(vertical: 2),
-                  color: AppColors.textSecondary.withValues(alpha: 0.25),
-                ),
-              ),
-              Container(
-                width: 8,
-                height: 8,
-                decoration: BoxDecoration(
-                  color: AppColors.brandOrange,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+    final offer = widget.offer;
+    final request = offer.request;
+    final seconds = offer.remainingSeconds;
+    final ttl = offer.ttlSeconds;
+    final progress = ttl > 0 ? (seconds / ttl).clamp(0.0, 1.0) : 0.0;
+    final isUrgent = seconds <= 10;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(20),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // ── TOP HEADER: TITLE ON RIGHT & CIRCLE TIMER ON LEFT (in AR/RTL) ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                // Title "طلب جديد" / "New Order" (RTL: Right side)
                 Text(
-                  pickup,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    height: 1.2,
+                  'new_order_title'.tr(),
+                  style: const TextStyle(
+                    fontSize: 21,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  dropOff,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+
+                // Circle Timer (RTL: Left side)
+                Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    SizedBox(
+                      width: 54,
+                      height: 54,
+                      child: CircularProgressIndicator(
+                        value: progress,
+                        strokeWidth: 4,
+                        backgroundColor: Colors.grey.shade200,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          isUrgent
+                              ? Colors.red.shade600
+                              : AppColors.brandOrange,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      westernDigits('$seconds'),
+                      style: TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w800,
+                        color: isUrgent ? Colors.red.shade700 : Colors.black,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ),
-        ],
+            const SizedBox(height: 20),
+
+            // ── METRICS CAPSULES (2 Containers: Trip Length & Gain) ──
+            Row(
+              children: [
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.swap_calls_rounded,
+                    label: 'trip_length_label'.tr(),
+                    value:
+                        '${westernDigits(request.distanceKm.toStringAsFixed(1))} ${'km_unit'.tr()}',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildMetricCard(
+                    icon: Icons.payments_rounded,
+                    label: 'trip_gain_label'.tr(),
+                    value: formatTripPrice(request.fare),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // ── TIMELINE: START POINT & END POINT ──
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Pickup / Start Point
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFF3B82F6),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'pickup_point_label'.tr(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              request.pickup,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Connector Line
+                  Padding(
+                    padding: const EdgeInsets.only(left: 5, right: 5),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      width: 2,
+                      height: 24,
+                      color: Colors.grey.shade300,
+                    ),
+                  ),
+
+                  // Dropoff / End Point
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Container(
+                          width: 12,
+                          height: 12,
+                          decoration: const BoxDecoration(
+                            color: Color(0xFFF59E0B),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'dropoff_point_label'.tr(),
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              request.dropOff,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // ── ACTION BUTTONS: ACCEPT & IGNORE ──
+            SizedBox(
+              height: 52,
+              child: ElevatedButton(
+                onPressed:
+                    (widget.acceptEnabled &&
+                        seconds > 0 &&
+                        !_accepting &&
+                        !_rejecting)
+                    ? _handleAccept
+                    : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.brandOrange,
+                  disabledBackgroundColor: AppColors.brandOrange.withValues(
+                    alpha: 0.4,
+                  ),
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(26),
+                  ),
+                ),
+                child: _accepting
+                    ? const SizedBox(
+                        width: 22,
+                        height: 22,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        seconds <= 0
+                            ? 'offer_expired'.tr()
+                            : 'accept_order'.tr(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                          color: Colors.white,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: (_accepting || _rejecting) ? null : _handleReject,
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.grey.shade600,
+                  minimumSize: const Size(120, 36),
+                ),
+                child: _rejecting
+                    ? SizedBox(
+                        width: 18,
+                        height: 18,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.grey.shade600,
+                        ),
+                      )
+                    : Text(
+                        'ignore'.tr(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

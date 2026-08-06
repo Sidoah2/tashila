@@ -31,7 +31,7 @@ class ApiClient {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          if (options.extra['silent'] != true) {
+          if (options.extra['showOverlay'] == true) {
             final cancelToken = options.cancelToken ?? CancelToken();
             options.cancelToken = cancelToken;
             final ctx = rootNavigatorKey.currentContext;
@@ -42,13 +42,13 @@ class ApiClient {
           handler.next(options);
         },
         onResponse: (response, handler) {
-          if (response.requestOptions.extra['silent'] != true) {
+          if (response.requestOptions.extra['showOverlay'] == true) {
             ApiOverlayManager.hide();
           }
           handler.next(response);
         },
         onError: (error, handler) async {
-          if (error.requestOptions.extra['silent'] != true) {
+          if (error.requestOptions.extra['showOverlay'] == true) {
             ApiOverlayManager.hide();
           }
           if (error.response?.statusCode == 401) {

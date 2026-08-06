@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:ui' as ui;
+
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -13,17 +13,7 @@ import 'package:device_preview/device_preview.dart';
 
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
 
-/// Picks en / ar / fr from the OS locale; anything else falls back to English.
-Locale _localeFromDevice() {
-  final device = ui.PlatformDispatcher.instance.locale;
-  final code = device.languageCode.toLowerCase();
-  for (final locale in _supported) {
-    if (locale.languageCode == code) {
-      return locale;
-    }
-  }
-  return const Locale('en');
-}
+
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,8 +24,8 @@ Future<void> main() async {
       builder: (context) => EasyLocalization(
         supportedLocales: _supported,
         path: 'assets/translations',
-        fallbackLocale: const Locale('en'),
-        startLocale: _localeFromDevice(),
+        fallbackLocale: const Locale('ar'),
+        startLocale: const Locale('ar'),
         useOnlyLangCode: true,
         child: const ProviderScope(child: TashilaDriverApp()),
       ),

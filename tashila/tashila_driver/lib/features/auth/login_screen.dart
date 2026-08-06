@@ -26,10 +26,30 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   String completePhone = '';
   late final TapGestureRecognizer _privacyTap;
   late final TapGestureRecognizer _termsTap;
+  late final TextEditingController _phoneController;
 
   @override
   void initState() {
     super.initState();
+    _phoneController = TextEditingController();
+    _phoneController.addListener(() {
+      final text = _phoneController.text.trim();
+      if (text.startsWith('0')) {
+        if (text.length > 10) {
+          _phoneController.value = TextEditingValue(
+            text: text.substring(0, 10),
+            selection: const TextSelection.collapsed(offset: 10),
+          );
+        }
+      } else {
+        if (text.length > 9) {
+          _phoneController.value = TextEditingValue(
+            text: text.substring(0, 9),
+            selection: const TextSelection.collapsed(offset: 9),
+          );
+        }
+      }
+    });
     _privacyTap = TapGestureRecognizer()
       ..onTap = () => _openLegalUrl(kPrivacyPolicyUrl);
     _termsTap = TapGestureRecognizer()
@@ -40,6 +60,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   void dispose() {
     _privacyTap.dispose();
     _termsTap.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -80,34 +101,42 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             child: SafeArea(
               bottom: false,
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 24),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.22),
-                            borderRadius: BorderRadius.circular(14),
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: 0.3),
+                    Align(
+                      alignment: Alignment.topRight,
+                      child: const AuthLanguageMenu(),
+                    ),
+                    const SizedBox(height: 8),
+                    Center(
+                      child: Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.08),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
                             ),
-                          ),
-                          child: const Icon(
-                            Icons.local_shipping_rounded,
-                            color: Colors.white,
-                            size: 26,
+                          ],
+                        ),
+                        child: ClipOval(
+                          child: Image.asset(
+                            'assets/images/arabic_logo.jpeg',
+                            fit: BoxFit.cover,
                           ),
                         ),
-                        const AuthLanguageMenu(),
-                      ],
+                      ),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     Text(
                       'app_title'.tr(),
+                      textAlign: TextAlign.center,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 28,
@@ -118,6 +147,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     const SizedBox(height: 4),
                     Text(
                       'login_title'.tr(),
+                      textAlign: TextAlign.center,
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.85),
                         fontSize: 15,
@@ -133,138 +163,153 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           Expanded(
             child: SafeArea(
               top: false,
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const SizedBox(height: 8),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(22),
-                        border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          width: 1.5,
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.04),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SizedBox(height: 8),
+                      Container(
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(22),
+                          border: Border.all(
+                            color: Colors.black.withValues(alpha: 0.05),
+                            width: 1.5,
                           ),
-                        ],
-                      ),
-                      padding: const EdgeInsets.all(18),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Directionality(
-                            textDirection: ui.TextDirection.ltr,
-                            child: IntlPhoneField(
-                              initialCountryCode: 'DZ',
-                              dropdownIconPosition: IconPosition.trailing,
-                              showCountryFlag: true,
-                              pickerDialogStyle: PickerDialogStyle(
-                                backgroundColor: Colors.white,
-                                countryNameStyle: theme.textTheme.bodyMedium,
-                                countryCodeStyle: theme.textTheme.bodyMedium,
-                              ),
-                              flagsButtonPadding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                              ),
-                              style: theme.textTheme.bodyLarge?.copyWith(
-                                fontWeight: FontWeight.w600,
-                              ),
-                              decoration: InputDecoration(
-                                hintText: 'phone_label'.tr(),
-                                filled: true,
-                                fillColor: AppColors.bg,
-                                contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16,
-                                  vertical: 18,
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.04),
+                              blurRadius: 20,
+                              offset: const Offset(0, 8),
+                            ),
+                          ],
+                        ),
+                        padding: const EdgeInsets.all(18),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: IntlPhoneField(
+                                controller: _phoneController,
+                                initialCountryCode: 'DZ',
+                                dropdownIconPosition: IconPosition.trailing,
+                                showCountryFlag: true,
+                                disableLengthCheck: true,
+                                textAlign: TextAlign.left,
+                                pickerDialogStyle: PickerDialogStyle(
+                                  backgroundColor: Colors.white,
+                                  countryNameStyle: theme.textTheme.bodyMedium,
+                                  countryCodeStyle: theme.textTheme.bodyMedium,
                                 ),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                                flagsButtonPadding: const EdgeInsets.symmetric(
+                                  horizontal: 14,
                                 ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: BorderSide.none,
+                                style: theme.textTheme.bodyLarge?.copyWith(
+                                  fontWeight: FontWeight.w600,
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                  borderSide: const BorderSide(
-                                    color: AppColors.brandOrange,
-                                    width: 2,
+                                decoration: InputDecoration(
+                                  hintText: 'phone_label'.tr(),
+                                  filled: true,
+                                  fillColor: AppColors.bg,
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 18,
+                                  ),
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: BorderSide.none,
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(16),
+                                    borderSide: const BorderSide(
+                                      color: AppColors.brandOrange,
+                                      width: 2,
+                                    ),
                                   ),
                                 ),
+                                onChanged: (phone) {
+                                  var number = phone.number.trim();
+                                  if (number.startsWith('0')) {
+                                    number = number.substring(1);
+                                  }
+                                  completePhone = '${phone.countryCode}$number';
+                                },
                               ),
-                              onChanged: (phone) {
-                                var number = phone.number.trim();
-                                if (number.startsWith('0')) {
-                                  number = number.substring(1);
-                                }
-                                completePhone = '${phone.countryCode}$number';
-                              },
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            'otp_sms_notice'.tr(),
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
+                            const SizedBox(height: 12),
+                            Text(
+                              'otp_sms_notice'.tr(),
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    PrimaryButton(
-                      label: 'send_otp'.tr(),
-                      isBusy: state.isBusy,
-                      onPressed: () async {
-                        if (completePhone.isEmpty) return;
-                        await notifier.requestOtp(completePhone);
-                        if (!context.mounted) return;
-                        context.push('/otp');
-                      },
-                    ),
-                    if (state.error != null) ...[
-                      const SizedBox(height: 12),
-                      Text(
-                        state.error!,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          color: Colors.red,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 13,
+                          ],
                         ),
                       ),
-                    ],
-                    const Spacer(),
-                    Text.rich(
-                      TextSpan(
-                        style: baseStyle,
-                        children: [
-                          TextSpan(text: 'legal_prefix'.tr()),
-                          TextSpan(
-                            text: 'privacy_policy'.tr(),
-                            style: linkStyle,
-                            recognizer: _privacyTap,
-                          ),
-                          TextSpan(text: 'legal_and'.tr()),
-                          TextSpan(
-                            text: 'terms_of_service'.tr(),
-                            style: linkStyle,
-                            recognizer: _termsTap,
-                          ),
-                        ],
+                      const SizedBox(height: 20),
+                      PrimaryButton(
+                        label: 'send_otp'.tr(),
+                        isBusy: state.isBusy,
+                        onPressed: () async {
+                          final text = _phoneController.text.trim();
+                          if (text.startsWith('0')) {
+                            final newText = text.substring(1);
+                            _phoneController.value = TextEditingValue(
+                              text: newText,
+                              selection: TextSelection.collapsed(
+                                offset: newText.length,
+                              ),
+                            );
+                          }
+                          if (completePhone.isEmpty) return;
+                          await notifier.requestOtp(completePhone);
+                          if (!context.mounted) return;
+                          context.push('/otp');
+                        },
                       ),
-                      textAlign: TextAlign.start,
-                    ),
-                  ],
+                      if (state.error != null) ...[
+                        const SizedBox(height: 12),
+                        Text(
+                          state.error!,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                      const SizedBox(height: 40),
+                      Text.rich(
+                        TextSpan(
+                          style: baseStyle,
+                          children: [
+                            TextSpan(text: 'legal_prefix'.tr()),
+                            TextSpan(
+                              text: 'privacy_policy'.tr(),
+                              style: linkStyle,
+                              recognizer: _privacyTap,
+                            ),
+                            TextSpan(text: 'legal_and'.tr()),
+                            TextSpan(
+                              text: 'terms_of_service'.tr(),
+                              style: linkStyle,
+                              recognizer: _termsTap,
+                            ),
+                          ],
+                        ),
+                        textAlign: TextAlign.start,
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

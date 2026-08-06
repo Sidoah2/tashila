@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart'
 class MapConfig {
   const MapConfig._();
 
-  static const _androidKey = 'AIzaSyBaRXAy9z9IClUJ1jYhYvPexA7rvp-_228';
+  static const _androidKey = 'AIzaSyCHmAnPG06Vm2V5XPDsQYmfzHy13ICCDtM';
   static const _iosKey = 'AIzaSyDOxXdhOejrci6fERrxrA5NE2C0P60PlJg';
 
   /// Maps / Places HTTP calls: Android key on Android, iOS key on iOS (matches native SDK keys).
@@ -21,7 +21,9 @@ class MapConfig {
     if (!mapApiKey.startsWith('AIza')) return false;
     if (mapApiKey.length < 30) return false;
     final upper = mapApiKey.toUpperCase();
-    if (upper.contains('DUMMY') || upper.contains('TEST') || upper.contains('YOUR_')) {
+    if (upper.contains('DUMMY') ||
+        upper.contains('TEST') ||
+        upper.contains('YOUR_')) {
       return false;
     }
     return true;
