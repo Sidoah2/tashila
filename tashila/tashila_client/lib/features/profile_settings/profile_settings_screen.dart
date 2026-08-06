@@ -52,563 +52,560 @@ class ProfileSettingsScreen extends ConsumerWidget {
         );
       },
       child: ColoredBox(
-      color: AppColors.bg,
-      child: SafeArea(
-        child: CustomScrollView(
-          physics: const BouncingScrollPhysics(),
-          slivers: [
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: Text(
-                  'profile'.tr(),
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    letterSpacing: -0.4,
+        color: AppColors.bg,
+        child: SafeArea(
+          child: CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: Text(
+                    'profile'.tr(),
+                    style: theme.textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                      letterSpacing: -0.4,
+                    ),
                   ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _ProfileHeroCard(
-                  firstName: state.firstName,
-                  lastName: state.lastName,
-                  profileImageUrl: state.profileImageUrl.trim(),
-                  profilePhotoPath: state.profilePhotoPath.trim(),
-                  phone: state.phone,
-                  tripCount: tripCount,
-                  completedCount: completedCount,
-                  onPhotoTap: () => _pickProfilePhoto(context, ref),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: _ProfileHeroCard(
+                    firstName: state.firstName,
+                    lastName: state.lastName,
+                    profileImageUrl: state.profileImageUrl.trim(),
+                    profilePhotoPath: state.profilePhotoPath.trim(),
+                    phone: state.phone,
+                    tripCount: tripCount,
+                    completedCount: completedCount,
+                    onPhotoTap: () => _pickProfilePhoto(context, ref),
+                  ),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: _SectionTitle(text: 'profile_section_account'.tr()),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _SettingsCard(
-                  children: [
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.brandOrange.withValues(
-                          alpha: 0.15,
-                        ),
-                        child: Icon(
-                          Icons.badge_outlined,
-                          color: AppColors.brandOrange,
-                          size: 22,
-                        ),
-                      ),
-                      title: Text(
-                        'profile_first_name'.tr(),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          state.firstName.trim().isEmpty
-                              ? 'profile_name_placeholder'.tr()
-                              : state.firstName.trim(),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppColors.brandOrange,
-                      ),
-                      onTap: () => _showEditFieldDialog(
-                        context,
-                        ref,
-                        title: 'profile_first_name'.tr(),
-                        currentValue: state.firstName,
-                        field: 'firstName',
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.brandOrange.withValues(
-                          alpha: 0.15,
-                        ),
-                        child: Icon(
-                          Icons.badge_outlined,
-                          color: AppColors.brandOrange,
-                          size: 22,
-                        ),
-                      ),
-                      title: Text(
-                        'profile_family_name'.tr(),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          state.lastName.trim().isEmpty
-                              ? 'profile_name_placeholder'.tr()
-                              : state.lastName.trim(),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppColors.brandOrange,
-                      ),
-                      onTap: () => _showEditFieldDialog(
-                        context,
-                        ref,
-                        title: 'profile_family_name'.tr(),
-                        currentValue: state.lastName,
-                        field: 'lastName',
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.brandOrange.withValues(
-                          alpha: 0.15,
-                        ),
-                        child: Icon(
-                          Icons.phone_android_rounded,
-                          color: AppColors.brandOrange,
-                          size: 22,
-                        ),
-                      ),
-                      title: Text(
-                        'profile_phone_label'.tr(),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          state.phone.isEmpty
-                              ? 'profile_phone_placeholder'.tr()
-                              : '\u200E${state.phone}',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: AppColors.brandOrange.withValues(
-                          alpha: 0.15,
-                        ),
-                        child: Icon(
-                          Icons.email_outlined,
-                          color: AppColors.brandOrange,
-                          size: 22,
-                        ),
-                      ),
-                      title: Text(
-                        'profile_onboarding_email_optional'.tr(),
-                        style: theme.textTheme.labelMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      subtitle: Padding(
-                        padding: const EdgeInsets.only(top: 4),
-                        child: Text(
-                          state.email.trim().isEmpty
-                              ? 'profile_name_placeholder'.tr()
-                              : state.email.trim(),
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-                      trailing: const Icon(
-                        Icons.edit_outlined,
-                        size: 18,
-                        color: AppColors.brandOrange,
-                      ),
-                      onTap: () => _showEditFieldDialog(
-                        context,
-                        ref,
-                        title: 'profile_onboarding_email_optional'.tr(),
-                        currentValue: state.email,
-                        field: 'email',
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 4,
-                      ),
-                      leading: CircleAvatar(
-                        backgroundColor: Colors.red.shade100,
-                        child: Icon(
-                          Icons.delete_forever_rounded,
-                          color: Colors.red.shade700,
-                          size: 20,
-                        ),
-                      ),
-                      title: Text(
-                        'profile_delete_account'.tr(context: context),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: Colors.red.shade800,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: Colors.red.shade300,
-                      ),
-                      onTap: () => _showDeleteAccountDialog(context, ref),
-                    ),
-                  ],
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: _SectionTitle(text: 'profile_section_account'.tr()),
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: _SectionTitle(text: 'profile_section_preferences'.tr()),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _SettingsCard(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
-                      child: Align(
-                        alignment: AlignmentDirectional.centerStart,
-                        child: Text(
-                          'language'.tr(),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: _SettingsCard(
+                    children: [
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.brandOrange.withValues(
+                            alpha: 0.15,
+                          ),
+                          child: Icon(
+                            Icons.badge_outlined,
+                            color: AppColors.brandOrange,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          'profile_first_name'.tr(),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            state.firstName.trim().isEmpty
+                                ? 'profile_name_placeholder'.tr()
+                                : state.firstName.trim(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppColors.brandOrange,
+                        ),
+                        onTap: () => _showEditFieldDialog(
+                          context,
+                          ref,
+                          title: 'profile_first_name'.tr(),
+                          currentValue: state.firstName,
+                          field: 'firstName',
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.brandOrange.withValues(
+                            alpha: 0.15,
+                          ),
+                          child: Icon(
+                            Icons.badge_outlined,
+                            color: AppColors.brandOrange,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          'profile_family_name'.tr(),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            state.lastName.trim().isEmpty
+                                ? 'profile_name_placeholder'.tr()
+                                : state.lastName.trim(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppColors.brandOrange,
+                        ),
+                        onTap: () => _showEditFieldDialog(
+                          context,
+                          ref,
+                          title: 'profile_family_name'.tr(),
+                          currentValue: state.lastName,
+                          field: 'lastName',
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.brandOrange.withValues(
+                            alpha: 0.15,
+                          ),
+                          child: Icon(
+                            Icons.phone_android_rounded,
+                            color: AppColors.brandOrange,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          'profile_phone_label'.tr(),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            state.phone.isEmpty
+                                ? 'profile_phone_placeholder'.tr()
+                                : '\u200E${state.phone}',
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: AppColors.brandOrange.withValues(
+                            alpha: 0.15,
+                          ),
+                          child: Icon(
+                            Icons.email_outlined,
+                            color: AppColors.brandOrange,
+                            size: 22,
+                          ),
+                        ),
+                        title: Text(
+                          'profile_onboarding_email_optional'.tr(),
+                          style: theme.textTheme.labelMedium?.copyWith(
+                            color: AppColors.textSecondary,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        subtitle: Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text(
+                            state.email.trim().isEmpty
+                                ? 'profile_name_placeholder'.tr()
+                                : state.email.trim(),
+                            style: theme.textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        trailing: const Icon(
+                          Icons.edit_outlined,
+                          size: 18,
+                          color: AppColors.brandOrange,
+                        ),
+                        onTap: () => _showEditFieldDialog(
+                          context,
+                          ref,
+                          title: 'profile_onboarding_email_optional'.tr(),
+                          currentValue: state.email,
+                          field: 'email',
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 4,
+                        ),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.red.shade100,
+                          child: Icon(
+                            Icons.delete_forever_rounded,
+                            color: Colors.red.shade700,
+                            size: 20,
+                          ),
+                        ),
+                        title: Text(
+                          'profile_delete_account'.tr(context: context),
                           style: theme.textTheme.titleSmall?.copyWith(
                             fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
+                            color: Colors.red.shade800,
                           ),
                         ),
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
-                      child: Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: [
-                          _LangChip(
-                            label: 'lang_ar'.tr(),
-                            locale: const Locale('ar'),
-                            ref: ref,
-                          ),
-                          _LangChip(
-                            label: 'lang_en'.tr(),
-                            locale: const Locale('en'),
-                            ref: ref,
-                          ),
-                          _LangChip(
-                            label: 'lang_fr'.tr(),
-                            locale: const Locale('fr'),
-                            ref: ref,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: _SectionTitle(text: 'profile_section_help'.tr()),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _SettingsCard(
-                  children: [
-                    ListTile(
-                      leading: Icon(
-                        Icons.lightbulb_outline_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                      title: Text(
-                        'profile_legal_tips_title'.tr(),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: Colors.red.shade300,
                         ),
+                        onTap: () => _showDeleteAccountDialog(context, ref),
                       ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      onTap: () => _showLegalScrollSheet(
-                        context,
-                        'profile_legal_tips_title'.tr(),
-                        'profile_legal_tips_body'.tr(),
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.article_outlined,
-                        color: AppColors.textSecondary,
-                      ),
-                      title: Text(
-                        'profile_legal_terms_title'.tr(),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      onTap: () => _showLegalScrollSheet(
-                        context,
-                        'profile_legal_terms_title'.tr(),
-                        'profile_legal_terms_body'.tr(),
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.privacy_tip_outlined,
-                        color: AppColors.textSecondary,
-                      ),
-                      title: Text(
-                        'profile_legal_privacy_title'.tr(),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      onTap: () => _showLegalScrollSheet(
-                        context,
-                        'profile_legal_privacy_title'.tr(),
-                        'profile_legal_privacy_body'.tr(),
-                      ),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        FontAwesomeIcons.whatsapp,
-                        color: Color(0xFF25D366),
-                      ),
-                      title: Text(
-                        'profile_support_whatsapp'.tr(),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      onTap: () => _openWhatsApp(context, isLaunching),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.info_outline_rounded,
-                        color: AppColors.textSecondary,
-                      ),
-                      title: Text(
-                        'profile_about'.tr(),
-                        style: theme.textTheme.titleSmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      trailing: Icon(
-                        Icons.chevron_right_rounded,
-                        color: AppColors.textSecondary.withValues(alpha: 0.5),
-                      ),
-                      onTap: () => _showAboutDialog(context),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    const _ProfileVersionTile(),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
-              sliver: SliverToBoxAdapter(
-                child: _SectionTitle(text: 'profile_social_section'.tr()),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverToBoxAdapter(
-                child: _SettingsCard(
-                  children: [
-                    ListTile(
-                      leading: const Icon(
-                        FontAwesomeIcons.facebook,
-                        color: Color(0xFF1877F2),
-                      ),
-                      title: Text('profile_link_facebook'.tr()),
-                      trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.facebook, context, isLaunching),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        FontAwesomeIcons.tiktok,
-                        color: Colors.black,
-                      ),
-                      title: Text('profile_link_tiktok'.tr()),
-                      trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.tiktok, context, isLaunching),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: const Icon(
-                        FontAwesomeIcons.instagram,
-                        color: Color(0xFFE1306C),
-                      ),
-                      title: Text('profile_link_instagram'.tr()),
-                      trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.instagram, context, isLaunching),
-                    ),
-                    Divider(
-                      height: 1,
-                      indent: 56,
-                      color: AppColors.textSecondary.withValues(alpha: 0.1),
-                    ),
-                    ListTile(
-                      leading: Icon(
-                        Icons.language,
-                        color: AppColors.textSecondary,
-                      ),
-                      title: Text('profile_link_website'.tr()),
-                      trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.website, context, isLaunching),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(20, 24, 20, 110),
-              sliver: SliverToBoxAdapter(
-                child: OutlinedButton(
-                  onPressed: () async {
-                    await notifier.logout();
-                    if (context.mounted) context.go('/login');
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red.shade700,
-                    side: BorderSide(color: Colors.red.shade200),
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                  ),
-                  child: Text(
-                    'logout'.tr(),
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w700,
-                    ),
+                    ],
                   ),
                 ),
               ),
-            ),
-          ],
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: _SectionTitle(
+                    text: 'profile_section_preferences'.tr(),
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: _SettingsCard(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 14, 16, 8),
+                        child: Align(
+                          alignment: AlignmentDirectional.centerStart,
+                          child: Text(
+                            'language'.tr(),
+                            style: theme.textTheme.titleSmall?.copyWith(
+                              fontWeight: FontWeight.w700,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 14),
+                        child: Wrap(
+                          spacing: 8,
+                          runSpacing: 8,
+                          children: [
+                            _LangChip(
+                              label: 'lang_ar'.tr(),
+                              locale: const Locale('ar'),
+                              ref: ref,
+                            ),
+                            _LangChip(
+                              label: 'lang_en'.tr(),
+                              locale: const Locale('en'),
+                              ref: ref,
+                            ),
+                            _LangChip(
+                              label: 'lang_fr'.tr(),
+                              locale: const Locale('fr'),
+                              ref: ref,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: _SectionTitle(text: 'profile_section_help'.tr()),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: _SettingsCard(
+                    children: [
+                      ListTile(
+                        leading: Icon(
+                          Icons.lightbulb_outline_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                        title: Text(
+                          'profile_legal_tips_title'.tr(),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        onTap: () => _showLegalScrollSheet(
+                          context,
+                          'profile_legal_tips_title'.tr(),
+                          'profile_legal_tips_body'.tr(),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: Icon(
+                          Icons.article_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                        title: Text(
+                          'profile_legal_terms_title'.tr(),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        onTap: () => _showLegalScrollSheet(
+                          context,
+                          'profile_legal_terms_title'.tr(),
+                          'profile_legal_terms_body'.tr(),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: Icon(
+                          Icons.privacy_tip_outlined,
+                          color: AppColors.textSecondary,
+                        ),
+                        title: Text(
+                          'profile_legal_privacy_title'.tr(),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        onTap: () => _showLegalScrollSheet(
+                          context,
+                          'profile_legal_privacy_title'.tr(),
+                          'profile_legal_privacy_body'.tr(),
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          FontAwesomeIcons.whatsapp,
+                          color: Color(0xFF25D366),
+                        ),
+                        title: Text(
+                          'profile_support_whatsapp'.tr(),
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        trailing: Icon(
+                          Icons.chevron_right_rounded,
+                          color: AppColors.textSecondary.withValues(alpha: 0.5),
+                        ),
+                        onTap: () => _openWhatsApp(context, isLaunching),
+                      ),
+
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      const _ProfileVersionTile(),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 22, 20, 8),
+                sliver: SliverToBoxAdapter(
+                  child: _SectionTitle(text: 'profile_social_section'.tr()),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: 20),
+                sliver: SliverToBoxAdapter(
+                  child: _SettingsCard(
+                    children: [
+                      ListTile(
+                        leading: const Icon(
+                          FontAwesomeIcons.facebook,
+                          color: Color(0xFF1877F2),
+                        ),
+                        title: Text('profile_link_facebook'.tr()),
+                        trailing: const Icon(Icons.open_in_new, size: 18),
+                        onTap: () => _openExternalUrl(
+                          AppSocialLinks.facebook,
+                          context,
+                          isLaunching,
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          FontAwesomeIcons.tiktok,
+                          color: Colors.black,
+                        ),
+                        title: Text('profile_link_tiktok'.tr()),
+                        trailing: const Icon(Icons.open_in_new, size: 18),
+                        onTap: () => _openExternalUrl(
+                          AppSocialLinks.tiktok,
+                          context,
+                          isLaunching,
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: const Icon(
+                          FontAwesomeIcons.instagram,
+                          color: Color(0xFFE1306C),
+                        ),
+                        title: Text('profile_link_instagram'.tr()),
+                        trailing: const Icon(Icons.open_in_new, size: 18),
+                        onTap: () => _openExternalUrl(
+                          AppSocialLinks.instagram,
+                          context,
+                          isLaunching,
+                        ),
+                      ),
+                      Divider(
+                        height: 1,
+                        indent: 56,
+                        color: AppColors.textSecondary.withValues(alpha: 0.1),
+                      ),
+                      ListTile(
+                        leading: Icon(
+                          Icons.language,
+                          color: AppColors.textSecondary,
+                        ),
+                        title: Text('profile_link_website'.tr()),
+                        trailing: const Icon(Icons.open_in_new, size: 18),
+                        onTap: () => _openExternalUrl(
+                          AppSocialLinks.website,
+                          context,
+                          isLaunching,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(20, 24, 20, 110),
+                sliver: SliverToBoxAdapter(
+                  child: OutlinedButton(
+                    onPressed: () async {
+                      await notifier.logout();
+                      if (context.mounted) context.go('/login');
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.red.shade700,
+                      side: BorderSide(color: Colors.red.shade200),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      'logout'.tr(),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Future<void> _showEditFieldDialog(
     BuildContext context,
@@ -710,7 +707,11 @@ class ProfileSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openExternalUrl(String url, BuildContext context, ValueNotifier<bool> loading) async {
+  Future<void> _openExternalUrl(
+    String url,
+    BuildContext context,
+    ValueNotifier<bool> loading,
+  ) async {
     if (url.isEmpty) return;
     loading.value = true;
     final uri = Uri.parse(url);
@@ -718,25 +719,28 @@ class ProfileSettingsScreen extends ConsumerWidget {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('link_error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('link_error'.tr())));
       }
     } finally {
       loading.value = false;
     }
   }
 
-  Future<void> _openWhatsApp(BuildContext context, ValueNotifier<bool> loading) async {
+  Future<void> _openWhatsApp(
+    BuildContext context,
+    ValueNotifier<bool> loading,
+  ) async {
     loading.value = true;
     final uri = Uri.parse('https://wa.me/$kSupportWhatsAppDigits');
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
     } catch (_) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('link_error'.tr())),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('link_error'.tr())));
       }
     } finally {
       loading.value = false;

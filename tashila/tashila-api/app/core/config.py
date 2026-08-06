@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     admin_jwt_secret: str
     admin_jwt_expire_minutes: int = 480
     fcm_server_key: str = ""
+    traccar_sms_url: str = "https://www.traccar.org/sms/"
     traccar_sms_token: str = ""
     simulation_otp_secret: str = ""
     allowed_origins: str = "*"
