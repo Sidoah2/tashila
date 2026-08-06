@@ -257,5 +257,8 @@
   "validation_invalid_phone": "Veuillez entrer un numéro de téléphone valide.",
   "warning_title": "Attention",
   "continue_button": "Continuer",
-  "cancel_button": "Annuler"
+  "cancel_button": "Annuler",
+  "settings_button": "Paramètres",
+  "location_disabled_body": "Les services de localisation (GPS) sont désactivés. Veuillez les activer dans les paramètres pour continuer.",
+  "link_error": "Désolé, impossible d'ouvrir le lien."
 }

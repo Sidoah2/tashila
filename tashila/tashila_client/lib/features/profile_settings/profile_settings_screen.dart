@@ -22,7 +22,36 @@ class ProfileSettingsScreen extends ConsumerWidget {
     final theme = Theme.of(context);
     final tripCount = state.history.length;
     final completedCount = state.history.where((t) => !t.cancelled).length;
-    return ColoredBox(
+    final isLaunching = ValueNotifier<bool>(false);
+    return ValueListenableBuilder<bool>(
+      valueListenable: isLaunching,
+      builder: (context, loading, child) {
+        return Stack(
+          children: [
+            child!,
+            if (loading)
+              Positioned.fill(
+                child: Container(
+                  color: Colors.black.withValues(alpha: 0.35),
+                  child: const Center(
+                    child: Card(
+                      color: Colors.white,
+                      elevation: 8,
+                      shape: CircleBorder(),
+                      child: Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: CircularProgressIndicator(
+                          color: AppColors.brandOrange,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        );
+      },
+      child: ColoredBox(
       color: AppColors.bg,
       child: SafeArea(
         child: CustomScrollView(
@@ -101,7 +130,11 @@ class ProfileSettingsScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      trailing: const Icon(Icons.edit_outlined, size: 18, color: AppColors.brandOrange),
+                      trailing: const Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.brandOrange,
+                      ),
                       onTap: () => _showEditFieldDialog(
                         context,
                         ref,
@@ -149,7 +182,11 @@ class ProfileSettingsScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      trailing: const Icon(Icons.edit_outlined, size: 18, color: AppColors.brandOrange),
+                      trailing: const Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.brandOrange,
+                      ),
                       onTap: () => _showEditFieldDialog(
                         context,
                         ref,
@@ -237,7 +274,11 @@ class ProfileSettingsScreen extends ConsumerWidget {
                           ),
                         ),
                       ),
-                      trailing: const Icon(Icons.edit_outlined, size: 18, color: AppColors.brandOrange),
+                      trailing: const Icon(
+                        Icons.edit_outlined,
+                        size: 18,
+                        color: AppColors.brandOrange,
+                      ),
                       onTap: () => _showEditFieldDialog(
                         context,
                         ref,
@@ -437,7 +478,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                         Icons.chevron_right_rounded,
                         color: AppColors.textSecondary.withValues(alpha: 0.5),
                       ),
-                      onTap: () => _openWhatsApp(),
+                      onTap: () => _openWhatsApp(context, isLaunching),
                     ),
                     Divider(
                       height: 1,
@@ -489,7 +530,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       ),
                       title: Text('profile_link_facebook'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.facebook),
+                      onTap: () => _openExternalUrl(AppSocialLinks.facebook, context, isLaunching),
                     ),
                     Divider(
                       height: 1,
@@ -503,7 +544,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       ),
                       title: Text('profile_link_tiktok'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.tiktok),
+                      onTap: () => _openExternalUrl(AppSocialLinks.tiktok, context, isLaunching),
                     ),
                     Divider(
                       height: 1,
@@ -517,7 +558,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       ),
                       title: Text('profile_link_instagram'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.instagram),
+                      onTap: () => _openExternalUrl(AppSocialLinks.instagram, context, isLaunching),
                     ),
                     Divider(
                       height: 1,
@@ -531,7 +572,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       ),
                       title: Text('profile_link_website'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
-                      onTap: () => _openExternalUrl(AppSocialLinks.website),
+                      onTap: () => _openExternalUrl(AppSocialLinks.website, context, isLaunching),
                     ),
                   ],
                 ),
@@ -565,8 +606,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Future<void> _showEditFieldDialog(
     BuildContext context,
@@ -595,7 +637,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
           ),
           FilledButton(
             onPressed: () => Navigator.pop(ctx, controller.text.trim()),
-            style: FilledButton.styleFrom(backgroundColor: AppColors.brandOrange),
+            style: FilledButton.styleFrom(
+              backgroundColor: AppColors.brandOrange,
+            ),
             child: Text('save'.tr()),
           ),
         ],
@@ -610,11 +654,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
       if (field == 'firstName') fn = value;
       if (field == 'lastName') ln = value;
       if (field == 'email') em = value;
-      await ref.read(appStateProvider.notifier).updateCustomerProfile(
-        firstName: fn,
-        lastName: ln,
-        email: em,
-      );
+      await ref
+          .read(appStateProvider.notifier)
+          .updateCustomerProfile(firstName: fn, lastName: ln, email: em);
     }
   }
 
@@ -668,17 +710,37 @@ class ProfileSettingsScreen extends ConsumerWidget {
     );
   }
 
-  Future<void> _openExternalUrl(String url) async {
+  Future<void> _openExternalUrl(String url, BuildContext context, ValueNotifier<bool> loading) async {
+    if (url.isEmpty) return;
+    loading.value = true;
     final uri = Uri.parse(url);
-    if (!await canLaunchUrl(uri)) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('link_error'.tr())),
+        );
+      }
+    } finally {
+      loading.value = false;
+    }
   }
 
-  Future<void> _openWhatsApp() async {
+  Future<void> _openWhatsApp(BuildContext context, ValueNotifier<bool> loading) async {
+    loading.value = true;
     final uri = Uri.parse('https://wa.me/$kSupportWhatsAppDigits');
     try {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } catch (_) {}
+    } catch (_) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('link_error'.tr())),
+        );
+      }
+    } finally {
+      loading.value = false;
+    }
   }
 
   void _showAboutDialog(BuildContext context) {
@@ -790,7 +852,10 @@ class _DeleteAccountDialogContentState
                 hintText: word,
                 filled: true,
                 fillColor: AppColors.bg,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 12,
+                ),
               ),
               onChanged: (_) => setState(() {}),
             ),
@@ -880,7 +945,7 @@ class _SettingsCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.02),
             blurRadius: 16,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -963,7 +1028,7 @@ class _ProfileHeroCard extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.025),
             blurRadius: 16,
             offset: const Offset(0, 6),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.all(20),
@@ -983,7 +1048,10 @@ class _ProfileHeroCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: Colors.white,
                         shape: BoxShape.circle,
-                        border: Border.all(color: AppColors.brandOrange, width: 2),
+                        border: Border.all(
+                          color: AppColors.brandOrange,
+                          width: 2,
+                        ),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withValues(alpha: 0.06),
