@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -210,7 +211,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                   : 'assets/images/doublecabin_icon.png';
                               final load = type == TruckType.singleCabine
                                   ? '700kg'
-                                  : '1400kg';
+                                  : '700kg';
 
                               return Expanded(
                                 child: GestureDetector(
@@ -352,6 +353,48 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                   isLoading: _booking,
                                   onPressed: state.canCreateTransportRequest
                                       ? () async {
+                                          final proceed = await showDialog<bool>(
+                                            context: context,
+                                            builder: (ctx) => AlertDialog(
+                                              backgroundColor: Colors.white,
+                                              surfaceTintColor: Colors.transparent,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(20),
+                                              ),
+                                              title: Text(
+                                                'warning_title'.tr(),
+                                                style: const TextStyle(fontWeight: FontWeight.w800),
+                                              ),
+                                              content: Text(
+                                                'booking_delay_charges_notice'.tr(),
+                                                style: const TextStyle(fontSize: 14, height: 1.4),
+                                              ),
+                                              actions: [
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(ctx, false),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: AppColors.textSecondary,
+                                                  ),
+                                                  child: Text(
+                                                    'cancel_button'.tr(),
+                                                    style: const TextStyle(fontWeight: FontWeight.w600),
+                                                  ),
+                                                ),
+                                                TextButton(
+                                                  onPressed: () => Navigator.pop(ctx, true),
+                                                  style: TextButton.styleFrom(
+                                                    foregroundColor: AppColors.brandOrange,
+                                                  ),
+                                                  child: Text(
+                                                    'continue_button'.tr(),
+                                                    style: const TextStyle(fontWeight: FontWeight.w800),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                          if (proceed != true) return;
+
                                           setState(() => _booking = true);
                                           var ok = false;
                                           try {
@@ -359,7 +402,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                                 .read(appStateProvider.notifier)
                                                 .createTransportRequest();
                                           } catch (_) {}
-                                          if (!mounted) return;
+                                          if (!context.mounted) return;
                                           setState(() => _booking = false);
                                           if (ok) {
                                             context.go('/trip');
@@ -436,13 +479,31 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
     final c = _controller;
     if (c == null) return;
 
+    final hasPickup = pickupLat != 0.0 && pickupLng != 0.0;
+    final hasDropoff = dropoffLat != 0.0 && dropoffLng != 0.0;
+
+    if (!hasPickup && !hasDropoff) {
+      await _moveToCurrentLocation();
+      return;
+    }
+
+    if (hasPickup && !hasDropoff) {
+      await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(pickupLat, pickupLng), 14.5));
+      return;
+    }
+
+    if (!hasPickup && hasDropoff) {
+      await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(dropoffLat, dropoffLng), 14.5));
+      return;
+    }
+
     final p = LatLng(pickupLat, pickupLng);
     final d = LatLng(dropoffLat, dropoffLng);
 
     final latDiff = (p.latitude - d.latitude).abs();
     final lngDiff = (p.longitude - d.longitude).abs();
     if (latDiff < 1e-7 && lngDiff < 1e-7) {
-      await c.animateCamera(CameraUpdate.newLatLngZoom(p, 14));
+      await c.animateCamera(CameraUpdate.newLatLngZoom(p, 14.5));
       return;
     }
 
@@ -460,12 +521,53 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
     await c.animateCamera(CameraUpdate.newLatLngBounds(bounds, 56));
   }
 
+  Future<void> _moveToCurrentLocation() async {
+    final c = _controller;
+    if (c == null) return;
+    try {
+      final enabled = await Geolocator.isLocationServiceEnabled();
+      if (!enabled) {
+        await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
+        return;
+      }
+      var perm = await Geolocator.checkPermission();
+      if (perm == LocationPermission.denied) {
+        perm = await Geolocator.requestPermission();
+      }
+      if (perm == LocationPermission.deniedForever || perm == LocationPermission.denied) {
+        await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
+        return;
+      }
+      Position? pos;
+      try {
+        pos = await Geolocator.getCurrentPosition(
+          locationSettings: const LocationSettings(
+            accuracy: LocationAccuracy.high,
+            timeLimit: Duration(seconds: 4),
+          ),
+        );
+      } catch (_) {
+        pos = await Geolocator.getLastKnownPosition();
+      }
+      if (pos != null) {
+        await c.animateCamera(CameraUpdate.newLatLngZoom(LatLng(pos.latitude, pos.longitude), 14.5));
+      } else {
+        await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
+      }
+    } catch (_) {
+      await c.animateCamera(CameraUpdate.newCameraPosition(_initialCamera));
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final pins = ref.watch(
       appStateProvider.select(
         (s) => (s.pickupLat, s.pickupLng, s.dropoffLat, s.dropoffLng),
       ),
+    );
+    final routePoints = ref.watch(
+      appStateProvider.select((s) => s.routePoints),
     );
 
     ref.listen(
@@ -492,8 +594,8 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
       );
     }
 
-    final pickupMarker = LatLng(pins.$1, pins.$2);
-    final dropoffMarker = LatLng(pins.$3, pins.$4);
+    final hasPickup = pins.$1 != 0.0 && pins.$2 != 0.0;
+    final hasDropoff = pins.$3 != 0.0 && pins.$4 != 0.0;
 
     return Stack(
       children: [
@@ -505,22 +607,33 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
           zoomControlsEnabled: false,
           gestureRecognizers: _gestures,
           markers: {
-            Marker(
-              markerId: const MarkerId('pickup'),
-              position: pickupMarker,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueGreen,
+            if (hasPickup)
+              Marker(
+                markerId: const MarkerId('pickup'),
+                position: LatLng(pins.$1, pins.$2),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueGreen,
+                ),
+                infoWindow: InfoWindow(title: 'pickup'.tr()),
               ),
-              infoWindow: InfoWindow(title: 'pickup'.tr()),
-            ),
-            Marker(
-              markerId: const MarkerId('dropoff'),
-              position: dropoffMarker,
-              icon: BitmapDescriptor.defaultMarkerWithHue(
-                BitmapDescriptor.hueOrange,
+            if (hasDropoff)
+              Marker(
+                markerId: const MarkerId('dropoff'),
+                position: LatLng(pins.$3, pins.$4),
+                icon: BitmapDescriptor.defaultMarkerWithHue(
+                  BitmapDescriptor.hueOrange,
+                ),
+                infoWindow: InfoWindow(title: 'dropoff'.tr()),
               ),
-              infoWindow: InfoWindow(title: 'dropoff'.tr()),
-            ),
+          },
+          polylines: {
+            if (routePoints.isNotEmpty)
+              Polyline(
+                polylineId: const PolylineId('booking_route'),
+                points: routePoints,
+                width: 4,
+                color: AppColors.brandOrange,
+              ),
           },
           onMapCreated: (c) {
             _controller = c;
@@ -540,7 +653,7 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
               foregroundColor: AppColors.brandOrange,
               shape: const CircleBorder(),
               elevation: 4,
-              onPressed: () => _fitCamera(pins.$1, pins.$2, pins.$3, pins.$4),
+              onPressed: _moveToCurrentLocation,
               child: const Icon(Icons.gps_fixed, size: 20),
             ),
           ),

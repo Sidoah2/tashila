@@ -1,355 +1,349 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:tashila_client/core/formatting/app_format.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
 
-/// Replaces Arabic-Indic and Persian digits with Western (ASCII) 0–9.
-String _westernDigits(String input) {
-  return input.replaceAllMapped(RegExp(r'[\u0660-\u0669\u06F0-\u06F9]'), (m) {
-    final c = m[0]!.codeUnitAt(0);
-    if (c >= 0x0660 && c <= 0x0669) return '${c - 0x0660}';
-    if (c >= 0x06F0 && c <= 0x06F9) return '${c - 0x06F0}';
-    return m[0]!;
-  });
-}
-
-class HistoryScreen extends ConsumerWidget {
+class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
+}
+
+class _HistoryScreenState extends ConsumerState<HistoryScreen>
+    with SingleTickerProviderStateMixin {
+  late final TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 3, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final history = ref.watch(appStateProvider).history;
-    final theme = Theme.of(context);
+    final money = dzdCurrency();
+
+    final now = DateTime.now();
+    final todayStart = DateTime(now.year, now.month, now.day);
+    final monthStart = DateTime(now.year, now.month, 1);
+    final yearStart = DateTime(now.year, 1, 1);
+
+    final dailyTrips = history.where((t) {
+      final localTime = t.date.toLocal();
+      return localTime.isAfter(todayStart) ||
+          localTime.isAtSameMomentAs(todayStart);
+    }).toList();
+
+    final monthlyTrips = history.where((t) {
+      final localTime = t.date.toLocal();
+      return localTime.isAfter(monthStart) ||
+          localTime.isAtSameMomentAs(monthStart);
+    }).toList();
+
+    final yearlyTrips = history.where((t) {
+      final localTime = t.date.toLocal();
+      return localTime.isAfter(yearStart) ||
+          localTime.isAtSameMomentAs(yearStart);
+    }).toList();
 
     return ColoredBox(
       color: AppColors.bg,
-      child: SafeArea(
-        child: history.isEmpty
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.history_rounded,
-                        size: 56,
-                        color: AppColors.textSecondary.withValues(alpha: 0.45),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        'no_history'.tr(),
-                        textAlign: TextAlign.center,
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
+      child: Scaffold(
+        backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          title: Text(
+            'trip_history_title'.tr(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w800,
+              fontSize: 18,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ),
+        body: Column(
+          children: [
+            const SizedBox(height: 8),
+            // Tab Bar Filters: Daily | Monthly | Yearly
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 20),
+              child: TabBar(
+                controller: _tabController,
+                indicatorColor: AppColors.brandOrange,
+                indicatorWeight: 3,
+                labelColor: AppColors.brandOrange,
+                indicatorSize: TabBarIndicatorSize.tab,
+                unselectedLabelColor: AppColors.textSecondary,
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 14,
                 ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 110),
-                itemCount: history.length + 1,
-                itemBuilder: (context, index) {
-                  if (index == 0) {
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 16, top: 4),
-                      child: Text(
-                        'trip_history_title'.tr(),
-                        style: theme.textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textPrimary,
-                          letterSpacing: -0.3,
-                        ),
-                      ),
-                    );
-                  }
-                  final item = history[index - 1];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 14),
-                    child: _StyledTripCard(item: item),
-                  );
-                },
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+                dividerColor: Colors.transparent,
+                dividerHeight: 0,
+                tabs: [
+                  Tab(text: 'daily'.tr()),
+                  Tab(text: 'monthly'.tr()),
+                  Tab(text: 'yearly'.tr()),
+                ],
               ),
+            ),
+            const SizedBox(height: 12),
+            // History Transaction List
+            Expanded(
+              child: TabBarView(
+                controller: _tabController,
+                children: [
+                  _HistoryListView(trips: dailyTrips, money: money),
+                  _HistoryListView(trips: monthlyTrips, money: money),
+                  _HistoryListView(trips: yearlyTrips, money: money),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _StyledTripCard extends StatelessWidget {
-  const _StyledTripCard({required this.item});
+class _HistoryListView extends StatelessWidget {
+  const _HistoryListView({required this.trips, required this.money});
 
-  final TripRecord item;
+  final List<TripRecord> trips;
+  final NumberFormat money;
 
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final locale = context.locale.toString();
-    final dateStr = _westernDigits(
-      '${DateFormat.yMMMMd(locale).format(item.date)} • ${DateFormat.jm(locale).format(item.date)}',
-    );
-    final truckLabel =
-        item.truckType == TruckType.singleCabine ? 'single_cabine'.tr() : 'double_cabine'.tr();
-    final priceFormatted = item.cancelled
-        ? '—'
-        : '${NumberFormat.decimalPattern(context.locale.languageCode).format(item.price)} DA';
-    final completed = !item.cancelled;
+  void _showTripDetailSheet(
+    BuildContext context,
+    TripRecord trip,
+    NumberFormat money,
+    String dateLabel,
+  ) {
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      showDragHandle: true,
+      backgroundColor: Colors.white,
+      builder: (ctx) {
+        final statusLabel = trip.cancelled
+            ? 'trip_status_cancelled'.tr()
+            : 'trip_status_completed'.tr();
+        final truckLabel = trip.truckType == TruckType.singleCabine
+            ? 'single_cabine'.tr()
+            : 'double_cabine'.tr();
 
-    final hasExtras = item.comment.isNotEmpty ||
-        item.goodTraits.isNotEmpty ||
-        item.badTraits.isNotEmpty;
-
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.04),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          )
-        ],
-      ),
-      padding: const EdgeInsets.all(18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            20,
+            8,
+            20,
+            20 + MediaQuery.paddingOf(ctx).bottom,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      dateStr,
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        height: 1.3,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      truckLabel,
-                      style: theme.textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: AppColors.textPrimary,
-                        height: 1.2,
-                        fontSize: 15,
-                      ),
-                    ),
-                  ],
+              Text(
+                'earnings_trip_detail_title'.tr(),
+                style: const TextStyle(
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  color: AppColors.textPrimary,
                 ),
               ),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Text(
-                    priceFormatted,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w900,
-                      color: item.cancelled ? AppColors.textSecondary : AppColors.brandOrange,
-                      height: 1.1,
-                      fontSize: 18,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  _StatusChip(completed: completed),
-                ],
+              const SizedBox(height: 16),
+              _detailRow(
+                ctx,
+                'earnings_trip_detail_fare'.tr(),
+                trip.cancelled ? '—' : money.format(trip.price),
+                emphasize: !trip.cancelled,
               ),
+              _detailRow(ctx, 'earnings_trip_detail_status'.tr(), statusLabel),
+              _detailRow(ctx, 'truck_type_label'.tr(), truckLabel),
+              _detailRow(ctx, 'earnings_trip_detail_pickup'.tr(), trip.pickup),
+              _detailRow(
+                ctx,
+                'earnings_trip_detail_dropoff'.tr(),
+                trip.dropoff,
+              ),
+              _detailRow(ctx, 'earnings_trip_detail_completed'.tr(), dateLabel),
+              if (!trip.cancelled && trip.rating > 0)
+                _detailRow(ctx, 'rating'.tr(), westernDigits('${trip.rating}')),
+              if (trip.cancelled && trip.cancellationReason.isNotEmpty)
+                _detailRow(
+                  ctx,
+                  'cancellation_reason_label'.tr(),
+                  trip.cancellationReason.tr(),
+                ),
+              if (trip.comment.isNotEmpty)
+                _detailRow(ctx, 'comment_label'.tr(), trip.comment),
+              if (trip.goodTraits.isNotEmpty)
+                _detailRow(
+                  ctx,
+                  'good_traits_label'.tr(),
+                  trip.goodTraits.join(', '),
+                ),
+              if (trip.badTraits.isNotEmpty)
+                _detailRow(
+                  ctx,
+                  'bad_traits_label'.tr(),
+                  trip.badTraits.join(', '),
+                ),
             ],
           ),
-          if (item.cancelled && item.cancellationReason.isNotEmpty) ...[
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              decoration: BoxDecoration(
-                color: Colors.red.shade50,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Text(
-                '${'cancellation_reason_label'.tr()}: ${item.cancellationReason}',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.red.shade800,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-            ),
-          ],
-          // Unified vertical location timeline connector
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    const SizedBox(height: 4),
-                    const Icon(Icons.circle, size: 8, color: Colors.green),
-                    Container(
-                      width: 1.5,
-                      height: 28,
-                      color: Colors.grey.shade200,
-                    ),
-                    const Icon(Icons.stop, size: 8, color: AppColors.brandOrange),
-                  ],
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        item.pickup,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        item.dropoff,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
+        );
+      },
+    );
+  }
+
+  Widget _detailRow(
+    BuildContext context,
+    String label,
+    String value, {
+    bool emphasize = false,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            flex: 2,
+            child: Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
             ),
           ),
-          if (!item.cancelled && item.rating > 0) ...[
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: Colors.amber.shade50,
-                borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: Colors.amber.shade100, width: 0.5),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: List.generate(
-                      5,
-                      (i) => Icon(
-                        Icons.star_rounded,
-                        size: 16,
-                        color: i < item.rating ? Colors.amber.shade700 : Colors.amber.shade200,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  Text(
-                    '${item.rating}/5',
-                    style: theme.textTheme.labelMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: Colors.amber.shade900,
-                    ),
-                  ),
-                ],
+          Expanded(
+            flex: 3,
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
+                color: emphasize
+                    ? AppColors.brandOrange
+                    : AppColors.textPrimary,
               ),
             ),
-          ],
-          if (hasExtras) ...[
-            const SizedBox(height: 14),
-            Divider(
-              height: 1,
-              thickness: 1,
-              color: AppColors.textSecondary.withValues(alpha: 0.08),
-            ),
-            const SizedBox(height: 12),
-            if (item.comment.isNotEmpty)
-              Text(
-                item.comment,
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
-                  height: 1.35,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            if (item.comment.isNotEmpty &&
-                (item.goodTraits.isNotEmpty || item.badTraits.isNotEmpty))
-              const SizedBox(height: 10),
-            if (item.goodTraits.isNotEmpty || item.badTraits.isNotEmpty)
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  ...item.goodTraits.map(
-                    (t) => Chip(
-                      label: Text(t, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                      backgroundColor: AppColors.success.withValues(alpha: 0.12),
-                      side: BorderSide.none,
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                  ...item.badTraits.map(
-                    (t) => Chip(
-                      label: Text(t, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                      backgroundColor: Colors.red.shade50,
-                      side: BorderSide(color: Colors.red.shade100, width: 0.5),
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: VisualDensity.compact,
-                    ),
-                  ),
-                ],
-              ),
-          ],
+          ),
         ],
       ),
     );
   }
-}
-
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.completed});
-
-  final bool completed;
 
   @override
   Widget build(BuildContext context) {
-    final label =
-        completed ? 'trip_status_completed'.tr() : 'trip_status_cancelled'.tr();
-    final bg = completed
-        ? AppColors.success.withValues(alpha: 0.18)
-        : Colors.red.shade50;
-    final fg =
-        completed ? AppColors.success : Colors.red.shade700;
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: bg,
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: fg,
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
+    if (trips.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.history_rounded,
+              size: 48,
+              color: AppColors.textSecondary,
             ),
-      ),
+            const SizedBox(height: 12),
+            Text(
+              'no_history'.tr(),
+              style: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final dateFmt = DateFormat('MMM d, yyyy h:mm a');
+
+    return ListView.separated(
+      padding: const EdgeInsets.fromLTRB(20, 8, 20, 110),
+      itemCount: trips.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 8),
+      itemBuilder: (context, index) {
+        final record = trips[index];
+        final dateStr = westernDigits(dateFmt.format(record.date));
+
+        return Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => _showTripDetailSheet(context, record, money, dateStr),
+            borderRadius: BorderRadius.circular(12),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              child: Row(
+                children: [
+                  Container(
+                    color: !record.cancelled
+                        ? AppColors.brandOrange
+                        : Colors.red,
+                    width: 2,
+                    height: 60,
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          dateStr,
+                          style: const TextStyle(
+                            fontSize: 13.5,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          !record.cancelled
+                              ? 'trip_status_completed'.tr()
+                              : 'trip_status_cancelled'.tr(),
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w700,
+                            color: !record.cancelled
+                                ? const Color(0xFF2E7D32)
+                                : Colors.red,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    record.cancelled ? '—' : money.format(record.price),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
-
-

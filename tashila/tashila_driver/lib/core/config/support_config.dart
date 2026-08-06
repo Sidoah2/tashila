@@ -1,2 +1,2 @@
 /// WhatsApp support (digits only, country code without +). Replace with the production number.
-const String kSupportWhatsAppDigits = '213555000123';
+const String kSupportWhatsAppDigits = '213791453050';

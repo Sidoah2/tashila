@@ -10,6 +10,8 @@ import 'package:tashila_client/features/profile/profile_onboarding_screen.dart';
 import 'package:tashila_client/features/splash/splash_screen.dart';
 import 'package:tashila_client/features/trip_flow/trip_screen.dart';
 
+import 'package:tashila_client/features/trip_flow/rate_driver_screen.dart';
+
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -38,12 +40,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
         if (appState.profileSetupComplete &&
             appState.hasActiveTrip &&
-            path != '/trip') {
+            path != '/trip' &&
+            path != '/rate-driver') {
           return '/trip';
         }
         if (appState.profileSetupComplete &&
             !appState.hasActiveTrip &&
-            path == '/trip') {
+            (path == '/trip' || path == '/rate-driver')) {
           return '/home';
         }
       } else if (path != '/login' &&
@@ -68,6 +71,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/home', builder: (_, _) => const HomeShellScreen()),
       GoRoute(path: '/trip', builder: (_, _) => const TripScreen()),
+      GoRoute(path: '/rate-driver', builder: (_, _) => const RateDriverScreen()),
     ],
   );
 

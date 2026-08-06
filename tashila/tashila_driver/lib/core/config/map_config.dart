@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart'
 class MapConfig {
   const MapConfig._();
 
-  static const androidKey = 'AIzaSyBaRXAy9z9IClUJ1jYhYvPexA7rvp-_228';
+  static const androidKey = 'AIzaSyCHmAnPG06Vm2V5XPDsQYmfzHy13ICCDtM';
   static const iosKey = 'AIzaSyDOxXdhOejrci6fERrxrA5NE2C0P60PlJg';
 
   static String get mapApiKey {

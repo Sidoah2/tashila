@@ -3,11 +3,12 @@ import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tashila_client/core/services/api_client.dart';
+import 'package:tashila_client/core/services/places_service.dart';
 import 'package:tashila_client/core/services/trip_socket_service.dart';
 
 enum TruckType { singleCabine, doubleCabine }
@@ -46,22 +47,20 @@ String formatRatingComment(
 /// Dynamic fare: base 1000 DZD (first 5 km), +100 DZD/km after 5 km, +20 DZD/min after 60 min, rounded up to 100 DZD.
 double estimateFareDzd(double distanceKm, {double tripMinutes = 0}) {
   final raw =
-      1000 + math.max(0, distanceKm - 5) * 100 + math.max(0, tripMinutes - 60) * 20;
+      1000 +
+      math.max(0, distanceKm - 5) * 100 +
+      math.max(0, tripMinutes - 60) * 20;
   return (raw / 100).ceil() * 100;
 }
 
 /// Great-circle distance in kilometers (pickup → drop-off).
-double tripRouteDistanceKm(
-  double lat1,
-  double lon1,
-  double lat2,
-  double lon2,
-) {
+double tripRouteDistanceKm(double lat1, double lon1, double lat2, double lon2) {
   const earthRadiusKm = 6371.0;
   double toRad(double deg) => deg * math.pi / 180;
   final dLat = toRad(lat2 - lat1);
   final dLon = toRad(lon2 - lon1);
-  final a = math.sin(dLat / 2) * math.sin(dLat / 2) +
+  final a =
+      math.sin(dLat / 2) * math.sin(dLat / 2) +
       math.cos(toRad(lat1)) *
           math.cos(toRad(lat2)) *
           math.sin(dLon / 2) *
@@ -94,6 +93,7 @@ class TripRecord {
   final int rating;
   final bool cancelled;
   final String cancellationReason;
+
   /// Localized labels chosen at rating time.
   final List<String> goodTraits;
   final List<String> badTraits;
@@ -113,14 +113,14 @@ class AppState {
     this.profileSetupComplete = false,
     this.notificationsEnabled = true,
     this.locale = const Locale('ar'),
-    this.pickup = 'Tamanrasset Center',
-    this.dropoff = 'Tamanrasset Airport',
-    this.pickupLat = 22.785,
-    this.pickupLng = 5.523,
-    this.dropoffLat = 22.812,
-    this.dropoffLng = 5.451,
-    this.pickupInServiceArea = true,
-    this.dropoffInServiceArea = true,
+    this.pickup = '',
+    this.dropoff = '',
+    this.pickupLat = 0.0,
+    this.pickupLng = 0.0,
+    this.dropoffLat = 0.0,
+    this.dropoffLng = 0.0,
+    this.pickupInServiceArea = false,
+    this.dropoffInServiceArea = false,
     this.selectedTruck = TruckType.singleCabine,
     this.estimatedPrice = 0,
     this.tripStage = TripStage.idle,
@@ -136,6 +136,7 @@ class AppState {
     this.driverVehicleModel = '',
     this.driverLat,
     this.driverLng,
+    this.routePoints = const [],
   });
 
   final bool initialized;
@@ -145,10 +146,13 @@ class AppState {
   final String firstName;
   final String lastName;
   final String email;
+
   /// Optional avatar URL (e.g. from your backend). Empty shows initials placeholder.
   final String profileImageUrl;
+
   /// Local profile photo file path (device). Takes precedence over [profileImageUrl] when set.
   final String profilePhotoPath;
+
   /// First-time profile form after OTP has been completed.
   final bool profileSetupComplete;
   final bool notificationsEnabled;
@@ -164,13 +168,18 @@ class AppState {
   final TruckType selectedTruck;
   final double estimatedPrice;
   final TripStage tripStage;
+  final List<LatLng> routePoints;
+
   /// Set when a transport request is created; cleared when the trip is reset.
   final DateTime? tripStartTime;
+
   /// Set when the trip reaches [TripStage.arrivedSummary] after end trip.
   final DateTime? tripEndTime;
   final List<TripRecord> history;
+
   /// Server-assigned trip ID for the active trip (used for cancel/rate API calls).
   final String? currentTripId;
+
   /// Latest API trip status string (requested, accepted, …).
   final String currentTripStatus;
   final String driverName;
@@ -231,6 +240,7 @@ class AppState {
     double? driverLat,
     double? driverLng,
     bool clearDriverLocation = false,
+    List<LatLng>? routePoints,
   }) {
     return AppState(
       initialized: initialized ?? this.initialized,
@@ -256,12 +266,14 @@ class AppState {
       selectedTruck: selectedTruck ?? this.selectedTruck,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
       tripStage: tripStage ?? this.tripStage,
-      tripStartTime:
-          tripStartTimeNull ? null : (tripStartTime ?? this.tripStartTime),
+      tripStartTime: tripStartTimeNull
+          ? null
+          : (tripStartTime ?? this.tripStartTime),
       tripEndTime: tripEndTimeNull ? null : (tripEndTime ?? this.tripEndTime),
       history: history ?? this.history,
-      currentTripId:
-          currentTripIdNull ? null : (currentTripId ?? this.currentTripId),
+      currentTripId: currentTripIdNull
+          ? null
+          : (currentTripId ?? this.currentTripId),
       currentTripStatus: currentTripStatus ?? this.currentTripStatus,
       driverName: driverName ?? this.driverName,
       driverPhone: driverPhone ?? this.driverPhone,
@@ -270,6 +282,7 @@ class AppState {
       driverVehicleModel: driverVehicleModel ?? this.driverVehicleModel,
       driverLat: clearDriverLocation ? null : (driverLat ?? this.driverLat),
       driverLng: clearDriverLocation ? null : (driverLng ?? this.driverLng),
+      routePoints: routePoints ?? this.routePoints,
     );
   }
 }
@@ -487,10 +500,7 @@ class AppStateNotifier extends Notifier<AppState> {
     try {
       await _apiClient.post<Map<String, dynamic>>(
         '/users/me/profile-setup',
-        data: {
-          'name': name,
-          'locale': state.locale.languageCode,
-        },
+        data: {'name': name, 'locale': state.locale.languageCode},
       );
       if (profilePhotoPath != null && profilePhotoPath.isNotEmpty) {
         final bytes = await File(profilePhotoPath).readAsBytes();
@@ -526,7 +536,8 @@ class AppStateNotifier extends Notifier<AppState> {
       lastName: lastName.trim(),
       email: email.trim(),
       profileSetupComplete: true,
-      profileImageUrl: uploadedAvatarUrl?.trim() ??
+      profileImageUrl:
+          uploadedAvatarUrl?.trim() ??
           profileImageUrl?.trim() ??
           state.profileImageUrl,
       profilePhotoPath: profilePhotoPath != null
@@ -568,7 +579,9 @@ class AppStateNotifier extends Notifier<AppState> {
       }
       state = state.copyWith(
         profilePhotoPath: path,
-        profileImageUrl: avatarUrl.isNotEmpty ? avatarUrl : state.profileImageUrl,
+        profileImageUrl: avatarUrl.isNotEmpty
+            ? avatarUrl
+            : state.profileImageUrl,
       );
     } catch (_) {}
   }
@@ -639,6 +652,7 @@ class AppStateNotifier extends Notifier<AppState> {
       pickupInServiceArea: inServiceArea,
     );
     _refreshFareEstimate();
+    _refreshRoutePoints();
   }
 
   void setDropoffPlace({
@@ -654,6 +668,30 @@ class AppStateNotifier extends Notifier<AppState> {
       dropoffInServiceArea: inServiceArea,
     );
     _refreshFareEstimate();
+    _refreshRoutePoints();
+  }
+
+  Future<void> _refreshRoutePoints() async {
+    if (state.pickupLat == 0.0 || state.pickupLng == 0.0 || state.dropoffLat == 0.0 || state.dropoffLng == 0.0) {
+      state = state.copyWith(routePoints: const []);
+      return;
+    }
+    try {
+      final places = ref.read(placesServiceProvider);
+      final points = await places.fetchDirections(
+        originLat: state.pickupLat,
+        originLng: state.pickupLng,
+        destLat: state.dropoffLat,
+        destLng: state.dropoffLng,
+      );
+      state = state.copyWith(routePoints: points);
+    } catch (_) {
+      // Fallback to straight line with midpoint
+      final p = LatLng(state.pickupLat, state.pickupLng);
+      final d = LatLng(state.dropoffLat, state.dropoffLng);
+      final mid = LatLng((p.latitude + d.latitude) / 2, (p.longitude + d.longitude) / 2);
+      state = state.copyWith(routePoints: [p, mid, d]);
+    }
   }
 
   void setTruckType(TruckType type) {
@@ -693,6 +731,10 @@ class AppStateNotifier extends Notifier<AppState> {
 
   Future<void> _refreshFareEstimateFromApi() async {
     if (!state.isLoggedIn) return;
+    if (state.pickupLat == 0.0 || state.pickupLng == 0.0 || state.dropoffLat == 0.0 || state.dropoffLng == 0.0) {
+      state = state.copyWith(estimatedPrice: 0);
+      return;
+    }
     try {
       final truckType = state.selectedTruck == TruckType.singleCabine
           ? 'single_cabin'
@@ -782,7 +824,8 @@ class AppStateNotifier extends Notifier<AppState> {
         _applyTripData(merged);
       },
       onStatusChanged: (data) {
-        final reason = data['cancelledReason'] as String? ??
+        final reason =
+            data['cancelledReason'] as String? ??
             data['reason'] as String? ??
             '';
         if (reason == 'no_drivers_found') {
@@ -841,8 +884,9 @@ class AppStateNotifier extends Notifier<AppState> {
 
   Future<bool> _resumeActiveTrip() async {
     try {
-      final res =
-          await _apiClient.get<Map<String, dynamic>>('/users/me/active-trip');
+      final res = await _apiClient.get<Map<String, dynamic>>(
+        '/users/me/active-trip',
+      );
       final tripRaw = res.data?['trip'];
       if (tripRaw is! Map) return false;
       final data = Map<String, dynamic>.from(tripRaw);
@@ -857,10 +901,12 @@ class AppStateNotifier extends Notifier<AppState> {
         return true;
       }
 
-      final fare = (data['finalFare'] as num?)?.toDouble() ??
+      final fare =
+          (data['finalFare'] as num?)?.toDouble() ??
           (data['fare'] as num?)?.toDouble();
       final createdAt =
-          DateTime.tryParse(data['createdAt'] as String? ?? '') ?? DateTime.now();
+          DateTime.tryParse(data['createdAt'] as String? ?? '') ??
+          DateTime.now();
       _applyTripLocationsFromPayload(data);
       state = state.copyWith(
         tripEndTimeNull: true,
@@ -933,8 +979,7 @@ class AppStateNotifier extends Notifier<AppState> {
       final tripStatus = tripMap['status'] as String? ?? 'requested';
       final cancelledReason = tripMap['cancelledReason'] as String? ?? '';
       final outcome = dispatchMap['outcome'] as String? ?? '';
-      final nearby =
-          (dispatchMap['nearbyDriversCount'] as num?)?.toInt() ?? -1;
+      final nearby = (dispatchMap['nearbyDriversCount'] as num?)?.toInt() ?? -1;
 
       if (tripStatus == 'cancelled' &&
           (cancelledReason == 'no_drivers_found' ||
@@ -991,7 +1036,8 @@ class AppStateNotifier extends Notifier<AppState> {
 
   /// Used by widget tests only — simulates driver progression without API.
   @visibleForTesting
-  void applyTripDataForTesting(Map<String, dynamic> data) => _applyTripData(data);
+  void applyTripDataForTesting(Map<String, dynamic> data) =>
+      _applyTripData(data);
 
   /// Used by widget tests only — simulates driver progression without API.
   @visibleForTesting
@@ -1022,8 +1068,9 @@ class AppStateNotifier extends Notifier<AppState> {
   void _startTripPolling(String tripId) {
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       try {
-        final res = await _apiClient
-            .get<Map<String, dynamic>>('/trips/$tripId');
+        final res = await _apiClient.get<Map<String, dynamic>>(
+          '/trips/$tripId',
+        );
         final data = res.data;
         if (data == null) return;
         _applyTripData(data);
@@ -1035,15 +1082,19 @@ class AppStateNotifier extends Notifier<AppState> {
     _applyTripLocationsFromPayload(data);
     final status = data['status'] as String? ?? '';
     final driver = data['driver'] as Map<String, dynamic>?;
-    final fare = (data['finalFare'] as num?)?.toDouble() ??
+    final fare =
+        (data['finalFare'] as num?)?.toDouble() ??
         (data['fare'] as num?)?.toDouble();
-    final plate = driver?['vehiclePlate'] as String? ??
+    final plate =
+        driver?['vehiclePlate'] as String? ??
         data['vehiclePlate'] as String? ??
         state.driverPlate;
-    final color = driver?['vehicleColor'] as String? ??
+    final color =
+        driver?['vehicleColor'] as String? ??
         data['vehicleColor'] as String? ??
         state.driverVehicleColor;
-    final model = driver?['vehicleModel'] as String? ??
+    final model =
+        driver?['vehicleModel'] as String? ??
         data['vehicleModel'] as String? ??
         state.driverVehicleModel;
     final driverTruck = driver?['truckType'] as String?;
@@ -1085,9 +1136,8 @@ class AppStateNotifier extends Notifier<AppState> {
           state = state.copyWith(tripStage: TripStage.tripStarted);
         }
       case 'awaitingCash':
-        if (state.tripStage != TripStage.awaitingPayment &&
-            state.tripStage != TripStage.arrivedSummary) {
-          state = state.copyWith(tripStage: TripStage.awaitingPayment);
+        if (state.tripStage != TripStage.arrivedSummary) {
+          endTrip(finalFare: fare);
         }
       case 'completed':
         _pollTimer?.cancel();
@@ -1118,10 +1168,10 @@ class AppStateNotifier extends Notifier<AppState> {
 
   Future<List<TripRecord>> _fetchTripHistory() async {
     try {
-      final res = await _apiClient
-          .get<Map<String, dynamic>>('/users/me/trips?limit=50&page=1');
-      final items =
-          (res.data?['items'] as List<dynamic>?) ?? [];
+      final res = await _apiClient.get<Map<String, dynamic>>(
+        '/users/me/trips?limit=50&page=1',
+      );
+      final items = (res.data?['items'] as List<dynamic>?) ?? [];
       return items.map((item) {
         final m = item as Map<String, dynamic>;
         final pickup = m['pickup'] as Map<String, dynamic>? ?? {};
@@ -1131,13 +1181,16 @@ class AppStateNotifier extends Notifier<AppState> {
             : TruckType.singleCabine;
         final cancelled = (m['status'] as String?) == 'cancelled';
         return TripRecord(
-          pickup: pickup['address'] as String? ??
+          pickup:
+              pickup['address'] as String? ??
               '${pickup['lat']},${pickup['lng']}',
-          dropoff: dropoff['address'] as String? ??
+          dropoff:
+              dropoff['address'] as String? ??
               '${dropoff['lat']},${dropoff['lng']}',
           price: ((m['finalFare'] as num?) ?? (m['fare'] as num?) ?? 0)
               .toDouble(),
-          date: DateTime.tryParse(m['createdAt'] as String? ?? '') ??
+          date:
+              DateTime.tryParse(m['createdAt'] as String? ?? '') ??
               DateTime.now(),
           truckType: truckType,
           comment: '',
@@ -1162,8 +1215,9 @@ class AppStateNotifier extends Notifier<AppState> {
     }
     final start = state.tripStartTime;
     final end = DateTime.now();
-    final minutes =
-        start != null ? end.difference(start).inMinutes.toDouble() : 0.0;
+    final minutes = start != null
+        ? end.difference(start).inMinutes.toDouble()
+        : 0.0;
     final km = tripRouteDistanceKm(
       state.pickupLat,
       state.pickupLng,
@@ -1175,7 +1229,8 @@ class AppStateNotifier extends Notifier<AppState> {
       tripStage: TripStage.arrivedSummary,
       tripEndTime: end,
       tripEndTimeNull: false,
-      estimatedPrice: finalFare ??
+      estimatedPrice:
+          finalFare ??
           (state.estimatedPrice > 0 ? state.estimatedPrice : computedFare),
     );
   }
@@ -1226,7 +1281,8 @@ class AppStateNotifier extends Notifier<AppState> {
     Map<String, dynamic> data, {
     double? fare,
   }) async {
-    final tripPrice = fare ??
+    final tripPrice =
+        fare ??
         (data['finalFare'] as num?)?.toDouble() ??
         (data['fare'] as num?)?.toDouble() ??
         (state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice);
@@ -1234,7 +1290,8 @@ class AppStateNotifier extends Notifier<AppState> {
       pickup: state.pickup,
       dropoff: state.dropoff,
       price: tripPrice,
-      date: DateTime.tryParse(data['createdAt'] as String? ?? '') ??
+      date:
+          DateTime.tryParse(data['createdAt'] as String? ?? '') ??
           DateTime.now(),
       truckType: state.selectedTruck,
       comment: data['driverRatingComment'] as String? ?? '',
@@ -1281,8 +1338,9 @@ class AppStateNotifier extends Notifier<AppState> {
           return false;
         }
       }
-      final tripPrice =
-          state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice;
+      final tripPrice = state.estimatedPrice > 0
+          ? state.estimatedPrice
+          : kEstimatedTripPrice;
       final record = TripRecord(
         pickup: state.pickup,
         dropoff: state.dropoff,

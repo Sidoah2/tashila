@@ -129,6 +129,8 @@ class DriverHomeScreen extends ConsumerWidget {
       }
     });
 
+    print("locale:" + Localizations.localeOf(context).languageCode);
+
     return PopScope(
       canPop: state.tripStatus != TripStatus.awaitingClientRating,
       onPopInvokedWithResult: (didPop, result) {
@@ -153,7 +155,10 @@ class DriverHomeScreen extends ConsumerWidget {
                   children: [
                     if (isIdlePhase) ...[
                       Directionality(
-                        textDirection: ui.TextDirection.ltr,
+                        textDirection:
+                            Localizations.localeOf(context).languageCode == 'ar'
+                            ? ui.TextDirection.ltr
+                            : ui.TextDirection.rtl,
                         child: Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 12,
@@ -1345,59 +1350,50 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Expanded(
-                                  flex: 2,
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap:
-                                          request.clientPhone.trim().isNotEmpty
-                                          ? () =>
-                                                _callClient(request.clientPhone)
-                                          : null,
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        height: 42,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
+                                Material(
+                                  color: Colors.transparent,
+                                  child: InkWell(
+                                    onTap: request.clientPhone.trim().isNotEmpty
+                                        ? () => _callClient(request.clientPhone)
+                                        : null,
+                                    borderRadius: BorderRadius.circular(12),
+                                    child: Container(
+                                      height: 42,
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 14,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: const Color(0xFFF5F6F8),
+                                        borderRadius: BorderRadius.circular(12),
+                                        border: Border.all(
+                                          color: Colors.grey.shade300,
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF5F6F8),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
+                                      ),
+                                      child: Row(
+                                        mainAxisSize: MainAxisSize.min,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                        children: [
+                                          const Icon(
+                                            Icons.phone_rounded,
+                                            size: 16,
+                                            color: AppColors.brandOrange,
                                           ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
+                                          const SizedBox(width: 6),
+                                          Text(
+                                            'call_client'.tr(),
+                                            style: const TextStyle(
+                                              fontSize: 13,
+                                              fontWeight: FontWeight.bold,
+                                              color: Colors.black,
+                                            ),
                                           ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Icon(
-                                              Icons.phone_rounded,
-                                              size: 16,
-                                              color: AppColors.brandOrange,
-                                            ),
-                                            const SizedBox(width: 6),
-                                            FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                'call_client'.tr(),
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
+                                        ],
                                       ),
                                     ),
                                   ),
                                 ),
-                                SizedBox(width: 10),
+                                const SizedBox(width: 10),
                                 Expanded(
                                   child: Material(
                                     color: Colors.transparent,
@@ -1631,12 +1627,15 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: Text(
+                        '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ],
@@ -1659,12 +1658,15 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      timerDisplay,
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                    Directionality(
+                      textDirection: ui.TextDirection.ltr,
+                      child: Text(
+                        timerDisplay,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
                       ),
                     ),
                   ],
@@ -2265,7 +2267,7 @@ class _CompactClientRow extends StatelessWidget {
                   if (request.clientPhone.trim().isNotEmpty) ...[
                     const SizedBox(height: 2),
                     Text(
-                      request.clientPhone,
+                      '\u200E${request.clientPhone}',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -3015,8 +3017,8 @@ class DriverDrawer extends ConsumerWidget {
                         const SizedBox(height: 2),
                         Text(
                           profile?.phone.isNotEmpty == true
-                              ? profile!.phone
-                              : state.phone,
+                              ? '\u200E${profile!.phone}'
+                              : '\u200E${state.phone}',
                           style: const TextStyle(
                             fontSize: 12.5,
                             color: AppColors.textSecondary,
@@ -3111,21 +3113,29 @@ class DriverDrawer extends ConsumerWidget {
                   _buildDivider(),
                   _DrawerTile(
                     icon: Icons.article_outlined,
-                    title: 'Terms and Condition',
-                    isActive: currentRoute == '/terms',
+                    title: 'profile_legal_terms_title'.tr(),
+                    isActive: false,
                     onTap: () {
                       Navigator.pop(context);
-                      context.push('/terms');
+                      _showLegalScrollDialog(
+                        context,
+                        'profile_legal_terms_title'.tr(),
+                        'driver_legal_terms_body'.tr(),
+                      );
                     },
                   ),
                   _buildDivider(),
                   _DrawerTile(
                     icon: Icons.shield_outlined,
-                    title: 'Privacy Policy',
-                    isActive: currentRoute == '/privacy',
+                    title: 'profile_legal_privacy_title'.tr(),
+                    isActive: false,
                     onTap: () {
                       Navigator.pop(context);
-                      context.push('/privacy');
+                      _showLegalScrollDialog(
+                        context,
+                        'profile_legal_privacy_title'.tr(),
+                        'driver_legal_privacy_body'.tr(),
+                      );
                     },
                   ),
                   _buildDivider(),
@@ -3145,6 +3155,110 @@ class DriverDrawer extends ConsumerWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  void _showLegalScrollDialog(BuildContext context, String title, String body) {
+    showDialog<void>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        elevation: 0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 440),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(
+                color: Colors.white.withValues(alpha: 0.8),
+                width: 1.5,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  blurRadius: 30,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: Colors.blue.shade50,
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Icon(
+                        Icons.article_rounded,
+                        color: Colors.blue.shade700,
+                        size: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 18,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Flexible(
+                  child: SingleChildScrollView(
+                    child: Text(
+                      body,
+                      style: const TextStyle(
+                        color: AppColors.textSecondary,
+                        fontSize: 14,
+                        height: 1.5,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                SizedBox(
+                  width: double.infinity,
+                  height: 44,
+                  child: ElevatedButton(
+                    onPressed: () => Navigator.pop(ctx),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandOrange,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    child: Text(
+                      ctx.locale.languageCode == 'ar'
+                          ? 'أفهم وأوافق'
+                          : (ctx.locale.languageCode == 'fr'
+                                ? 'Compris'
+                                : 'Close'),
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );

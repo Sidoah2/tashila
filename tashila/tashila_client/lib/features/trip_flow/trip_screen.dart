@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' as foundation;
@@ -12,10 +11,8 @@ import 'package:tashila_client/core/config/map_config.dart';
 import 'package:tashila_client/core/formatting/app_format.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
-import 'package:tashila_client/core/widgets/trip_stage_indicator.dart';
 import 'package:tashila_client/core/widgets/rating_sheet_host.dart';
 import 'package:tashila_client/features/trip_flow/cancel_trip_sheet.dart';
-import 'package:tashila_client/features/trip_flow/searching_radar.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class TripScreen extends ConsumerStatefulWidget {
@@ -41,30 +38,25 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         stage != TripStage.noDriversFound;
   }
 
-  static bool _canCancelTrip(AppState state) => state.canCancelActiveTrip;
-
   Future<void> _onCancelTripPressed(BuildContext context) async {
     final reason = await showCancelTripReasonSheet(context);
     if (!context.mounted) return;
     if (reason == null || reason.trim().isEmpty) return;
-    await ref.read(appStateProvider.notifier).cancelTripWithReason(reason.trim());
+    await ref
+        .read(appStateProvider.notifier)
+        .cancelTripWithReason(reason.trim());
     if (!context.mounted) return;
     context.go('/home');
   }
 
   @override
   Widget build(BuildContext context) {
-    ref.listen<AppState>(appStateProvider, (previous, next) {
-      if (previous?.tripStage != TripStage.arrivedSummary &&
-          next.tripStage == TripStage.arrivedSummary) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          _showDriverRatingSheet();
-        });
-      }
-    });
-
     final state = ref.watch(appStateProvider);
+
+    if (state.tripStage == TripStage.arrivedSummary) {
+      return _buildArrivedSummaryScreen(context, state);
+    }
+
     final pickup = LatLng(state.pickupLat, state.pickupLng);
     final dropoff = LatLng(state.dropoffLat, state.dropoffLng);
     final driverPos = state.hasDriverLocation
@@ -81,8 +73,10 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     final zoom = span > 0.08 ? 11.0 : (span > 0.03 ? 12.5 : 14.0);
 
     final showDriverMarker = _showDriverMarker(state.tripStage);
-    final canCancel = _canCancelTrip(state);
-    final maxPanelH = (MediaQuery.sizeOf(context).height * 0.36).clamp(240.0, 400.0);
+    final maxPanelH = (MediaQuery.sizeOf(context).height * 0.45).clamp(
+      320.0,
+      480.0,
+    );
     final panelW = MediaQuery.sizeOf(context).width - 28;
 
     final markers = <Marker>{
@@ -105,7 +99,9 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         Marker(
           markerId: const MarkerId('driver'),
           position: driverPos,
-          icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueAzure),
+          icon: BitmapDescriptor.defaultMarkerWithHue(
+            BitmapDescriptor.hueAzure,
+          ),
           infoWindow: InfoWindow(
             title: driverTitle,
             snippet: state.hasDriverLocation
@@ -117,144 +113,83 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     }
 
     return PopScope(
-      canPop: state.tripStage != TripStage.arrivedSummary,
-      onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        if (state.tripStage == TripStage.arrivedSummary) {
-          _showDriverRatingSheet();
-        }
-      },
+      canPop: true,
       child: Scaffold(
-      extendBody: true,
-      appBar: AppBar(title: Text('trip_flow'.tr())),
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned.fill(
-            child: !MapConfig.canRenderGoogleMap
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Text(
-                        'map_disabled_message'.tr(),
-                        textAlign: TextAlign.center,
+        extendBody: true,
+        appBar: AppBar(title: Text('trip_flow'.tr())),
+        body: Stack(
+          fit: StackFit.expand,
+          children: [
+            Positioned.fill(
+              child: !MapConfig.canRenderGoogleMap
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(24),
+                        child: Text(
+                          'map_disabled_message'.tr(),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
+                    )
+                  : GoogleMap(
+                      initialCameraPosition: CameraPosition(
+                        target: mid,
+                        zoom: zoom,
+                      ),
+                      gestureRecognizers:
+                          <foundation.Factory<OneSequenceGestureRecognizer>>{
+                            foundation.Factory<OneSequenceGestureRecognizer>(
+                              () => EagerGestureRecognizer(),
+                            ),
+                          },
+                      polylines: {
+                        Polyline(
+                          polylineId: const PolylineId('route'),
+                          points: state.routePoints.isNotEmpty
+                              ? state.routePoints
+                              : [pickup, mid, dropoff],
+                          width: 4,
+                          color: AppColors.brandOrange,
+                        ),
+                      },
+                      markers: markers,
                     ),
-                  )
-                : GoogleMap(
-                    initialCameraPosition: CameraPosition(
-                      target: mid,
-                      zoom: zoom,
-                    ),
-                    gestureRecognizers: <foundation.Factory<OneSequenceGestureRecognizer>>{
-                      foundation.Factory<OneSequenceGestureRecognizer>(
-                        () => EagerGestureRecognizer(),
-                      ),
-                    },
-                    polylines: {
-                      Polyline(
-                        polylineId: const PolylineId('route'),
-                        points: [pickup, mid, dropoff],
-                        width: 4,
-                        color: AppColors.brandOrange,
-                      ),
-                    },
-                    markers: markers,
-                  ),
-          ),
-          if (state.tripStage == TripStage.searchingDriver)
-            const Positioned.fill(
-              child: SearchingRadarWidget(),
             ),
-          Positioned(
-
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Material(
-              color: Colors.white,
-              elevation: 16,
-              shadowColor: Colors.black38,
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: SafeArea(
-                top: false,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(maxHeight: maxPanelH),
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
-                    child: FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: panelW,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Center(
-                              child: Container(
-                                width: 36,
-                                height: 4,
-                                decoration: BoxDecoration(
-                                  color: AppColors.textSecondary.withValues(alpha: 0.28),
-                                  borderRadius: BorderRadius.circular(999),
-                                ),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            if (state.tripStage != TripStage.noDriversFound) ...[
-                              TripStageIndicator(stage: state.tripStage, compact: true),
-                              const SizedBox(height: 6),
-                            ],
-                            if (state.tripStage != TripStage.idle &&
-                                state.tripStage != TripStage.searchingDriver &&
-                                state.tripStage != TripStage.noDriversFound)
-                              Padding(
-                                padding: const EdgeInsets.only(bottom: 4),
-                                child: _TripDriverInfoCard(
-                                  stage: state.tripStage,
-                                  truckType: state.selectedTruck,
-                                  driverName: state.driverName,
-                                  driverPhone: state.driverPhone,
-                                  driverPlate: state.driverPlate,
-                                  driverVehicleColor: state.driverVehicleColor,
-                                  driverVehicleModel: state.driverVehicleModel,
-                                ),
-                              ),
-                            _TripStageBody(
-                              stage: state.tripStage,
-                              state: state,
-                              pickup: pickup,
-                              dropoff: dropoff,
-                              onOpenRating: _showDriverRatingSheet,
-                            ),
-                            if (canCancel) ...[
-                              const SizedBox(height: 8),
-                              OutlinedButton.icon(
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: const Color(0xFFC62828),
-                                  side: const BorderSide(color: Color(0xFFE57373)),
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
-                                  visualDensity: VisualDensity.compact,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                ),
-                                onPressed: () => _onCancelTripPressed(context),
-                                icon: const Icon(Icons.close_rounded, size: 18),
-                                label: Text(
-                                  'cancel_trip'.tr(),
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ],
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 0,
+              child: Material(
+                color: Colors.white,
+                elevation: 16,
+                shadowColor: Colors.black38,
+                shape: const RoundedRectangleBorder(
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
+                ),
+                clipBehavior: Clip.antiAlias,
+                child: SafeArea(
+                  top: false,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxHeight: maxPanelH),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(14, 8, 14, 10),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          width: panelW,
+                          child: switch (state.tripStage) {
+                            TripStage.idle => const SizedBox.shrink(),
+                            TripStage.searchingDriver =>
+                              _buildSearchingDriverPanel(context, state),
+                            TripStage.noDriversFound =>
+                              _buildNoDriversFoundPanel(context, state),
+                            TripStage.driverEnRoute ||
+                            TripStage.tripStarted ||
+                            TripStage.awaitingPayment =>
+                              _buildDriverAcceptedPanel(context, state),
+                            TripStage.arrivedSummary => const SizedBox.shrink(),
+                          },
                         ),
                       ),
                     ),
@@ -262,10 +197,914 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
-    ),
+    );
+  }
+
+  Widget _buildSearchingDriverPanel(BuildContext context, AppState state) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textSecondary.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(
+              width: 14,
+              height: 14,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  AppColors.brandOrange,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              'searching_drivers_title'.tr(),
+              style: const TextStyle(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Vertical Endpoints Display
+        Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Dot/Line indicator
+              Column(
+                children: [
+                  const SizedBox(height: 4),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2E7D32),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  Container(width: 2, height: 36, color: Colors.grey.shade300),
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: const BoxDecoration(
+                      color: AppColors.brandOrange,
+                      shape: BoxShape.rectangle,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(width: 12),
+              // Text Fields
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'trip_summary_from_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    Text(
+                      state.pickup,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      'trip_summary_to_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey.shade500,
+                      ),
+                    ),
+                    Text(
+                      state.dropoff,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 14),
+        // Cancel Button
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: () => _onCancelTripPressed(context),
+            icon: const Icon(Icons.close_rounded, color: Colors.red, size: 18),
+            label: Text(
+              'cancel_order'.tr(),
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red, width: 1.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              backgroundColor: Colors.red.shade50.withValues(alpha: 0.1),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Price & Cash Row
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'fixed_price'.tr(),
+                  style: TextStyle(
+                    fontSize: 11,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  formatTripPrice(
+                    state.estimatedPrice > 0
+                        ? state.estimatedPrice
+                        : kEstimatedTripPrice,
+                  ),
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.brandOrange,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+              decoration: BoxDecoration(
+                color: Colors.amber.shade50,
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(color: Colors.amber.shade200),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.payments_rounded,
+                    color: Colors.amber,
+                    size: 16,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'cash_payment'.tr(),
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.amber.shade900,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDriverAcceptedPanel(BuildContext context, AppState state) {
+    final distance = tripRouteDistanceKm(
+      state.pickupLat,
+      state.pickupLng,
+      state.dropoffLat,
+      state.dropoffLng,
+    );
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Center(
+          child: Container(
+            width: 36,
+            height: 4,
+            decoration: BoxDecoration(
+              color: AppColors.textSecondary.withValues(alpha: 0.28),
+              borderRadius: BorderRadius.circular(999),
+            ),
+          ),
+        ),
+        const SizedBox(height: 10),
+        // Top Floating Driver Card
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.grey.shade200),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              // Profile picture
+              CircleAvatar(
+                radius: 24,
+                backgroundColor: AppColors.brandOrange.withValues(alpha: 0.1),
+                child: const Icon(
+                  Icons.person_rounded,
+                  color: AppColors.brandOrange,
+                  size: 28,
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Driver Name and 5 Stars colored rating
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      state.driverName.isNotEmpty
+                          ? state.driverName
+                          : 'trip_driver_pending'.tr(),
+                      style: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: List.generate(5, (index) {
+                        return const Icon(
+                          Icons.star_rounded,
+                          color: Colors.amber,
+                          size: 14,
+                        );
+                      }),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 12),
+              // Section for details of vehicle
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.end,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Text(
+                      state.selectedTruck == TruckType.singleCabine
+                          ? 'single_cabine'.tr()
+                          : 'double_cabine'.tr(),
+                      style: const TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.brandOrange,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    state.driverVehicleModel.isNotEmpty
+                        ? state.driverVehicleModel
+                        : 'trip_vehicle_pending'.tr(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  Text(
+                    state.driverPlate.isNotEmpty
+                        ? state.driverPlate
+                        : 'trip_plate_pending'.tr(),
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        // Trip Stats (3 boxes side-by-side)
+        Row(
+          children: [
+            // Price Card
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.amber.shade50.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.amber.shade100),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'trip_summary_price_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      formatTripPrice(
+                        state.estimatedPrice > 0
+                            ? state.estimatedPrice
+                            : kEstimatedTripPrice,
+                      ),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.brandOrange,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Duration Card
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'trip_summary_duration_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '14 ${'trip_unit_minutes'.tr()}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            // Distance Card
+            Expanded(
+              child: Container(
+                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade50,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'trip_summary_distance_label'.tr(),
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: Colors.grey.shade500,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${distance.toStringAsFixed(1)} ${'trip_summary_km_unit'.tr()}',
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w900,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        // Action Buttons Row
+        Row(
+          children: [
+            if (state.canCancelActiveTrip) ...[
+              // Small cancel button (cross icon)
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () => _onCancelTripPressed(context),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    width: 50,
+                    height: 50,
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.red,
+                      size: 24,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10),
+            ],
+            // Call Action Button
+            Expanded(
+              child: SizedBox(
+                height: 50,
+                child: ElevatedButton.icon(
+                  onPressed: state.driverPhone.trim().isNotEmpty
+                      ? () => launchUrl(Uri.parse('tel:${state.driverPhone}'))
+                      : null,
+                  icon: const Icon(Icons.phone_rounded, size: 18),
+                  label: Text(
+                    'driver_contact'.tr(),
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 15,
+                    ),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(14),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildNoDriversFoundPanel(BuildContext context, AppState state) {
+    final theme = Theme.of(context);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Icon(Icons.person_off_outlined, size: 44, color: Colors.red.shade700),
+        const SizedBox(height: 12),
+        Text(
+          'no_drivers_found_title'.tr(),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w800,
+            color: Colors.red.shade900,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'no_drivers_found_message'.tr(),
+          textAlign: TextAlign.center,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: AppColors.textSecondary,
+            height: 1.35,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 16),
+        FilledButton.icon(
+          onPressed: () {
+            ref.read(appStateProvider.notifier).dismissNoDriversFound();
+            context.go('/home');
+          },
+          icon: const Icon(Icons.refresh_rounded),
+          label: Text('no_drivers_found_try_again'.tr()),
+          style: FilledButton.styleFrom(
+            backgroundColor: AppColors.brandOrange,
+            padding: const EdgeInsets.symmetric(vertical: 12),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildArrivedSummaryScreen(BuildContext context, AppState state) {
+    final distance = tripRouteDistanceKm(
+      state.pickupLat,
+      state.pickupLng,
+      state.dropoffLat,
+      state.dropoffLng,
+    );
+    final durationText = _formatDuration(
+      state.tripStartTime,
+      state.tripEndTime,
+    );
+
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        ref.read(appStateProvider.notifier).completeRatingSession();
+        context.go('/home');
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFF8FAFC),
+        appBar: AppBar(
+          backgroundColor: Colors.white,
+          elevation: 0,
+          // leading: IconButton(
+          //   icon: const Icon(Icons.close_rounded, color: AppColors.textPrimary),
+          //   onPressed: () {
+          //     ref.read(appStateProvider.notifier).completeRatingSession();
+          //     context.go('/home');
+          //   },
+          // ),
+          title: Text(
+            'trip_summary_title'.tr(),
+            style: const TextStyle(
+              fontWeight: FontWeight.w900,
+              fontSize: 18,
+              color: AppColors.textPrimary,
+            ),
+          ),
+          centerTitle: true,
+        ),
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const SizedBox(height: 12),
+                // Success Checkmark
+                Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: AppColors.success.withValues(alpha: 0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_rounded,
+                      size: 48,
+                      color: AppColors.success,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  'trip_completed_successfully'.tr(),
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'thank_you_trust'.tr(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey.shade500,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // Price Badge Card
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.brandOrange.withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: AppColors.brandOrange.withValues(alpha: 0.25),
+                      width: 1.5,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'total_value'.tr(),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.amber.shade50,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(color: Colors.amber.shade200),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(
+                                  Icons.payments_rounded,
+                                  color: Colors.amber,
+                                  size: 14,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'cash_payment'.tr(),
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.amber.shade900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      Text(
+                        formatTripPrice(
+                          state.estimatedPrice > 0
+                              ? state.estimatedPrice
+                              : kEstimatedTripPrice,
+                        ),
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: AppColors.brandOrange,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+
+                // Side-by-side stats cards
+                Row(
+                  children: [
+                    // Distance Card
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.pin_drop_rounded,
+                              color: AppColors.brandOrange,
+                              size: 20,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'trip_summary_distance_label'.tr(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              '${distance.toStringAsFixed(1)} ${'trip_summary_km_unit'.tr()}',
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    // Duration Card
+                    Expanded(
+                      child: Container(
+                        padding: const EdgeInsets.all(14),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          border: Border.all(color: Colors.grey.shade200),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Icon(
+                              Icons.access_time_rounded,
+                              color: AppColors.brandOrange,
+                              size: 20,
+                            ),
+                            const SizedBox(height: 10),
+                            Text(
+                              'trip_summary_duration_label'.tr(),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade500,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              durationText,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w900,
+                                color: AppColors.textPrimary,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+
+                // Mini Map Card
+                Container(
+                  height: 140,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(18),
+                    border: Border.all(color: Colors.grey.shade200),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  child: !MapConfig.canRenderGoogleMap
+                      ? const Center(
+                          child: Icon(
+                            Icons.map_rounded,
+                            size: 44,
+                            color: Colors.grey,
+                          ),
+                        )
+                      : GoogleMap(
+                          initialCameraPosition: CameraPosition(
+                            target: LatLng(
+                              (state.pickupLat + state.dropoffLat) / 2,
+                              (state.pickupLng + state.dropoffLng) / 2,
+                            ),
+                            zoom: 12.5,
+                          ),
+                          zoomControlsEnabled: false,
+                          myLocationButtonEnabled: false,
+                          scrollGesturesEnabled: false,
+                          zoomGesturesEnabled: false,
+                          rotateGesturesEnabled: false,
+                          tiltGesturesEnabled: false,
+                          markers: {
+                            Marker(
+                              markerId: const MarkerId('pickup'),
+                              position: LatLng(
+                                state.pickupLat,
+                                state.pickupLng,
+                              ),
+                              icon: BitmapDescriptor.defaultMarkerWithHue(
+                                BitmapDescriptor.hueGreen,
+                              ),
+                            ),
+                            Marker(
+                              markerId: const MarkerId('dropoff'),
+                              position: LatLng(
+                                state.dropoffLat,
+                                state.dropoffLng,
+                              ),
+                              icon: BitmapDescriptor.defaultMarkerWithHue(
+                                BitmapDescriptor.hueOrange,
+                              ),
+                            ),
+                          },
+                          polylines: {
+                            Polyline(
+                              polylineId: const PolylineId('route'),
+                              points: state.routePoints.isNotEmpty
+                                  ? state.routePoints
+                                  : [
+                                      LatLng(state.pickupLat, state.pickupLng),
+                                      LatLng(
+                                        (state.pickupLat + state.dropoffLat) / 2,
+                                        (state.pickupLng + state.dropoffLng) / 2,
+                                      ),
+                                      LatLng(state.dropoffLat, state.dropoffLng),
+                                    ],
+                              width: 3,
+                              color: AppColors.brandOrange,
+                            ),
+                          },
+                        ),
+                ),
+                const SizedBox(height: 24),
+
+                // Rate Driver Button
+                SizedBox(
+                  height: 52,
+                  child: ElevatedButton(
+                    onPressed: _showDriverRatingSheet,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.brandOrange,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      'trip_rate_driver'.tr(),
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -286,936 +1125,16 @@ class _TripScreenState extends ConsumerState<TripScreen> {
   }
 }
 
-Future<void> _openMapsSearch(LatLng location) async {
-  final uri = Uri.parse(
-    'https://www.google.com/maps/search/?api=1&query=${location.latitude},${location.longitude}',
-  );
-  await launchUrl(uri, mode: LaunchMode.externalApplication);
+String _formatDuration(DateTime? start, DateTime? end) {
+  if (start == null || end == null) return '—';
+  final d = end.difference(start);
+  if (d.inHours >= 1) {
+    return ltrNumber(
+      '${d.inHours} ${'trip_unit_hours'.tr()} ${d.inMinutes.remainder(60)} ${'trip_unit_minutes'.tr()}',
+    );
+  }
+  if (d.inMinutes >= 1) {
+    return ltrNumber('${d.inMinutes} ${'trip_unit_minutes'.tr()}');
+  }
+  return ltrNumber('${d.inSeconds} ${'trip_unit_seconds'.tr()}');
 }
-
-/// Pickup / drop-off in one row; opens Maps on tap.
-class _ClientRouteEndpointsRow extends StatelessWidget {
-  const _ClientRouteEndpointsRow({
-    required this.pickupAddress,
-    required this.dropAddress,
-    required this.pickup,
-    required this.dropoff,
-  });
-
-  final String pickupAddress;
-  final String dropAddress;
-  final LatLng pickup;
-  final LatLng dropoff;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    const radius = 12.0;
-    const pad = EdgeInsets.symmetric(horizontal: 8, vertical: 8);
-
-    Widget buildCell({
-      required Color dot,
-      required String label,
-      required String address,
-      required VoidCallback onTap,
-    }) {
-      return Material(
-        color: const Color(0xFFF5F5F5),
-        borderRadius: BorderRadius.circular(radius),
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(radius),
-          child: Padding(
-            padding: pad,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      width: 6,
-                      height: 6,
-                      decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: theme.textTheme.labelSmall?.copyWith(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.textSecondary,
-                          fontSize: 10,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                    ),
-                    Icon(
-                      Icons.open_in_new_rounded,
-                      size: 13,
-                      color: AppColors.brandOrange.withValues(alpha: 0.85),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  address,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                    fontSize: 11.5,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      );
-    }
-
-    final rtl = Directionality.of(context) == ui.TextDirection.rtl;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(
-          child: buildCell(
-            dot: const Color(0xFF2E7D32),
-            label: 'trip_summary_from_label'.tr(),
-            address: pickupAddress,
-            onTap: () => _openMapsSearch(pickup),
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 5),
-          child: Padding(
-            padding: const EdgeInsets.only(top: 18),
-            child: Icon(
-              rtl ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
-              size: 16,
-              color: AppColors.textSecondary.withValues(alpha: 0.45),
-            ),
-          ),
-        ),
-        Expanded(
-          child: buildCell(
-            dot: AppColors.brandOrange,
-            label: 'trip_summary_to_label'.tr(),
-            address: dropAddress,
-            onTap: () => _openMapsSearch(dropoff),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TripStageBody extends ConsumerWidget {
-  const _TripStageBody({
-    required this.stage,
-    required this.state,
-    required this.pickup,
-    required this.dropoff,
-    required this.onOpenRating,
-  });
-
-  final TripStage stage;
-  final AppState state;
-  final LatLng pickup;
-  final LatLng dropoff;
-  final Future<void> Function() onOpenRating;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    switch (stage) {
-      case TripStage.idle:
-        return Center(child: Text('trip_idle'.tr()));
-      case TripStage.searchingDriver:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2.2,
-                    valueColor: AlwaysStoppedAnimation<Color>(AppColors.brandOrange),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    'searching_drivers_title'.tr(),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'searching_drivers_subtitle'.tr(),
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.3,
-              ),
-            ),
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.bg,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.black.withValues(alpha: 0.03)),
-              ),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline_rounded, color: AppColors.brandOrange, size: 18),
-                  const SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'searching_dispatch_hint'.tr(),
-                      style: theme.textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        fontWeight: FontWeight.w600,
-                        height: 1.25,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'searching_contact_status'.tr(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: AppColors.textSecondary.withValues(alpha: 0.8),
-              ),
-            ),
-          ],
-        );
-      case TripStage.noDriversFound:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Icon(
-              Icons.person_off_outlined,
-              size: 44,
-              color: Colors.red.shade700,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              'no_drivers_found_title'.tr(),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-                color: Colors.red.shade900,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'no_drivers_found_message'.tr(),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.35,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 16),
-            FilledButton.icon(
-              onPressed: () {
-                ref.read(appStateProvider.notifier).dismissNoDriversFound();
-                context.go('/home');
-              },
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text('no_drivers_found_try_again'.tr()),
-              style: FilledButton.styleFrom(
-                backgroundColor: AppColors.brandOrange,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-              ),
-            ),
-          ],
-        );
-      case TripStage.driverEnRoute:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              'trip_driver_status_en_route'.tr(),
-              textAlign: TextAlign.center,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.25,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            if (state.hasDriverLocation) ...[
-              const SizedBox(height: 6),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.my_location_rounded,
-                    size: 16,
-                    color: AppColors.brandOrange,
-                  ),
-                  const SizedBox(width: 6),
-                  Flexible(
-                    child: Text(
-                      'driver_live_on_map'.tr(),
-                      textAlign: TextAlign.center,
-                      style: theme.textTheme.labelSmall?.copyWith(
-                        color: AppColors.brandOrange,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 8),
-            _ClientRouteEndpointsRow(
-              pickupAddress: state.pickup,
-              dropAddress: state.dropoff,
-              pickup: pickup,
-              dropoff: dropoff,
-            ),
-          ],
-        );
-      case TripStage.tripStarted:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (state.hasDriverLocation) ...[
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.my_location_rounded,
-                    size: 16,
-                    color: AppColors.brandOrange,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    'driver_live_on_map'.tr(),
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.brandOrange,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-            ],
-            _ClientRouteEndpointsRow(
-              pickupAddress: state.pickup,
-              dropAddress: state.dropoff,
-              pickup: pickup,
-              dropoff: dropoff,
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Icon(Icons.local_shipping_outlined, color: AppColors.brandOrange, size: 20),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'trip_started_title'.tr(),
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'trip_started_auto_complete_hint'.tr(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.25,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        );
-      case TripStage.awaitingPayment:
-        final priceStr = formatTripPrice(
-          state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice,
-        );
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.payments_outlined, color: AppColors.brandOrange, size: 28),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'trip_awaiting_payment_title'.tr(),
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'trip_awaiting_payment_message'.tr(namedArgs: {'amount': priceStr}),
-              style: theme.textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                height: 1.35,
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              'trip_awaiting_payment_hint'.tr(),
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
-                height: 1.3,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        );
-      case TripStage.arrivedSummary:
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            _TripConclusionCard(state: state, compact: true),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              style: TextButton.styleFrom(
-                visualDensity: VisualDensity.compact,
-                foregroundColor: AppColors.brandOrange,
-              ),
-              onPressed: () => onOpenRating(),
-              icon: const Icon(Icons.star_rounded, size: 20),
-              label: Text(
-                'trip_rate_driver'.tr(),
-                style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 13),
-              ),
-            ),
-          ],
-        );
-    }
-  }
-}
-
-class _TripDriverInfoCard extends StatelessWidget {
-  const _TripDriverInfoCard({
-    required this.stage,
-    required this.truckType,
-    required this.driverName,
-    required this.driverPhone,
-    required this.driverPlate,
-    required this.driverVehicleColor,
-    required this.driverVehicleModel,
-  });
-
-  final TripStage stage;
-  final TruckType truckType;
-  final String driverName;
-  final String driverPhone;
-  final String driverPlate;
-  final String driverVehicleColor;
-  final String driverVehicleModel;
-
-  String? get _statusHint {
-    return switch (stage) {
-      TripStage.driverEnRoute => 'trip_driver_status_en_route'.tr(),
-      TripStage.awaitingPayment => 'trip_awaiting_payment_title'.tr(),
-      _ => null,
-    };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final typeLabel =
-        truckType == TruckType.singleCabine ? 'single_cabine'.tr() : 'double_cabine'.tr();
-    final statusHint = _statusHint;
-
-    final modelText = driverVehicleModel.trim().isNotEmpty ? driverVehicleModel.trim() : null;
-    final colorText = driverVehicleColor.trim().isNotEmpty ? driverVehicleColor.trim() : null;
-    final vehicleInfo = [
-      if (colorText != null) colorText,
-      if (modelText != null) modelText,
-    ].join(' ');
-    final vehicleDisplay = vehicleInfo.isNotEmpty ? vehicleInfo : 'trip_vehicle_pending'.tr();
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-          width: 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CircleAvatar(
-                radius: 24,
-                backgroundColor: AppColors.brandOrange.withValues(alpha: 0.1),
-                child: const Icon(Icons.person_rounded, color: AppColors.brandOrange, size: 28),
-              ),
-              const SizedBox(height: 4),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: Colors.amber.shade50,
-                  borderRadius: BorderRadius.circular(6),
-                  border: Border.all(color: Colors.amber.shade200, width: 0.5),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(Icons.star_rounded, color: Colors.amber, size: 10),
-                    const SizedBox(width: 2),
-                    Text(
-                      '4.9',
-                      style: TextStyle(
-                        color: Colors.amber.shade900,
-                        fontSize: 9.5,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  driverName.isNotEmpty ? driverName : 'trip_driver_pending'.tr(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    color: AppColors.textPrimary,
-                    fontSize: 15,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  '$vehicleDisplay • $typeLabel',
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                // Algerian License Plate Simulation
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFFFD400), // Algerian Yellow Plate
-                    borderRadius: BorderRadius.circular(6),
-                    border: Border.all(color: Colors.black.withValues(alpha: 0.8), width: 1.2),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withValues(alpha: 0.05),
-                        blurRadius: 4,
-                        offset: const Offset(0, 1),
-                      )
-                    ],
-                  ),
-                  child: Text(
-                    driverPlate.trim().isNotEmpty ? driverPlate.trim() : '00000 000 00',
-                    style: const TextStyle(
-                      color: Colors.black,
-                      fontFamily: 'monospace',
-                      fontWeight: FontWeight.w900,
-                      fontSize: 11,
-                      letterSpacing: 1,
-                    ),
-                  ),
-                ),
-                if (statusHint != null) ...[
-                  const SizedBox(height: 6),
-                  Text(
-                    statusHint,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: AppColors.brandOrange,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-          const SizedBox(width: 8),
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: AppColors.brandOrange.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
-            ),
-            child: IconButton(
-              tooltip: 'driver_contact'.tr(),
-              icon: const Icon(Icons.call_rounded, color: AppColors.brandOrange, size: 20),
-              onPressed: driverPhone.isEmpty
-                  ? null
-                  : () => launchUrl(Uri.parse('tel:$driverPhone')),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TripConclusionCard extends StatelessWidget {
-  const _TripConclusionCard({
-    required this.state,
-    this.compact = false,
-  });
-
-  final AppState state;
-  final bool compact;
-
-  static String _formatDuration(DateTime? start, DateTime? end) {
-    if (start == null || end == null) return '—';
-    final d = end.difference(start);
-    if (d.inHours >= 1) {
-      return ltrNumber(
-        '${d.inHours} ${'trip_unit_hours'.tr()} ${d.inMinutes.remainder(60)} ${'trip_unit_minutes'.tr()}',
-      );
-    }
-    if (d.inMinutes >= 1) {
-      return ltrNumber('${d.inMinutes} ${'trip_unit_minutes'.tr()}');
-    }
-    return ltrNumber('${d.inSeconds} ${'trip_unit_seconds'.tr()}');
-  }
-
-  static String _formatPrice(AppState state) {
-    final amount = state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice;
-    return formatTripPrice(amount);
-  }
-
-  static String _formatDistanceKm(double km) {
-    return ltrNumber('${km.toStringAsFixed(1)} ${'trip_summary_km_unit'.tr()}');
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (compact) return _buildCompact(context);
-    final theme = Theme.of(context);
-    final km = tripRouteDistanceKm(
-      state.pickupLat,
-      state.pickupLng,
-      state.dropoffLat,
-      state.dropoffLng,
-    );
-    final priceStr = _formatPrice(state);
-
-    return Card(
-      color: AppColors.brandOrange.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-        side: BorderSide(color: AppColors.brandOrange.withValues(alpha: 0.5), width: 1.5),
-      ),
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(14),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                const Icon(Icons.route_rounded, color: AppColors.brandOrange, size: 24),
-                const SizedBox(width: 8),
-                Expanded(
-                  child: Text(
-                    'trip_summary_title'.tr(),
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            _summaryRow(
-              context,
-              'trip_summary_duration_label'.tr(),
-              _formatDuration(state.tripStartTime, state.tripEndTime),
-            ),
-            _summaryRow(context, 'trip_summary_from_label'.tr(), state.pickup),
-            _summaryRow(context, 'trip_summary_to_label'.tr(), state.dropoff),
-            _summaryRow(
-              context,
-              'trip_summary_distance_label'.tr(),
-              _formatDistanceKm(km),
-            ),
-            _summaryRow(
-              context,
-              'trip_summary_price_label'.tr(),
-              priceStr,
-              emphasize: true,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCompact(BuildContext context) {
-    final theme = Theme.of(context);
-    final km = tripRouteDistanceKm(
-      state.pickupLat,
-      state.pickupLng,
-      state.dropoffLat,
-      state.dropoffLng,
-    );
-    final priceStr = _formatPrice(state);
-    final rtl = Directionality.of(context) == ui.TextDirection.rtl;
-
-    return Card(
-      color: AppColors.brandOrange.withValues(alpha: 0.08),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: AppColors.brandOrange.withValues(alpha: 0.5), width: 1),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(10),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Icon(Icons.route_rounded, color: AppColors.brandOrange, size: 20),
-                const SizedBox(width: 6),
-                Expanded(
-                  child: Text(
-                    'trip_summary_title'.tr(),
-                    style: theme.textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w800),
-                  ),
-                ),
-                Text(
-                  priceStr,
-                  style: theme.textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.brandOrange,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _compactKV(
-                    context,
-                    'trip_summary_duration_label'.tr(),
-                    _formatDuration(state.tripStartTime, state.tripEndTime),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.symmetric(horizontal: 6),
-                  width: 1,
-                  height: 40,
-                  color: AppColors.textSecondary.withValues(alpha: 0.15),
-                ),
-                Expanded(
-                  child: _compactKV(
-                    context,
-                    'trip_summary_distance_label'.tr(),
-                    _formatDistanceKm(km),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 6),
-            Divider(height: 1, color: AppColors.brandOrange.withValues(alpha: 0.22)),
-            const SizedBox(height: 6),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: _compactAddr(
-                    context,
-                    'trip_summary_from_label'.tr(),
-                    state.pickup,
-                    const Color(0xFF2E7D32),
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.only(top: 10, left: 4, right: 4),
-                  child: Icon(
-                    rtl ? Icons.arrow_back_rounded : Icons.arrow_forward_rounded,
-                    size: 16,
-                    color: AppColors.textSecondary.withValues(alpha: 0.4),
-                  ),
-                ),
-                Expanded(
-                  child: _compactAddr(
-                    context,
-                    'trip_summary_to_label'.tr(),
-                    state.dropoff,
-                    AppColors.brandOrange,
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _compactKV(BuildContext context, String label, String value) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.labelSmall?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w700,
-            fontSize: 10,
-            height: 1.1,
-          ),
-        ),
-        const SizedBox(height: 2),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            fontSize: 12,
-            height: 1.2,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _compactAddr(
-    BuildContext context,
-    String label,
-    String value,
-    Color dot,
-  ) {
-    final theme = Theme.of(context);
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            Container(
-              width: 6,
-              height: 6,
-              decoration: BoxDecoration(color: dot, shape: BoxShape.circle),
-            ),
-            const SizedBox(width: 5),
-            Expanded(
-              child: Text(
-                label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: theme.textTheme.labelSmall?.copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textSecondary,
-                  fontSize: 10,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 3),
-        Text(
-          value,
-          maxLines: 2,
-          overflow: TextOverflow.ellipsis,
-          style: theme.textTheme.bodySmall?.copyWith(
-            fontWeight: FontWeight.w600,
-            fontSize: 11.5,
-            height: 1.2,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _summaryRow(
-    BuildContext context,
-    String label,
-    String value, {
-    bool emphasize = false,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            flex: 2,
-            child: Text(
-              label,
-              style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-            ),
-          ),
-          Expanded(
-            flex: 3,
-            child: Text(
-              value,
-              textAlign: TextAlign.end,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: emphasize ? FontWeight.w800 : FontWeight.w600,
-                    color: emphasize ? AppColors.brandOrange : AppColors.textPrimary,
-                  ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-

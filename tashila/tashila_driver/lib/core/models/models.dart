@@ -390,11 +390,7 @@ class IncomingOffer {
     if (parsed == null) {
       return now.add(const Duration(seconds: defaultTtlSeconds));
     }
-    final utc = parsed.isUtc ? parsed : parsed.toUtc();
-    if (utc.difference(now).inSeconds < defaultTtlSeconds) {
-      return now.add(const Duration(seconds: defaultTtlSeconds));
-    }
-    return utc;
+    return parsed.isUtc ? parsed : parsed.toUtc();
   }
 
   static IncomingOffer? fromSocketPayload(Map<String, dynamic> data) {

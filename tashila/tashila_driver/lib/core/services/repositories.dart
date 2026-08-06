@@ -2,10 +2,7 @@ import '../models/models.dart';
 import 'api_client.dart';
 
 class OtpVerifyResult {
-  const OtpVerifyResult({
-    required this.success,
-    this.profileComplete = false,
-  });
+  const OtpVerifyResult({required this.success, this.profileComplete = false});
 
   final bool success;
   final bool profileComplete;
@@ -13,7 +10,10 @@ class OtpVerifyResult {
 
 abstract class AuthRepository {
   Future<void> requestOtp(String phone);
-  Future<OtpVerifyResult> verifyOtp({required String phone, required String otp});
+  Future<OtpVerifyResult> verifyOtp({
+    required String phone,
+    required String otp,
+  });
 }
 
 abstract class ProfileRepository {
@@ -57,7 +57,9 @@ class TripHistoryEarningsRepository implements EarningsRepository {
     final client = _client;
     if (client == null) return null;
     try {
-      final res = await client.get<Map<String, dynamic>>('/drivers/me/earnings');
+      final res = await client.get<Map<String, dynamic>>(
+        '/drivers/me/earnings',
+      );
       return DriverPlatformEarnings.fromJson(res.data);
     } catch (_) {
       return null;

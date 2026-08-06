@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tashila_client/core/config/app_social_links.dart';
 import 'package:tashila_client/core/config/support_config.dart';
 import 'package:tashila_client/core/state/app_state.dart';
@@ -189,7 +190,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                         child: Text(
                           state.phone.isEmpty
                               ? 'profile_phone_placeholder'.tr()
-                              : state.phone,
+                              : '\u200E${state.phone}',
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w700,
                             color: AppColors.textPrimary,
@@ -422,9 +423,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
                       color: AppColors.textSecondary.withValues(alpha: 0.1),
                     ),
                     ListTile(
-                      leading: Icon(
-                        Icons.chat_outlined,
-                        color: AppColors.brandOrange,
+                      leading: const Icon(
+                        FontAwesomeIcons.whatsapp,
+                        color: Color(0xFF25D366),
                       ),
                       title: Text(
                         'profile_support_whatsapp'.tr(),
@@ -483,7 +484,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                   children: [
                     ListTile(
                       leading: const Icon(
-                        Icons.facebook,
+                        FontAwesomeIcons.facebook,
                         color: Color(0xFF1877F2),
                       ),
                       title: Text('profile_link_facebook'.tr()),
@@ -497,8 +498,8 @@ class ProfileSettingsScreen extends ConsumerWidget {
                     ),
                     ListTile(
                       leading: const Icon(
-                        Icons.music_note,
-                        color: Colors.black87,
+                        FontAwesomeIcons.tiktok,
+                        color: Colors.black,
                       ),
                       title: Text('profile_link_tiktok'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
@@ -511,8 +512,8 @@ class ProfileSettingsScreen extends ConsumerWidget {
                     ),
                     ListTile(
                       leading: const Icon(
-                        Icons.camera_alt_outlined,
-                        color: Color(0xFFE4405F),
+                        FontAwesomeIcons.instagram,
+                        color: Color(0xFFE1306C),
                       ),
                       title: Text('profile_link_instagram'.tr()),
                       trailing: const Icon(Icons.open_in_new, size: 18),
@@ -675,8 +676,9 @@ class ProfileSettingsScreen extends ConsumerWidget {
 
   Future<void> _openWhatsApp() async {
     final uri = Uri.parse('https://wa.me/$kSupportWhatsAppDigits');
-    if (!await canLaunchUrl(uri)) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
+    try {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } catch (_) {}
   }
 
   void _showAboutDialog(BuildContext context) {

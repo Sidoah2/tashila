@@ -7,6 +7,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
 import '../models/models.dart';
 import '../services/api_client.dart';
@@ -533,17 +534,15 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     await prefs.setString(kPhone, state.phone);
     await prefs.setBool(kProfileSetupComplete, result.profileComplete);
 
+    await refreshProfileFromServer();
+
     _setState(
       state.copyWith(
         isAuthenticated: true,
         profileSetupComplete: result.profileComplete,
-        profile: (state.profile ?? DriverProfile.empty()).copyWith(
-          phone: state.phone,
-        ),
         isBusy: false,
       ),
     );
-    await refreshProfileFromServer();
     await _resumeActiveTripIfAny();
     await syncTripHistoryFromServer();
     await syncPlatformEarningsFromServer();
@@ -821,6 +820,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       list[idx] = offer;
     } else {
       list.add(offer);
+      try {
+        FlutterRingtonePlayer().playNotification();
+      } catch (e) {
+        debugPrint('Failed to play ringtone: $e');
+      }
     }
     list.sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
     _setState(
@@ -880,6 +884,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           clearCurrentRequest: true,
           clearTripStartedAt: true,
           clearError: true,
+          infoMessage: 'trip_cancelled_by_client'.tr(),
         ),
       );
     }

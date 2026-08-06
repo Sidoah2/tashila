@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:easy_localization/easy_localization.dart';
 
 import '../../features/auth/login_screen.dart';
 import '../../features/auth/otp_screen.dart';
 import '../../features/earnings/earnings_screen.dart';
 import '../../features/home/home_shell_screen.dart';
+import '../../features/home/rate_client_screen.dart';
+import '../../features/legal/privacy_policy_screen.dart';
+import '../../features/legal/terms_conditions_screen.dart';
 import '../../features/onboarding/driver_onboarding_screen.dart';
+import '../../features/orders/driver_orders_screen.dart';
+import '../../features/profile/driver_profile_edit_screen.dart';
+import '../../features/profile/driver_profile_view_screen.dart';
 import '../../features/profile/profile_setup_screen.dart';
+import '../../features/settings/language_screen.dart';
+import '../../features/support/driver_support_screen.dart';
 import '../state/driver_app_state.dart';
+import '../theme/app_colors.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -75,12 +83,45 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ProfileSetupScreen(),
       ),
       GoRoute(
+        path: '/profile-view',
+        builder: (context, state) => const DriverProfileViewScreen(),
+      ),
+      GoRoute(
+        path: '/profile-edit',
+        builder: (context, state) => const DriverProfileEditScreen(),
+      ),
+      GoRoute(
+        path: '/support',
+        builder: (context, state) => const DriverSupportScreen(),
+      ),
+      GoRoute(
+        path: '/orders',
+        builder: (context, state) => const DriverOrdersScreen(),
+      ),
+      GoRoute(
         path: '/home',
         builder: (context, state) => const HomeShellScreen(),
+      ),
+
+      GoRoute(
+        path: '/language',
+        builder: (context, state) => const LanguageScreen(),
+      ),
+      GoRoute(
+        path: '/terms',
+        builder: (context, state) => const TermsConditionsScreen(),
+      ),
+      GoRoute(
+        path: '/privacy',
+        builder: (context, state) => const PrivacyPolicyScreen(),
       ),
       GoRoute(
         path: '/earnings',
         builder: (context, state) => const EarningsScreen(),
+      ),
+      GoRoute(
+        path: '/rate-client',
+        builder: (context, state) => const RateClientScreen(),
       ),
     ],
   );
@@ -95,13 +136,41 @@ class SplashScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const CircularProgressIndicator(),
-            const SizedBox(height: 12),
-            Text('splash_title'.tr()),
+            Container(
+              width: 140,
+              height: 140,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 24,
+                    offset: const Offset(0, 8),
+                  ),
+                ],
+              ),
+              child: ClipOval(
+                child: Image.asset(
+                  'assets/images/arabic_logo.jpeg',
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            const SizedBox(
+              width: 24,
+              height: 24,
+              child: CircularProgressIndicator(
+                strokeWidth: 2.5,
+                color: AppColors.brandOrange,
+              ),
+            ),
           ],
         ),
       ),
