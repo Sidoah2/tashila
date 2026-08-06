@@ -232,38 +232,51 @@ async def push_document_status(
 
 # --- SMS ---
 
-TRACCAR_SMS_URL = "https://www.traccar.org/sms/"
-
-
 async def send_sms(phone: str, message: str) -> None:
+    url = settings.traccar_sms_url or "https://www.traccar.org/sms/"
     token = settings.traccar_sms_token
-    if not token:
+    
+    # If using the default cloud relay, the token is mandatory.
+    if "traccar.org" in url and not token:
         if settings.is_production:
-            logger.warning("SMS provider not configured, message not sent to %s", phone)
+            logger.warning("SMS provider not configured (missing token), message not sent to %s", phone)
         else:
             print(f"[SMS] To: {phone} | {message}")
         return
 
     try:
+        headers = {
+            "Content-Type": "application/json",
+        }
+        if token:
+            headers["Authorization"] = token
+
         async with httpx.AsyncClient(timeout=15.0) as client:
             resp = await client.post(
-                TRACCAR_SMS_URL,
-                headers={
-                    "Authorization": token,
-                    "Content-Type": "application/json",
-                },
+                url,
+                headers=headers,
                 json={"to": phone, "message": message},
             )
         if resp.status_code == 200:
-            data = resp.json()
-            if data.get("successCount", 0) > 0:
-                logger.info("SMS sent to %s via Traccar", phone)
+            try:
+                data = resp.json()
+            except Exception:
+                data = {}
+            
+            # Cloud relay uses successCount > 0, local gateway might use success=True or just return 200 OK
+            if (
+                data.get("successCount", 0) > 0 
+                or data.get("success", False) 
+                or "traccar.org" not in url
+            ):
+                logger.info("SMS sent to %s via Traccar Gateway (%s)", phone, url)
             else:
                 logger.warning("Traccar SMS failed for %s: %s", phone, resp.text[:200])
         else:
             logger.warning("Traccar SMS HTTP %s for %s: %s", resp.status_code, phone, resp.text[:200])
     except Exception:
         logger.exception("SMS send error for %s", phone)
+
 
 
 # Backwards-compatible aliases
