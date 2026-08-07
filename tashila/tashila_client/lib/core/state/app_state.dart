@@ -744,6 +744,8 @@ class AppStateNotifier extends Notifier<AppState> {
       dropoffInServiceArea: false,
       estimatedPrice: 0,
       routePoints: const [],
+      // Reset truck type to default so the next booking starts fresh.
+      selectedTruck: TruckType.singleCabine,
     );
   }
 
@@ -883,13 +885,11 @@ class AppStateNotifier extends Notifier<AppState> {
   void _applyTripLocationsFromPayload(Map<String, dynamic> data) {
     final pickup = data['pickup'] as Map<String, dynamic>?;
     final dropoff = data['dropoff'] as Map<String, dynamic>?;
-    final truckType = data['truckType'] as String?;
-    TruckType? truck;
-    if (truckType == 'double_cabin') {
-      truck = TruckType.doubleCabine;
-    } else if (truckType == 'single_cabin') {
-      truck = TruckType.singleCabine;
-    }
+    // NOTE: Do NOT read truckType here — it belongs to the trip/driver and
+    // would silently overwrite the user's own truck-type selection every time
+    // a poll or socket event arrives. Truck type is set only at trip-resume
+    // time (before the state reset in _resumeActiveTrip) and during
+    // _applyTripData when the driver's vehicle type is known.
     state = state.copyWith(
       pickup: pickup?['address'] as String? ?? state.pickup,
       pickupLat: (pickup?['lat'] as num?)?.toDouble() ?? state.pickupLat,
@@ -897,7 +897,6 @@ class AppStateNotifier extends Notifier<AppState> {
       dropoff: dropoff?['address'] as String? ?? state.dropoff,
       dropoffLat: (dropoff?['lat'] as num?)?.toDouble() ?? state.dropoffLat,
       dropoffLng: (dropoff?['lng'] as num?)?.toDouble() ?? state.dropoffLng,
-      selectedTruck: truck ?? state.selectedTruck,
       pickupInServiceArea: true,
       dropoffInServiceArea: true,
     );
