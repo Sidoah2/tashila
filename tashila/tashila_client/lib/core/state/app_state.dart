@@ -674,7 +674,10 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   Future<void> _refreshRoutePoints() async {
-    if (state.pickupLat == 0.0 || state.pickupLng == 0.0 || state.dropoffLat == 0.0 || state.dropoffLng == 0.0) {
+    if (state.pickupLat == 0.0 ||
+        state.pickupLng == 0.0 ||
+        state.dropoffLat == 0.0 ||
+        state.dropoffLng == 0.0) {
       state = state.copyWith(routePoints: const []);
       return;
     }
@@ -691,7 +694,10 @@ class AppStateNotifier extends Notifier<AppState> {
       // Fallback to straight line with midpoint
       final p = LatLng(state.pickupLat, state.pickupLng);
       final d = LatLng(state.dropoffLat, state.dropoffLng);
-      final mid = LatLng((p.latitude + d.latitude) / 2, (p.longitude + d.longitude) / 2);
+      final mid = LatLng(
+        (p.latitude + d.latitude) / 2,
+        (p.longitude + d.longitude) / 2,
+      );
       state = state.copyWith(routePoints: [p, mid, d]);
     }
   }
@@ -743,7 +749,10 @@ class AppStateNotifier extends Notifier<AppState> {
 
   Future<void> _refreshFareEstimateFromApi() async {
     if (!state.isLoggedIn) return;
-    if (state.pickupLat == 0.0 || state.pickupLng == 0.0 || state.dropoffLat == 0.0 || state.dropoffLng == 0.0) {
+    if (state.pickupLat == 0.0 ||
+        state.pickupLng == 0.0 ||
+        state.dropoffLat == 0.0 ||
+        state.dropoffLng == 0.0) {
       state = state.copyWith(estimatedPrice: 0);
       return;
     }
@@ -912,6 +921,20 @@ class AppStateNotifier extends Notifier<AppState> {
         _handleNoDriversFound();
         return true;
       }
+
+      // ─── Guard: trip already rated ─────────────────────────────────────────
+      // If the driver has been rated, the user has fully completed this trip.
+      // Do not re-trigger any trip UI — just return without touching state.
+      final alreadyRated = data['driverRating'] != null;
+      if (alreadyRated) {
+        // If somehow the state wasn't cleaned up (e.g. app killed mid-teardown),
+        // force a teardown now so the router doesn't redirect to /trip.
+        if (state.tripStage != TripStage.idle) {
+          unawaited(_teardownActiveTrip());
+        }
+        return false;
+      }
+      // ───────────────────────────────────────────────────────────────────────
 
       // ─── Guard: already showing the post-trip summary ──────────────────────
       // didChangeAppLifecycleState calls this every time the app resumes.
@@ -1174,7 +1197,11 @@ class AppStateNotifier extends Notifier<AppState> {
         }
       case 'awaitingCash':
         if (state.tripStage != TripStage.arrivedSummary) {
-          endTrip(finalFare: fare, serverStartedAt: startedAt, serverCompletedAt: completedAt);
+          endTrip(
+            finalFare: fare,
+            serverStartedAt: startedAt,
+            serverCompletedAt: completedAt,
+          );
         }
       case 'completed':
         _pollTimer?.cancel();
@@ -1186,7 +1213,11 @@ class AppStateNotifier extends Notifier<AppState> {
           break;
         }
         if (state.tripStage != TripStage.arrivedSummary) {
-          endTrip(finalFare: fare, serverStartedAt: startedAt, serverCompletedAt: completedAt);
+          endTrip(
+            finalFare: fare,
+            serverStartedAt: startedAt,
+            serverCompletedAt: completedAt,
+          );
         }
       case 'cancelled':
         _pollTimer?.cancel();
@@ -1355,9 +1386,13 @@ class AppStateNotifier extends Notifier<AppState> {
       goodTraits: const [],
       badTraits: const [],
     );
-    final exists = state.history.any((r) => r.id == tripId && tripId.isNotEmpty);
+    final exists = state.history.any(
+      (r) => r.id == tripId && tripId.isNotEmpty,
+    );
     if (exists) {
-      final list = state.history.map((r) => r.id == tripId ? record : r).toList();
+      final list = state.history
+          .map((r) => r.id == tripId ? record : r)
+          .toList();
       state = state.copyWith(history: list);
     } else {
       state = state.copyWith(history: [record, ...state.history]);
@@ -1415,9 +1450,13 @@ class AppStateNotifier extends Notifier<AppState> {
         goodTraits: List<String>.from(goodTraits),
         badTraits: List<String>.from(badTraits),
       );
-      final exists = state.history.any((r) => r.id == tripId && tripId != null && tripId.isNotEmpty);
+      final exists = state.history.any(
+        (r) => r.id == tripId && tripId != null && tripId.isNotEmpty,
+      );
       if (exists) {
-        final list = state.history.map((r) => r.id == tripId ? record : r).toList();
+        final list = state.history
+            .map((r) => r.id == tripId ? record : r)
+            .toList();
         state = state.copyWith(history: list);
       } else {
         state = state.copyWith(history: [record, ...state.history]);
