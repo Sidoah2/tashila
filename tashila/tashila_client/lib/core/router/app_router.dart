@@ -40,6 +40,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         }
         if (appState.profileSetupComplete &&
             appState.hasActiveTrip &&
+            // arrivedSummary is handled by /rate-driver; do not redirect /home
+            // back to /trip when the user has just finished rating and navigated home.
+            appState.tripStage != TripStage.arrivedSummary &&
             path != '/trip' &&
             path != '/rate-driver') {
           return '/trip';
@@ -71,7 +74,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(path: '/home', builder: (_, _) => const HomeShellScreen()),
       GoRoute(path: '/trip', builder: (_, _) => const TripScreen()),
-      GoRoute(path: '/rate-driver', builder: (_, _) => const RateDriverScreen()),
+      GoRoute(
+        path: '/rate-driver',
+        builder: (_, _) => const RateDriverScreen(),
+      ),
     ],
   );
 
