@@ -72,7 +72,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     );
     final zoom = span > 0.08 ? 11.0 : (span > 0.03 ? 12.5 : 14.0);
 
-    final showDriverMarker = _showDriverMarker(state.tripStage);
+    final showDriverMarker = _showDriverMarker(state.tripStage) && state.hasDriverLocation;
     final maxPanelH = (MediaQuery.sizeOf(context).height * 0.45).clamp(
       320.0,
       480.0,

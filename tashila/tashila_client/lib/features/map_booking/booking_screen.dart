@@ -444,7 +444,9 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             ),
                           ],
                         ),
-                        if (!state.canCreateTransportRequest) ...[
+                        if (!state.canCreateTransportRequest &&
+                            state.pickup.isNotEmpty &&
+                            state.dropoff.isNotEmpty) ...[
                           const SizedBox(height: 8),
                           Text(
                             'service_area_unavailable'.tr(),
