@@ -913,6 +913,17 @@ class AppStateNotifier extends Notifier<AppState> {
         return true;
       }
 
+      // ─── Guard: already showing the post-trip summary ──────────────────────
+      // didChangeAppLifecycleState calls this every time the app resumes.
+      // If the client is already on the arrivedSummary screen, skip the
+      // destructive tripStage reset (which would flash the map) and just
+      // silently re-apply the fresh data.
+      if (state.tripStage == TripStage.arrivedSummary) {
+        _applyTripData(data);
+        return true;
+      }
+      // ───────────────────────────────────────────────────────────────────────
+
       final fare =
           (data['finalFare'] as num?)?.toDouble() ??
           (data['fare'] as num?)?.toDouble();
@@ -1247,6 +1258,9 @@ class AppStateNotifier extends Notifier<AppState> {
         state.tripStage == TripStage.arrivedSummary) {
       return;
     }
+    // Stop polling — we no longer need live status once the summary is shown.
+    _pollTimer?.cancel();
+    _pollTimer = null;
     // Prefer server timestamp; fall back to what we have in state, then now().
     final start = serverStartedAt ?? state.tripStartTime;
     final end = serverCompletedAt ?? DateTime.now();
