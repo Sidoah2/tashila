@@ -105,6 +105,30 @@ async def notify_trip_status_changed(
     }
     if extra:
         payload.update(extra)
+
+    # Include server-authoritative timestamps so clients can display real trip duration.
+    if status in ("inProgress", "awaitingCash", "completed"):
+        try:
+            trip = await trip_service.get_trip_by_id(trip_id)
+            if status == "inProgress" and trip.get("startedAt"):
+                started = trip["startedAt"]
+                payload["startedAt"] = (
+                    started.isoformat() if hasattr(started, "isoformat") else str(started)
+                )
+            if status in ("awaitingCash", "completed") and trip.get("completedAt"):
+                completed = trip["completedAt"]
+                payload["completedAt"] = (
+                    completed.isoformat() if hasattr(completed, "isoformat") else str(completed)
+                )
+            if status in ("awaitingCash", "completed") and trip.get("startedAt"):
+                started = trip["startedAt"]
+                payload.setdefault(
+                    "startedAt",
+                    started.isoformat() if hasattr(started, "isoformat") else str(started),
+                )
+        except Exception:
+            pass  # Non-critical — client falls back to local timestamps
+
     await emit_to_trip_room(trip_id, "trip:status_changed", payload)
 
 

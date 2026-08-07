@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:easy_localization/easy_localization.dart';
@@ -23,6 +24,41 @@ class TripScreen extends ConsumerStatefulWidget {
 }
 
 class _TripScreenState extends ConsumerState<TripScreen> {
+  Timer? _elapsedTimer;
+  int _elapsedSeconds = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncElapsedTimer(ref.read(appStateProvider));
+  }
+
+  @override
+  void dispose() {
+    _elapsedTimer?.cancel();
+    super.dispose();
+  }
+
+  /// Starts / stops the 1-second ticker based on current trip stage.
+  void _syncElapsedTimer(AppState state) {
+    if (state.tripStage == TripStage.tripStarted) {
+      if (_elapsedTimer == null || !_elapsedTimer!.isActive) {
+        // Seed elapsed from startTime if available.
+        if (state.tripStartTime != null) {
+          _elapsedSeconds =
+              DateTime.now().difference(state.tripStartTime!).inSeconds.clamp(0, 86400);
+        }
+        _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
+          if (!mounted) return;
+          setState(() => _elapsedSeconds++);
+        });
+      }
+    } else {
+      _elapsedTimer?.cancel();
+      _elapsedTimer = null;
+    }
+  }
+
   Future<void> _showDriverRatingSheet() async {
     if (!mounted) return;
     await showRequiredDriverRatingSheet(context);
@@ -52,6 +88,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(appStateProvider);
+    _syncElapsedTimer(state);
 
     if (state.tripStage == TripStage.arrivedSummary) {
       return _buildArrivedSummaryScreen(context, state);
@@ -72,7 +109,8 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     );
     final zoom = span > 0.08 ? 11.0 : (span > 0.03 ? 12.5 : 14.0);
 
-    final showDriverMarker = _showDriverMarker(state.tripStage) && state.hasDriverLocation;
+    final showDriverMarker =
+        _showDriverMarker(state.tripStage) && state.hasDriverLocation;
     final maxPanelH = (MediaQuery.sizeOf(context).height * 0.45).clamp(
       320.0,
       480.0,
@@ -329,30 +367,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         ),
         const SizedBox(height: 14),
         // Cancel Button
-        SizedBox(
-          width: double.infinity,
-          height: 48,
-          child: OutlinedButton.icon(
-            onPressed: () => _onCancelTripPressed(context),
-            icon: const Icon(Icons.close_rounded, color: Colors.red, size: 18),
-            label: Text(
-              'cancel_order'.tr(),
-              style: const TextStyle(
-                color: Colors.red,
-                fontWeight: FontWeight.bold,
-                fontSize: 14,
-              ),
-            ),
-            style: OutlinedButton.styleFrom(
-              side: const BorderSide(color: Colors.red, width: 1.2),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              backgroundColor: Colors.red.shade50.withValues(alpha: 0.1),
-            ),
-          ),
-        ),
-        const SizedBox(height: 12),
+
         // Price & Cash Row
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -409,6 +424,30 @@ class _TripScreenState extends ConsumerState<TripScreen> {
               ),
             ),
           ],
+        ),
+        SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 48,
+          child: OutlinedButton.icon(
+            onPressed: () => _onCancelTripPressed(context),
+            icon: const Icon(Icons.close_rounded, color: Colors.red, size: 18),
+            label: Text(
+              'cancel_order'.tr(),
+              style: const TextStyle(
+                color: Colors.red,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              side: const BorderSide(color: Colors.red, width: 1.2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              backgroundColor: Colors.red.shade50.withValues(alpha: 0.1),
+            ),
+          ),
         ),
       ],
     );
@@ -548,7 +587,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
           ),
         ),
         const SizedBox(height: 12),
-        // Trip Stats (3 boxes side-by-side)
+        // Trip Stats (2 or 3 cards side-by-side)
         Row(
           children: [
             // Price Card
@@ -588,39 +627,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
               ),
             ),
             const SizedBox(width: 8),
-            // Duration Card
-            Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade50,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  children: [
-                    Text(
-                      'trip_summary_duration_label'.tr(),
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: Colors.grey.shade500,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '14 ${'trip_unit_minutes'.tr()}',
-                      style: const TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w900,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(width: 8),
+
             // Distance Card
             Expanded(
               child: Container(
@@ -653,6 +660,43 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                 ),
               ),
             ),
+
+            // Live Elapsed Timer Card — only shown when trip is in progress
+            if (state.tripStage == TripStage.tripStarted) ...[
+              const SizedBox(width: 8),
+              Expanded(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F4FD),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFBBDEFB)),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'trip_summary_duration_label'.tr(),
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: Colors.grey.shade500,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        _formatElapsed(_elapsedSeconds),
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w900,
+                          color: Color(0xFF1565C0),
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 12),
@@ -1065,10 +1109,15 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                                   : [
                                       LatLng(state.pickupLat, state.pickupLng),
                                       LatLng(
-                                        (state.pickupLat + state.dropoffLat) / 2,
-                                        (state.pickupLng + state.dropoffLng) / 2,
+                                        (state.pickupLat + state.dropoffLat) /
+                                            2,
+                                        (state.pickupLng + state.dropoffLng) /
+                                            2,
                                       ),
-                                      LatLng(state.dropoffLat, state.dropoffLng),
+                                      LatLng(
+                                        state.dropoffLat,
+                                        state.dropoffLng,
+                                      ),
                                     ],
                               width: 3,
                               color: AppColors.brandOrange,
@@ -1106,6 +1155,18 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         ),
       ),
     );
+  }
+
+  /// Formats elapsed seconds as HH:MM:SS (or MM:SS when under 1 hour) for the
+  /// live trip timer displayed during [TripStage.tripStarted].
+  String _formatElapsed(int totalSeconds) {
+    final h = totalSeconds ~/ 3600;
+    final m = (totalSeconds % 3600) ~/ 60;
+    final s = totalSeconds % 60;
+    if (h > 0) {
+      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
+    }
+    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
   static LatLng _driverAlongRoute(LatLng a, LatLng b, TripStage stage) {

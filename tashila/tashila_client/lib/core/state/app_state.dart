@@ -1117,6 +1117,16 @@ class AppStateNotifier extends Notifier<AppState> {
       truckFromDriver = TruckType.singleCabine;
     }
 
+    // Parse server-authoritative timestamps (sent by backend when status changes).
+    final startedAtRaw = data['startedAt'] as String?;
+    final completedAtRaw = data['completedAt'] as String?;
+    final startedAt = startedAtRaw != null
+        ? DateTime.tryParse(startedAtRaw)?.toLocal()
+        : null;
+    final completedAt = completedAtRaw != null
+        ? DateTime.tryParse(completedAtRaw)?.toLocal()
+        : null;
+
     state = state.copyWith(
       currentTripStatus: status,
       driverName: driver?['name'] as String? ?? state.driverName,
@@ -1142,6 +1152,10 @@ class AppStateNotifier extends Notifier<AppState> {
           );
         }
       case 'inProgress':
+        // Use server startedAt for accurate trip start time.
+        if (startedAt != null) {
+          state = state.copyWith(tripStartTime: startedAt);
+        }
         if (state.tripStage != TripStage.tripStarted &&
             state.tripStage != TripStage.awaitingPayment &&
             state.tripStage != TripStage.arrivedSummary) {
@@ -1149,7 +1163,7 @@ class AppStateNotifier extends Notifier<AppState> {
         }
       case 'awaitingCash':
         if (state.tripStage != TripStage.arrivedSummary) {
-          endTrip(finalFare: fare);
+          endTrip(finalFare: fare, serverStartedAt: startedAt, serverCompletedAt: completedAt);
         }
       case 'completed':
         _pollTimer?.cancel();
@@ -1161,7 +1175,7 @@ class AppStateNotifier extends Notifier<AppState> {
           break;
         }
         if (state.tripStage != TripStage.arrivedSummary) {
-          endTrip(finalFare: fare);
+          endTrip(finalFare: fare, serverStartedAt: startedAt, serverCompletedAt: completedAt);
         }
       case 'cancelled':
         _pollTimer?.cancel();
@@ -1220,14 +1234,22 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   /// Delivery leg finished — moves to [TripStage.arrivedSummary].
-  void endTrip({double? finalFare}) {
+  ///
+  /// [serverStartedAt] and [serverCompletedAt] are the authoritative UTC timestamps
+  /// from the backend. When provided they override the client-side approximations.
+  void endTrip({
+    double? finalFare,
+    DateTime? serverStartedAt,
+    DateTime? serverCompletedAt,
+  }) {
     if (state.tripStage == TripStage.idle ||
         state.tripStage == TripStage.noDriversFound ||
         state.tripStage == TripStage.arrivedSummary) {
       return;
     }
-    final start = state.tripStartTime;
-    final end = DateTime.now();
+    // Prefer server timestamp; fall back to what we have in state, then now().
+    final start = serverStartedAt ?? state.tripStartTime;
+    final end = serverCompletedAt ?? DateTime.now();
     final minutes = start != null
         ? end.difference(start).inMinutes.toDouble()
         : 0.0;
@@ -1240,6 +1262,8 @@ class AppStateNotifier extends Notifier<AppState> {
     final computedFare = estimateFareDzd(km, tripMinutes: minutes);
     state = state.copyWith(
       tripStage: TripStage.arrivedSummary,
+      // Update tripStartTime to the authoritative server value if provided.
+      tripStartTime: serverStartedAt ?? state.tripStartTime,
       tripEndTime: end,
       tripEndTimeNull: false,
       estimatedPrice:
