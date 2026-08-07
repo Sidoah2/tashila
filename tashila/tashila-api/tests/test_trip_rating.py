@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from unittest.mock import AsyncMock, patch
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -39,7 +39,7 @@ async def test_get_active_trip_for_client_includes_completed_pending_driver_rati
     assert result["status"] == "completed"
     assert result["driverRating"] is None
     call_filter = mock_collection.find_one.await_args.args[0]
-    assert "$or" in call_filter
+    assert "clientId" in call_filter
 
 
 @pytest.mark.asyncio
@@ -78,7 +78,7 @@ async def test_rate_driver_updates_driver_average() -> None:
     trip_doc = {
         "_id": "507f1f77bcf86cd799439011",
         "clientId": "c1",
-        "driverId": "d1",
+        "driverId": "507f1f77bcf86cd799439012",
         "status": "completed",
         "driverRating": None,
     }
@@ -87,7 +87,7 @@ async def test_rate_driver_updates_driver_average() -> None:
     trips_collection = AsyncMock()
     trips_collection.find_one = AsyncMock(return_value=trip_doc)
     trips_collection.update_one = AsyncMock()
-    trips_collection.aggregate = AsyncMock(
+    trips_collection.aggregate = MagicMock(
         return_value=AsyncMock(to_list=AsyncMock(return_value=[{"avgRating": 4.5}]))
     )
 

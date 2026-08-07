@@ -71,6 +71,7 @@ double tripRouteDistanceKm(double lat1, double lon1, double lat2, double lon2) {
 
 class TripRecord {
   const TripRecord({
+    this.id,
     required this.pickup,
     required this.dropoff,
     required this.price,
@@ -84,6 +85,7 @@ class TripRecord {
     this.badTraits = const [],
   });
 
+  final String? id;
   final String pickup;
   final String dropoff;
   final double price;
@@ -726,6 +728,16 @@ class AppStateNotifier extends Notifier<AppState> {
       driverVehicleColor: '',
       driverVehicleModel: '',
       clearDriverLocation: true,
+      pickup: '',
+      dropoff: '',
+      pickupLat: 0.0,
+      pickupLng: 0.0,
+      dropoffLat: 0.0,
+      dropoffLng: 0.0,
+      pickupInServiceArea: false,
+      dropoffInServiceArea: false,
+      estimatedPrice: 0,
+      routePoints: const [],
     );
   }
 
@@ -1181,6 +1193,7 @@ class AppStateNotifier extends Notifier<AppState> {
             : TruckType.singleCabine;
         final cancelled = (m['status'] as String?) == 'cancelled';
         return TripRecord(
+          id: m['id'] as String? ?? m['_id'] as String? ?? '',
           pickup:
               pickup['address'] as String? ??
               '${pickup['lat']},${pickup['lng']}',
@@ -1254,6 +1267,7 @@ class AppStateNotifier extends Notifier<AppState> {
       }
     }
     final record = TripRecord(
+      id: tripId,
       pickup: state.pickup,
       dropoff: state.dropoff,
       price: state.estimatedPrice,
@@ -1281,12 +1295,14 @@ class AppStateNotifier extends Notifier<AppState> {
     Map<String, dynamic> data, {
     double? fare,
   }) async {
+    final tripId = data['id'] as String? ?? data['_id'] as String? ?? '';
     final tripPrice =
         fare ??
         (data['finalFare'] as num?)?.toDouble() ??
         (data['fare'] as num?)?.toDouble() ??
         (state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice);
     final record = TripRecord(
+      id: tripId,
       pickup: state.pickup,
       dropoff: state.dropoff,
       price: tripPrice,
@@ -1301,7 +1317,13 @@ class AppStateNotifier extends Notifier<AppState> {
       goodTraits: const [],
       badTraits: const [],
     );
-    state = state.copyWith(history: [record, ...state.history]);
+    final exists = state.history.any((r) => r.id == tripId && tripId.isNotEmpty);
+    if (exists) {
+      final list = state.history.map((r) => r.id == tripId ? record : r).toList();
+      state = state.copyWith(history: list);
+    } else {
+      state = state.copyWith(history: [record, ...state.history]);
+    }
     await _teardownActiveTrip();
     _refreshFareEstimate();
   }
@@ -1342,6 +1364,7 @@ class AppStateNotifier extends Notifier<AppState> {
           ? state.estimatedPrice
           : kEstimatedTripPrice;
       final record = TripRecord(
+        id: tripId,
         pickup: state.pickup,
         dropoff: state.dropoff,
         price: tripPrice,
@@ -1354,12 +1377,19 @@ class AppStateNotifier extends Notifier<AppState> {
         goodTraits: List<String>.from(goodTraits),
         badTraits: List<String>.from(badTraits),
       );
-      state = state.copyWith(history: [record, ...state.history]);
+      final exists = state.history.any((r) => r.id == tripId && tripId != null && tripId.isNotEmpty);
+      if (exists) {
+        final list = state.history.map((r) => r.id == tripId ? record : r).toList();
+        state = state.copyWith(history: list);
+      } else {
+        state = state.copyWith(history: [record, ...state.history]);
+      }
       return true;
     }
     if (state.history.isEmpty) return false;
     final first = state.history.first;
     final updated = TripRecord(
+      id: first.id,
       pickup: first.pickup,
       dropoff: first.dropoff,
       price: first.price,

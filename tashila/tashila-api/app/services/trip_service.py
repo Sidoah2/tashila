@@ -418,40 +418,44 @@ def _pending_driver_rating_filter() -> dict[str, Any]:
 
 async def get_active_trip_for_driver(driver_id: str) -> dict[str, Any] | None:
     doc = await get_database()[TRIPS_COLLECTION].find_one(
-        {
-            "driverId": driver_id,
-            "$or": [
-                {"status": {"$in": list(DRIVER_ACTIVE_TRIP_STATUSES)}},
-                _pending_client_rating_filter(),
-            ],
-        },
+        {"driverId": driver_id},
         sort=[("updatedAt", -1)],
     )
     if doc is None:
         return None
-    serialized = _serialize_doc(doc)
-    client_info = await _get_client_info(serialized.get("clientId", ""))
-    return {**serialized, "client": client_info}
+
+    status = doc.get("status")
+    has_rating = doc.get("clientRating") is not None
+    is_active = status in DRIVER_ACTIVE_TRIP_STATUSES
+    is_pending_rating = status == "completed" and not has_rating
+
+    if is_active or is_pending_rating:
+        serialized = _serialize_doc(doc)
+        client_info = await _get_client_info(serialized.get("clientId", ""))
+        return {**serialized, "client": client_info}
+    return None
 
 
 async def get_active_trip_for_client(client_id: str) -> dict[str, Any] | None:
     doc = await get_database()[TRIPS_COLLECTION].find_one(
-        {
-            "clientId": client_id,
-            "$or": [
-                {"status": {"$in": list(ACTIVE_CLIENT_STATUSES)}},
-                _pending_driver_rating_filter(),
-            ],
-        },
+        {"clientId": client_id},
         sort=[("updatedAt", -1)],
     )
     if doc is None:
         return None
-    serialized = _serialize_doc(doc)
-    driver_info = await _get_driver_info(serialized.get("driverId"))
-    if driver_info:
-        return {**serialized, "driver": driver_info}
-    return serialized
+
+    status = doc.get("status")
+    has_rating = doc.get("driverRating") is not None
+    is_active = status in ACTIVE_CLIENT_STATUSES
+    is_pending_rating = status == "completed" and not has_rating
+
+    if is_active or is_pending_rating:
+        serialized = _serialize_doc(doc)
+        driver_info = await _get_driver_info(serialized.get("driverId"))
+        if driver_info:
+            return {**serialized, "driver": driver_info}
+        return serialized
+    return None
 
 
 async def get_trip_by_id(trip_id: str) -> dict[str, Any]:
