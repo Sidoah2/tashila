@@ -935,6 +935,19 @@ class AppStateNotifier extends Notifier<AppState> {
       }
       // ───────────────────────────────────────────────────────────────────────
 
+      // ─── Guard: post-trip race condition ───────────────────────────────────
+      // After submitRating() tears down state (tripStage → idle), the app
+      // lifecycle may fire resumeActiveTripIfAny() before the backend has
+      // persisted the driverRating (so alreadyRated is still false above).
+      // If we are already idle and the trip is in a terminal post-ride
+      // status (awaitingCash / completed), there is nothing to resume —
+      // the cleanup already happened on the client side.
+      if (state.tripStage == TripStage.idle &&
+          (status == 'awaitingCash' || status == 'completed')) {
+        return false;
+      }
+      // ───────────────────────────────────────────────────────────────────────
+
       // ─── Guard: already showing the post-trip summary ──────────────────────
       // didChangeAppLifecycleState calls this every time the app resumes.
       // If the client is already on the arrivedSummary screen, skip the
