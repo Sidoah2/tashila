@@ -82,9 +82,6 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
   }
 
   Future<void> _finish() async {
-    if (_submitting) return;
-    setState(() => _submitting = true);
-    await ref.read(appStateProvider.notifier).completeRatingSession();
     if (!mounted) return;
     context.go('/home');
   }

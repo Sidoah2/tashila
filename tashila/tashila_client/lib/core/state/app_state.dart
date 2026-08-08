@@ -1047,6 +1047,9 @@ class AppStateNotifier extends Notifier<AppState> {
         tripStage: TripStage.searchingDriver,
         tripStartTime: DateTime.now(),
         estimatedPrice: fare ?? state.estimatedPrice,
+        // Clear any stale route from the previous trip so the map on /trip
+        // does not flicker with an old polyline before new routing is ready.
+        routePoints: const [],
       );
       _startTripPolling(tripId);
       try {
@@ -1460,6 +1463,12 @@ class AppStateNotifier extends Notifier<AppState> {
       } else {
         state = state.copyWith(history: [record, ...state.history]);
       }
+      // Tear down trip state immediately so that /home shows clean
+      // pickup/dropoff fields and no stale route line. The caller
+      // (rate_driver_screen._finish) no longer needs to call
+      // completeRatingSession() separately.
+      await _teardownActiveTrip();
+      _refreshFareEstimate();
       return true;
     }
     if (state.history.isEmpty) return false;
