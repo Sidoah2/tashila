@@ -1140,6 +1140,11 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   void _applyTripData(Map<String, dynamic> data) {
+    if (state.tripStage == TripStage.idle) {
+      // If the client has already rated the driver and returned to the home screen (idle stage),
+      // ignore any late in-flight poll responses or socket messages for the completed trip.
+      return;
+    }
     _applyTripLocationsFromPayload(data);
     final status = data['status'] as String? ?? '';
     final driver = data['driver'] as Map<String, dynamic>?;
