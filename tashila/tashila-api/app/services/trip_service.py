@@ -300,14 +300,18 @@ async def create_trip(
     if active is not None:
         raise ConflictError("You already have an active trip")
 
-    pending_rating = await collection.find_one(
-        {"clientId": client_id, **_pending_driver_rating_filter()},
+    last_trip = await collection.find_one(
+        {"clientId": client_id},
+        sort=[("updatedAt", -1)],
     )
-    if pending_rating is not None:
-        raise ConflictError(
-            "Please rate your last trip before booking a new one",
-            code="rating_required",
-        )
+    if last_trip is not None:
+        status = last_trip.get("status")
+        has_rating = last_trip.get("driverRating") is not None
+        if status == "completed" and not has_rating:
+            raise ConflictError(
+                "Please rate your last trip before booking a new one",
+                code="rating_required",
+            )
 
     _validate_truck_type(data.truckType)
     estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType)
@@ -552,8 +556,8 @@ async def rate_driver(
         raise NotFoundError("Trip not found")
     if trip.get("clientId") != client_id:
         raise ForbiddenError("You do not have access to this trip")
-    if trip.get("status") != "completed":
-        raise ConflictError("Trip must be completed before rating")
+    if trip.get("status") not in ("completed", "awaitingCash"):
+        raise ConflictError("Trip must be completed or awaiting cash before rating")
     if trip.get("driverRating") is not None:
         raise ConflictError("Driver already rated for this trip")
 
