@@ -206,6 +206,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _tripRepository = ref.read(tripRepositoryProvider);
     _earningsRepository = ref.read(earningsRepositoryProvider);
     _apiClient = ref.read(apiClientProvider);
+    _apiClient.onUnauthorized = () {
+      unawaited(logout());
+    };
     ref.onDispose(() {
       _requestPollTimer?.cancel();
       _activeTripPollTimer?.cancel();
