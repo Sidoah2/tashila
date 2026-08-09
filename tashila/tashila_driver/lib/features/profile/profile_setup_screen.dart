@@ -548,46 +548,70 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   }
 
   Future<void> _pickProfilePhoto() async {
+    print("[DEBUG_PHOTO] _pickProfilePhoto called");
     if (!mounted) return;
     final source = await _showMediaSourceSheet();
-    if (!mounted || source == null) return;
+    print("[DEBUG_PHOTO] Selected source: $source");
+    if (!mounted || source == null) {
+      print("[DEBUG_PHOTO] Source is null or widget not mounted");
+      return;
+    }
 
     final picker = ImagePicker();
     String? path;
 
     switch (source) {
       case _MediaPickSource.camera:
+        print("[DEBUG_PHOTO] Launching camera picker...");
         final x = await picker.pickImage(
           source: ImageSource.camera,
           imageQuality: 85,
         );
+        print("[DEBUG_PHOTO] Camera returned: ${x?.path}");
         if (x != null) {
           path = await persistPickedImage(x, 'profile_photo');
+          print("[DEBUG_PHOTO] Persisted camera path: $path");
         }
         break;
       case _MediaPickSource.gallery:
+        print("[DEBUG_PHOTO] Launching gallery picker...");
         final xg = await picker.pickImage(
           source: ImageSource.gallery,
           imageQuality: 85,
         );
+        print("[DEBUG_PHOTO] Gallery returned: ${xg?.path}");
         if (xg != null) {
           path = await persistPickedImage(xg, 'profile_photo');
+          print("[DEBUG_PHOTO] Persisted gallery path: $path");
         }
         break;
       case _MediaPickSource.files:
+        print("[DEBUG_PHOTO] Launching file picker...");
         final result = await FilePicker.pickFiles(
           type: FileType.image,
           allowMultiple: false,
           withData: false,
         );
+        print(
+          "[DEBUG_PHOTO] File picker returned: ${result?.files.single.path}",
+        );
         if (result != null && result.files.isNotEmpty) {
           path = result.files.single.path;
+          print("[DEBUG_PHOTO] File path: $path");
         }
         break;
     }
 
-    if (path == null || !mounted) return;
+    print("[DEBUG_PHOTO] Final path to save: $path");
+    if (path == null || !mounted) {
+      print(
+        "[DEBUG_PHOTO] Path is null or widget not mounted, aborting upload",
+      );
+      return;
+    }
+    print("[DEBUG_PHOTO] Invoking setProfilePhotoPath in AppState...");
     await ref.read(driverAppStateProvider.notifier).setProfilePhotoPath(path);
+    print("[DEBUG_PHOTO] setProfilePhotoPath execution finished");
   }
 
   Future<void> _pickDocument(DocumentType type) async {
