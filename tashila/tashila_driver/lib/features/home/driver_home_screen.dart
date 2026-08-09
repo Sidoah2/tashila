@@ -3345,7 +3345,7 @@ class DriverDrawer extends ConsumerWidget {
                           side: BorderSide(color: Colors.grey.shade300),
                         ),
                         child: Text(
-                          'cancelk'.tr(),
+                          'cancel'.tr(),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,

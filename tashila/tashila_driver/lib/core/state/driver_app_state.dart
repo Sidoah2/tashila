@@ -760,12 +760,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       if (httpRepo is HttpProfileRepository) {
         try {
           avatarUrl = await httpRepo.uploadAvatar(localPath);
+          print("HEEEEY");
         } catch (e) {
+          print('FIALD $e');
           _setState(
-            state.copyWith(
-              isBusy: false,
-              error: 'error_updating_profile'.tr(),
-            ),
+            state.copyWith(isBusy: false, error: 'error_updating_profile'.tr()),
           );
           return;
         }
@@ -780,7 +779,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     await _saveProfile(updated);
     _setState(state.copyWith(profile: updated, isBusy: false));
   }
-
 
   Future<void> setAvailability(AvailabilityStatus status) async {
     if (status == AvailabilityStatus.online &&

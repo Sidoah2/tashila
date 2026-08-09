@@ -379,7 +379,9 @@ class _DriverProfileEditScreenState
                           ),
                           boxShadow: [
                             BoxShadow(
-                              color: AppColors.brandOrange.withValues(alpha: 0.3),
+                              color: AppColors.brandOrange.withValues(
+                                alpha: 0.3,
+                              ),
                               blurRadius: 16,
                               offset: const Offset(0, 4),
                             ),
@@ -394,10 +396,14 @@ class _DriverProfileEditScreenState
                               backgroundColor: AppColors.brandOrange.withValues(
                                 alpha: 0.15,
                               ),
-                              backgroundImage: (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty)
+                              backgroundImage:
+                                  (profile?.avatarUrl != null &&
+                                      profile!.avatarUrl!.isNotEmpty)
                                   ? NetworkImage(profile.avatarUrl!)
                                   : null,
-                              child: (profile?.avatarUrl == null || profile!.avatarUrl!.isEmpty)
+                              child:
+                                  (profile?.avatarUrl == null ||
+                                      profile!.avatarUrl!.isEmpty)
                                   ? Text(
                                       firstLetter,
                                       style: const TextStyle(
