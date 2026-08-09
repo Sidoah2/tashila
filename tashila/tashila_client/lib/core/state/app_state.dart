@@ -832,6 +832,7 @@ class AppStateNotifier extends Notifier<AppState> {
       driverVehicleModel: '',
       clearDriverLocation: true,
     );
+    _refreshRoutePoints();
   }
 
   Future<void> _ensureTripSocket(String tripId) async {
@@ -994,6 +995,7 @@ class AppStateNotifier extends Notifier<AppState> {
         debugPrint('[Tashila] resume trip socket failed: $e');
       }
       _applyTripData(data);
+      unawaited(_refreshRoutePoints());
       return true;
     } catch (e) {
       debugPrint('[Tashila] resumeActiveTrip failed: $e');
@@ -1068,9 +1070,6 @@ class AppStateNotifier extends Notifier<AppState> {
         tripStage: TripStage.searchingDriver,
         tripStartTime: DateTime.now(),
         estimatedPrice: fare ?? state.estimatedPrice,
-        // Clear any stale route from the previous trip so the map on /trip
-        // does not flicker with an old polyline before new routing is ready.
-        routePoints: const [],
       );
       _startTripPolling(tripId);
       try {
