@@ -1152,13 +1152,20 @@ class AppStateNotifier extends Notifier<AppState> {
       if (topId != null) tripId = topId.toString();
     }
 
+    debugPrint(
+      '[Tashila] _applyTripData called: '
+      'payloadKeys=${data.keys.toList()}, '
+      'parsedTripId="$tripId", '
+      'state.currentTripId="${state.currentTripId}", '
+      'tripStage=${state.tripStage}, '
+      'status="${data['status']}"',
+    );
+
     if (state.tripStage == TripStage.idle ||
         (state.currentTripId != null &&
             state.currentTripId!.isNotEmpty &&
             state.currentTripId != tripId)) {
-      // Ignore updates that are either:
-      // 1. For a trip when we are already idle.
-      // 2. For an old trip that does not match our current active trip ID.
+      debugPrint('[Tashila] _applyTripData IGNORED: stage is idle or trip ID mismatch');
       return;
     }
     _applyTripLocationsFromPayload(data);
