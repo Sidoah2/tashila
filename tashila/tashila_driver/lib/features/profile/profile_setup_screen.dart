@@ -1573,27 +1573,32 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                             Stack(
                               clipBehavior: Clip.none,
                               children: [
-                                Container(
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: Colors.white,
-                                      width: 3,
-                                    ),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withValues(
-                                          alpha: 0.15,
-                                        ),
-                                        blurRadius: 10,
-                                        offset: const Offset(0, 4),
+                                GestureDetector(
+                                  onTap: state.isBusy
+                                      ? null
+                                      : _pickProfilePhoto,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: Colors.white,
+                                        width: 3,
                                       ),
-                                    ],
-                                  ),
-                                  child: buildLocalProfileAvatar(
-                                    path: profile.profilePhotoPath,
-                                    networkUrl: profile.avatarUrl,
-                                    radius: 36,
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withValues(
+                                            alpha: 0.15,
+                                          ),
+                                          blurRadius: 10,
+                                          offset: const Offset(0, 4),
+                                        ),
+                                      ],
+                                    ),
+                                    child: buildLocalProfileAvatar(
+                                      path: profile.profilePhotoPath,
+                                      networkUrl: profile.avatarUrl,
+                                      radius: 36,
+                                    ),
                                   ),
                                 ),
                                 Positioned(

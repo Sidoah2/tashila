@@ -749,35 +749,56 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   }
 
   Future<void> setProfilePhotoPath(String? localPath) async {
+    debugPrint('[AVATAR] setProfilePhotoPath called — localPath=$localPath');
     final current = state.profile ?? DriverProfile.empty();
+    debugPrint('[AVATAR] current.profilePhotoPath=${current.profilePhotoPath}  avatarUrl=${current.avatarUrl}');
+    debugPrint('[AVATAR] isReadyForDashboard=${current.isReadyForDashboard}');
     _setState(state.copyWith(isBusy: true, clearError: true));
 
-    // Only upload to the backend; do NOT call saveProfile which hits the
-    // profile-setup endpoint (wrong for avatar-only changes).
+    // Try to upload to the backend. Do NOT call saveProfile() which hits
+    // the profile-setup endpoint (wrong endpoint for avatar-only changes).
     String? avatarUrl;
+    bool uploadFailed = false;
     if (localPath != null && localPath.isNotEmpty) {
       final httpRepo = _profileRepository;
+      debugPrint('[AVATAR] _profileRepository runtimeType=${httpRepo.runtimeType}');
       if (httpRepo is HttpProfileRepository) {
+        debugPrint('[AVATAR] Starting uploadAvatar to PUT /drivers/me/avatar ...');
         try {
           avatarUrl = await httpRepo.uploadAvatar(localPath);
-          print("HEEEEY");
-        } catch (e) {
-          print('FIALD $e');
-          _setState(
-            state.copyWith(isBusy: false, error: 'error_updating_profile'.tr()),
-          );
-          return;
+          debugPrint('[AVATAR] uploadAvatar SUCCESS — returned avatarUrl=$avatarUrl');
+        } catch (e, st) {
+          debugPrint('[AVATAR] uploadAvatar FAILED — error: $e');
+          debugPrint('[AVATAR] stack: $st');
+          uploadFailed = true;
         }
+      } else {
+        debugPrint('[AVATAR] Repository is NOT HttpProfileRepository — skip backend upload');
       }
+    } else {
+      debugPrint('[AVATAR] localPath is null/empty — clearing avatar');
     }
 
+    // Always persist the local path so the photo shows in the UI immediately,
+    // even if the backend upload failed.
     final updated = current.copyWith(
       profilePhotoPath: localPath,
       clearProfilePhoto: localPath == null,
+      // Only update avatarUrl if backend upload succeeded.
       avatarUrl: avatarUrl ?? (localPath == null ? null : current.avatarUrl),
     );
+    debugPrint('[AVATAR] updated.profilePhotoPath=${updated.profilePhotoPath}  avatarUrl=${updated.avatarUrl}  uploadFailed=$uploadFailed');
     await _saveProfile(updated);
-    _setState(state.copyWith(profile: updated, isBusy: false));
+    debugPrint('[AVATAR] local profile saved');
+    _setState(
+      state.copyWith(
+        profile: updated,
+        isBusy: false,
+        // Surface a non-blocking error only if upload actually failed.
+        error: uploadFailed ? 'error_updating_profile'.tr() : null,
+      ),
+    );
+    debugPrint('[AVATAR] state updated — done');
   }
 
   Future<void> setAvailability(AvailabilityStatus status) async {

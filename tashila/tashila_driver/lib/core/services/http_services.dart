@@ -1,4 +1,6 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tashila_driver/core/models/models.dart';
 import 'package:tashila_driver/core/services/api_client.dart';
@@ -7,7 +9,6 @@ import 'package:tashila_driver/core/utils/geo.dart';
 import 'package:tashila_driver/core/utils/picked_image_io.dart';
 
 // ignore: unused_element (kept for exhaustive switch if TruckType enum is added later)
-
 
 class HttpAuthRepository implements AuthRepository {
   HttpAuthRepository(this._client);
@@ -44,10 +45,7 @@ class HttpAuthRepository implements AuthRepository {
       await _client.saveTokens(accessToken, refreshToken ?? '');
       final user = data['user'] as Map<String, dynamic>?;
       final profileComplete = user?['profileComplete'] as bool? ?? false;
-      return OtpVerifyResult(
-        success: true,
-        profileComplete: profileComplete,
-      );
+      return OtpVerifyResult(success: true, profileComplete: profileComplete);
     } catch (_) {
       return const OtpVerifyResult(success: false);
     }
@@ -125,7 +123,9 @@ class HttpProfileRepository implements ProfileRepository {
   @override
   Future<Map<String, dynamic>?> fetchDocuments() async {
     try {
-      final res = await _client.get<Map<String, dynamic>>('/drivers/me/documents');
+      final res = await _client.get<Map<String, dynamic>>(
+        '/drivers/me/documents',
+      );
       return res.data;
     } catch (_) {
       return null;
@@ -135,8 +135,9 @@ class HttpProfileRepository implements ProfileRepository {
   @override
   Future<Map<String, dynamic>?> fetchApprovalStatus() async {
     try {
-      final res =
-          await _client.get<Map<String, dynamic>>('/drivers/me/approval-status');
+      final res = await _client.get<Map<String, dynamic>>(
+        '/drivers/me/approval-status',
+      );
       return res.data;
     } catch (_) {
       return null;
@@ -145,7 +146,9 @@ class HttpProfileRepository implements ProfileRepository {
 
   Future<DriverPlatformEarnings?> fetchEarnings() async {
     try {
-      final res = await _client.get<Map<String, dynamic>>('/drivers/me/earnings');
+      final res = await _client.get<Map<String, dynamic>>(
+        '/drivers/me/earnings',
+      );
       return DriverPlatformEarnings.fromJson(res.data);
     } catch (_) {
       return null;
@@ -153,15 +156,28 @@ class HttpProfileRepository implements ProfileRepository {
   }
 
   Future<String?> uploadAvatar(String filePath) async {
+    debugPrint('[AVATAR][uploadAvatar] filePath=$filePath');
     final bytes = await readUploadBytes(filePath);
+    debugPrint('[AVATAR][uploadAvatar] bytes.length=${bytes.length}');
     final name = filePath.split('/').last;
-    final res = await _client.uploadFile<Map<String, dynamic>>(
-      '/drivers/me/avatar',
-      'file',
-      bytes,
-      name,
-    );
-    return res.data?['avatarUrl'] as String?;
+    debugPrint('[AVATAR][uploadAvatar] filename=$name');
+    try {
+      final res = await _client.uploadFile<Map<String, dynamic>>(
+        '/drivers/me/avatar',
+        'file',
+        bytes,
+        name,
+      );
+      debugPrint('[AVATAR][uploadAvatar] HTTP status=${res.statusCode}');
+      debugPrint('[AVATAR][uploadAvatar] response data=${res.data}');
+      final url = res.data?['avatarUrl'] as String?;
+      debugPrint('[AVATAR][uploadAvatar] parsed avatarUrl=$url');
+      return url;
+    } catch (e, st) {
+      debugPrint('[AVATAR][uploadAvatar] EXCEPTION: $e');
+      debugPrint('[AVATAR][uploadAvatar] stacktrace: $st');
+      rethrow;
+    }
   }
 }
 
@@ -179,7 +195,8 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
     dropoffLng: dropoffLng,
     apiDistanceKm: (m['distanceKm'] as num?)?.toDouble(),
   );
-  final apiMinutes = (m['estimatedDurationMinutes'] as num?)?.toInt() ??
+  final apiMinutes =
+      (m['estimatedDurationMinutes'] as num?)?.toInt() ??
       (m['estimatedMinutes'] as num?)?.toInt();
   final estimatedDurationMinutes = (apiMinutes != null && apiMinutes > 0)
       ? apiMinutes
@@ -189,7 +206,11 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
   final startedAtStr = m['startedAt'] as String?;
   final completedAtStr = m['completedAt'] as String?;
   return TripRequest(
-    id: m['id'] as String? ?? m['tripId'] as String? ?? m['_id'] as String? ?? '',
+    id:
+        m['id'] as String? ??
+        m['tripId'] as String? ??
+        m['_id'] as String? ??
+        '',
     clientName: m['clientName'] as String? ?? client['name'] as String? ?? '',
     clientPhone:
         m['clientPhone'] as String? ?? client['phone'] as String? ?? '',
@@ -203,7 +224,9 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
     expiresAt: expiresAt,
     truckType: migrateTruckType(m['truckType'] as String?),
     startedAt: startedAtStr != null ? DateTime.tryParse(startedAtStr) : null,
-    completedAt: completedAtStr != null ? DateTime.tryParse(completedAtStr) : null,
+    completedAt: completedAtStr != null
+        ? DateTime.tryParse(completedAtStr)
+        : null,
   );
 }
 
@@ -215,8 +238,7 @@ class HttpTripRepository implements TripRepository {
   @override
   Future<List<TripRequest>> fetchNearbyRequests() async {
     try {
-      final res = await _client
-          .get<List<dynamic>>('/drivers/me/trip-requests');
+      final res = await _client.get<List<dynamic>>('/drivers/me/trip-requests');
       final items = res.data ?? [];
       return items
           .map((item) => _tripRequestFromApiMap(item as Map<String, dynamic>))
