@@ -315,6 +315,9 @@ class AppStateNotifier extends Notifier<AppState> {
   @override
   AppState build() {
     _apiClient = ref.read(apiClientProvider);
+    _apiClient.onUnauthorized = () {
+      unawaited(logout());
+    };
     ref.onDispose(() {
       _tripTimer?.cancel();
       _pollTimer?.cancel();

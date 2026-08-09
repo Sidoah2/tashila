@@ -667,45 +667,45 @@ class _TripScreenState extends ConsumerState<TripScreen> {
               ),
             ),
 
-            // Live Elapsed Timer Card — only shown when trip is in progress
-            if (state.tripStage == TripStage.tripStarted) ...[
-              const SizedBox(width: 8),
-              Expanded(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    vertical: 8,
-                    horizontal: 4,
-                  ),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F4FD),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFBBDEFB)),
-                  ),
-                  child: Column(
-                    children: [
-                      Text(
-                        'trip_summary_duration_label'.tr(),
-                        style: TextStyle(
-                          fontSize: 10,
-                          color: Colors.grey.shade500,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        _formatElapsed(_elapsedSeconds),
-                        style: const TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w900,
-                          color: Color(0xFF1565C0),
-                          fontFeatures: [FontFeature.tabularFigures()],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            // // Live Elapsed Timer Card — only shown when trip is in progress
+            // if (state.tripStage == TripStage.tripStarted) ...[
+            //   const SizedBox(width: 8),
+            //   Expanded(
+            //     child: Container(
+            //       padding: const EdgeInsets.symmetric(
+            //         vertical: 8,
+            //         horizontal: 4,
+            //       ),
+            //       decoration: BoxDecoration(
+            //         color: const Color(0xFFE8F4FD),
+            //         borderRadius: BorderRadius.circular(12),
+            //         border: Border.all(color: const Color(0xFFBBDEFB)),
+            //       ),
+            //       child: Column(
+            //         children: [
+            //           Text(
+            //             'trip_summary_duration_label'.tr(),
+            //             style: TextStyle(
+            //               fontSize: 10,
+            //               color: Colors.grey.shade500,
+            //               fontWeight: FontWeight.bold,
+            //             ),
+            //           ),
+            //           const SizedBox(height: 2),
+            //           Text(
+            //             _formatElapsed(_elapsedSeconds),
+            //             style: const TextStyle(
+            //               fontSize: 13,
+            //               fontWeight: FontWeight.w900,
+            //               color: Color(0xFF1565C0),
+            //               fontFeatures: [FontFeature.tabularFigures()],
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ],
           ],
         ),
         const SizedBox(height: 12),
