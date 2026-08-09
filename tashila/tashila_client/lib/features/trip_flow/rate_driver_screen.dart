@@ -49,7 +49,9 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
   Future<void> _submit() async {
     if (!_canSubmit) return;
     setState(() => _submitting = true);
-    final ok = await ref.read(appStateProvider.notifier).submitRating(
+    final ok = await ref
+        .read(appStateProvider.notifier)
+        .submitRating(
           stars: _stars,
           comment: _comment.text.trim(),
           goodTraits: _goodSelected.map((k) => k.tr()).toList(),
@@ -133,9 +135,13 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(appStateProvider);
-    final fare = state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice;
+    final fare = state.estimatedPrice > 0
+        ? state.estimatedPrice
+        : kEstimatedTripPrice;
     final fareStr = formatTripPrice(fare);
-    final driverName = state.driverName.isNotEmpty ? state.driverName : 'driver_label'.tr();
+    final driverName = state.driverName.isNotEmpty
+        ? state.driverName
+        : 'driver_label'.tr();
 
     return PopScope(
       canPop: false,
@@ -196,12 +202,22 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
                                   ),
                                   width: 1.5,
                                 ),
+                                image: state.driverAvatarUrl.isNotEmpty
+                                    ? DecorationImage(
+                                        image: NetworkImage(
+                                          state.driverAvatarUrl,
+                                        ),
+                                        fit: BoxFit.cover,
+                                      )
+                                    : null,
                               ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                color: AppColors.brandOrange,
-                                size: 28,
-                              ),
+                              child: state.driverAvatarUrl.isEmpty
+                                  ? const Icon(
+                                      Icons.person_rounded,
+                                      color: AppColors.brandOrange,
+                                      size: 28,
+                                    )
+                                  : null,
                             ),
                             const SizedBox(width: 14),
                             Expanded(
@@ -567,11 +583,11 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 10,
-                                  crossAxisSpacing: 10,
-                                  childAspectRatio: 2.5,
-                                ),
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 10,
+                                      crossAxisSpacing: 10,
+                                      childAspectRatio: 2.5,
+                                    ),
                                 itemCount: _goodTraitKeys.length,
                                 itemBuilder: (context, index) {
                                   final key = _goodTraitKeys[index];
@@ -600,11 +616,11 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
                                 physics: const NeverScrollableScrollPhysics(),
                                 gridDelegate:
                                     const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 10,
-                                  crossAxisSpacing: 10,
-                                  childAspectRatio: 2.5,
-                                ),
+                                      crossAxisCount: 2,
+                                      mainAxisSpacing: 10,
+                                      crossAxisSpacing: 10,
+                                      childAspectRatio: 2.5,
+                                    ),
                                 itemCount: _badTraitKeys.length,
                                 itemBuilder: (context, index) {
                                   final key = _badTraitKeys[index];
@@ -894,10 +910,7 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
     );
   }
 
-  Widget _buildSuccessView(
-    AppState state,
-    String fareStr,
-  ) {
+  Widget _buildSuccessView(AppState state, String fareStr) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [

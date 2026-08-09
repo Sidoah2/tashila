@@ -183,10 +183,17 @@ double neighborhoodDistanceKm(
 bool coordinatesInSupportedServiceArea(
   double lat,
   double lng, {
-  double maxKm = 8,
+  double? centerLat,
+  double? centerLng,
+  double? radiusKm,
 }) {
-  // Bypasses the local hardcoded geofence list to allow testing and booking anywhere in Algeria.
-  return true;
+  if (centerLat == null || centerLng == null || radiusKm == null) {
+    // Falls back to Tamanrasset center and 200 km radius as default
+    final dist = neighborhoodDistanceKm(lat, lng, 22.765900134406188, 5.538099427546386);
+    return dist <= 200.0;
+  }
+  final dist = neighborhoodDistanceKm(lat, lng, centerLat, centerLng);
+  return dist <= radiusKm;
 }
 
 /// Snaps GPS to the nearest supported neighborhood label (for UX when address is coarse).

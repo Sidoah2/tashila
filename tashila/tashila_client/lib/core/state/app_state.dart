@@ -128,6 +128,8 @@ class AppState {
     this.tripStage = TripStage.idle,
     this.tripStartTime,
     this.tripEndTime,
+    this.serviceAreaCenter = const LatLng(22.765900134406188, 5.538099427546386),
+    this.serviceAreaRadiusKm = 200.0,
     this.history = const [],
     this.currentTripId,
     this.currentTripStatus = '',
@@ -136,6 +138,7 @@ class AppState {
     this.driverPlate = '',
     this.driverVehicleColor = '',
     this.driverVehicleModel = '',
+    this.driverAvatarUrl = '',
     this.driverLat,
     this.driverLng,
     this.routePoints = const [],
@@ -171,6 +174,8 @@ class AppState {
   final double estimatedPrice;
   final TripStage tripStage;
   final List<LatLng> routePoints;
+  final LatLng serviceAreaCenter;
+  final double serviceAreaRadiusKm;
 
   /// Set when a transport request is created; cleared when the trip is reset.
   final DateTime? tripStartTime;
@@ -189,6 +194,7 @@ class AppState {
   final String driverPlate;
   final String driverVehicleColor;
   final String driverVehicleModel;
+  final String driverAvatarUrl;
   final double? driverLat;
   final double? driverLng;
 
@@ -228,6 +234,8 @@ class AppState {
     TripStage? tripStage,
     DateTime? tripStartTime,
     DateTime? tripEndTime,
+    LatLng? serviceAreaCenter,
+    double? serviceAreaRadiusKm,
     bool tripStartTimeNull = false,
     bool tripEndTimeNull = false,
     List<TripRecord>? history,
@@ -239,6 +247,7 @@ class AppState {
     String? driverPlate,
     String? driverVehicleColor,
     String? driverVehicleModel,
+    String? driverAvatarUrl,
     double? driverLat,
     double? driverLng,
     bool clearDriverLocation = false,
@@ -272,6 +281,8 @@ class AppState {
           ? null
           : (tripStartTime ?? this.tripStartTime),
       tripEndTime: tripEndTimeNull ? null : (tripEndTime ?? this.tripEndTime),
+      serviceAreaCenter: serviceAreaCenter ?? this.serviceAreaCenter,
+      serviceAreaRadiusKm: serviceAreaRadiusKm ?? this.serviceAreaRadiusKm,
       history: history ?? this.history,
       currentTripId: currentTripIdNull
           ? null
@@ -282,6 +293,7 @@ class AppState {
       driverPlate: driverPlate ?? this.driverPlate,
       driverVehicleColor: driverVehicleColor ?? this.driverVehicleColor,
       driverVehicleModel: driverVehicleModel ?? this.driverVehicleModel,
+      driverAvatarUrl: driverAvatarUrl ?? this.driverAvatarUrl,
       driverLat: clearDriverLocation ? null : (driverLat ?? this.driverLat),
       driverLng: clearDriverLocation ? null : (driverLng ?? this.driverLng),
       routePoints: routePoints ?? this.routePoints,
@@ -359,6 +371,7 @@ class AppStateNotifier extends Notifier<AppState> {
       locale: Locale(lang),
       history: history,
     );
+    await _fetchPublicSettings();
     if (loggedIn) {
       await resumeActiveTripIfAny();
     }
@@ -395,6 +408,25 @@ class AppStateNotifier extends Notifier<AppState> {
         profileSetupComplete: complete,
         profileImageUrl: avatar.isNotEmpty ? avatar : state.profileImageUrl,
       );
+    } catch (_) {}
+  }
+
+  Future<void> _fetchPublicSettings() async {
+    try {
+      final res = await _apiClient.get<Map<String, dynamic>>('/settings');
+      final data = res.data;
+      if (data != null) {
+        final center = data['serviceAreaCenter'] as Map<String, dynamic>?;
+        final lat = (center?['lat'] as num?)?.toDouble();
+        final lng = (center?['lng'] as num?)?.toDouble();
+        final radius = (data['serviceAreaRadiusKm'] as num?)?.toDouble();
+        if (lat != null && lng != null && radius != null) {
+          state = state.copyWith(
+            serviceAreaCenter: LatLng(lat, lng),
+            serviceAreaRadiusKm: radius,
+          );
+        }
+      }
     } catch (_) {}
   }
 
@@ -488,6 +520,9 @@ class AppStateNotifier extends Notifier<AppState> {
       profileSetupComplete: complete,
       history: history,
     );
+
+    await _syncUserFromServer();
+    await _fetchPublicSettings();
   }
 
   Future<void> saveProfileSetup({
@@ -733,6 +768,7 @@ class AppStateNotifier extends Notifier<AppState> {
       driverPlate: '',
       driverVehicleColor: '',
       driverVehicleModel: '',
+      driverAvatarUrl: '',
       clearDriverLocation: true,
       pickup: '',
       dropoff: '',
@@ -830,6 +866,7 @@ class AppStateNotifier extends Notifier<AppState> {
       driverPlate: '',
       driverVehicleColor: '',
       driverVehicleModel: '',
+      driverAvatarUrl: '',
       clearDriverLocation: true,
     );
     _refreshRoutePoints();
@@ -940,7 +977,8 @@ class AppStateNotifier extends Notifier<AppState> {
       // Check if we have already rated or cancelled this trip in our local session history.
       // This prevents the lifecycle resume from restoring a trip that was just finished.
       final bool alreadyRatedOrCancelledLocally = state.history.any(
-        (record) => record.id == tripId && (record.rating > 0 || record.cancelled),
+        (record) =>
+            record.id == tripId && (record.rating > 0 || record.cancelled),
       );
       if (alreadyRatedOrCancelledLocally) {
         return false;
@@ -984,6 +1022,7 @@ class AppStateNotifier extends Notifier<AppState> {
         driverPlate: '',
         driverVehicleColor: '',
         driverVehicleModel: '',
+        driverAvatarUrl: '',
         tripStage: initialStage,
         tripStartTime: createdAt,
         estimatedPrice: fare ?? state.estimatedPrice,
@@ -1066,6 +1105,7 @@ class AppStateNotifier extends Notifier<AppState> {
         driverPlate: '',
         driverVehicleColor: '',
         driverVehicleModel: '',
+        driverAvatarUrl: '',
         clearDriverLocation: true,
         tripStage: TripStage.searchingDriver,
         tripStartTime: DateTime.now(),
@@ -1221,6 +1261,7 @@ class AppStateNotifier extends Notifier<AppState> {
       driverPlate: plate,
       driverVehicleColor: color,
       driverVehicleModel: model,
+      driverAvatarUrl: driver?['avatarUrl'] as String? ?? state.driverAvatarUrl,
       selectedTruck: truckFromDriver ?? state.selectedTruck,
       estimatedPrice: fare ?? state.estimatedPrice,
     );

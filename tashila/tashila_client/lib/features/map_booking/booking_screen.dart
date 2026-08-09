@@ -191,7 +191,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                       children: [
                         // Segmented Vehicle Type Switcher
                         Container(
-                          height: 52,
+                          height: 130,
                           decoration: BoxDecoration(
                             color: AppColors.bg,
                             borderRadius: BorderRadius.circular(14),
@@ -238,16 +238,17 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                           : [],
                                     ),
                                     alignment: Alignment.center,
-                                    child: Row(
+                                    child: Column(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
                                       children: [
                                         Image.asset(
                                           asset,
-                                          height: 24,
+                                          height: 88,
+                                          // width: 88,
                                           fit: BoxFit.contain,
                                         ),
-                                        const SizedBox(width: 8),
+                                        const SizedBox(width: 2),
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -444,9 +445,10 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                             ),
                           ],
                         ),
-                        if (!state.canCreateTransportRequest &&
-                            state.pickup.isNotEmpty &&
-                            state.dropoff.isNotEmpty) ...[
+                        if ((state.pickup.isNotEmpty &&
+                                !state.pickupInServiceArea) ||
+                            (state.dropoff.isNotEmpty &&
+                                !state.dropoffInServiceArea)) ...[
                           const SizedBox(height: 8),
                           Text(
                             'service_area_unavailable'.tr(),
