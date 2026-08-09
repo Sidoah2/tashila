@@ -31,6 +31,7 @@ from app.routers import (
     uploads,
     users,
     neighborhoods,
+    settings as settings_router,
 )
 from app.socket import sio, start_redis_bridge
 
@@ -117,6 +118,7 @@ def create_app() -> FastAPI:
     application.include_router(trips.router)
     application.include_router(pricing.router)
     application.include_router(neighborhoods.router)
+    application.include_router(settings_router.router)
     application.include_router(admin_users.router)
     application.include_router(admin_trips.router)
     application.include_router(admin_stats.router)

@@ -189,7 +189,14 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
       _showErrorSnack('service_area_unavailable'.tr());
       return;
     }
-    final inService = coordinatesInSupportedServiceArea(lat, lng);
+    final state = ref.read(appStateProvider);
+    final inService = coordinatesInSupportedServiceArea(
+      lat,
+      lng,
+      centerLat: state.serviceAreaCenter.latitude,
+      centerLng: state.serviceAreaCenter.longitude,
+      radiusKm: state.serviceAreaRadiusKm,
+    );
     final notifier = ref.read(appStateProvider.notifier);
     if (widget.isPickup) {
       notifier.setPickupPlace(
@@ -384,9 +391,13 @@ class _LocationSearchScreenState extends ConsumerState<LocationSearchScreen> {
       if (!mounted) return;
       setState(() => _loading = false);
 
+      final state = ref.read(appStateProvider);
       if (!coordinatesInSupportedServiceArea(
         position.latitude,
         position.longitude,
+        centerLat: state.serviceAreaCenter.latitude,
+        centerLng: state.serviceAreaCenter.longitude,
+        radiusKm: state.serviceAreaRadiusKm,
       )) {
         _showErrorSnack('service_not_in_area_message'.tr());
         return;

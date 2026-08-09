@@ -45,8 +45,10 @@ class _TripScreenState extends ConsumerState<TripScreen> {
       if (_elapsedTimer == null || !_elapsedTimer!.isActive) {
         // Seed elapsed from startTime if available.
         if (state.tripStartTime != null) {
-          _elapsedSeconds =
-              DateTime.now().difference(state.tripStartTime!).inSeconds.clamp(0, 86400);
+          _elapsedSeconds = DateTime.now()
+              .difference(state.tripStartTime!)
+              .inSeconds
+              .clamp(0, 86400);
         }
         _elapsedTimer = Timer.periodic(const Duration(seconds: 1), (_) {
           if (!mounted) return;
@@ -493,15 +495,19 @@ class _TripScreenState extends ConsumerState<TripScreen> {
           ),
           child: Row(
             children: [
-              // Profile picture
               CircleAvatar(
                 radius: 24,
                 backgroundColor: AppColors.brandOrange.withValues(alpha: 0.1),
-                child: const Icon(
-                  Icons.person_rounded,
-                  color: AppColors.brandOrange,
-                  size: 28,
-                ),
+                backgroundImage: state.driverAvatarUrl.isNotEmpty
+                    ? NetworkImage(state.driverAvatarUrl)
+                    : null,
+                child: state.driverAvatarUrl.isEmpty
+                    ? const Icon(
+                        Icons.person_rounded,
+                        color: AppColors.brandOrange,
+                        size: 28,
+                      )
+                    : null,
               ),
               const SizedBox(width: 12),
               // Driver Name and 5 Stars colored rating
@@ -666,7 +672,10 @@ class _TripScreenState extends ConsumerState<TripScreen> {
               const SizedBox(width: 8),
               Expanded(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 8,
+                    horizontal: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: const Color(0xFFE8F4FD),
                     borderRadius: BorderRadius.circular(12),
