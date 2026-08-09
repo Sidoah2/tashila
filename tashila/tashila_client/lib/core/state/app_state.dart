@@ -1140,9 +1140,25 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   void _applyTripData(Map<String, dynamic> data) {
-    if (state.tripStage == TripStage.idle) {
-      // If the client has already rated the driver and returned to the home screen (idle stage),
-      // ignore any late in-flight poll responses or socket messages for the completed trip.
+    String tripId = '';
+    if (data['tripId'] != null) {
+      tripId = data['tripId'].toString();
+    } else if (data['trip'] is Map) {
+      final nested = Map<String, dynamic>.from(data['trip'] as Map);
+      final nid = nested['id'] ?? nested['_id'];
+      if (nid != null) tripId = nid.toString();
+    } else {
+      final topId = data['id'] ?? data['_id'];
+      if (topId != null) tripId = topId.toString();
+    }
+
+    if (state.tripStage == TripStage.idle ||
+        (state.currentTripId != null &&
+            state.currentTripId!.isNotEmpty &&
+            state.currentTripId != tripId)) {
+      // Ignore updates that are either:
+      // 1. For a trip when we are already idle.
+      // 2. For an old trip that does not match our current active trip ID.
       return;
     }
     _applyTripLocationsFromPayload(data);
