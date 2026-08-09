@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:ui' as ui;
 
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
@@ -82,7 +83,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     } else {
       pin.clear();
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid OTP. Please try again.')),
+        SnackBar(content: Text('invalid_otp'.tr())),
       );
     }
   }
@@ -237,13 +238,16 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             ),
                             const SizedBox(height: 20),
                             Center(
-                              child: Pinput(
-                                length: 6,
-                                controller: pin,
-                                defaultPinTheme: defaultPinTheme,
-                                focusedPinTheme: focusedPinTheme,
-                                submittedPinTheme: focusedPinTheme,
-                                onCompleted: (_) => _verifyAndContinue(),
+                              child: Directionality(
+                                textDirection: ui.TextDirection.ltr,
+                                child: Pinput(
+                                  length: 6,
+                                  controller: pin,
+                                  defaultPinTheme: defaultPinTheme,
+                                  focusedPinTheme: focusedPinTheme,
+                                  submittedPinTheme: focusedPinTheme,
+                                  onCompleted: (_) => _verifyAndContinue(),
+                                ),
                               ),
                             ),
                             const SizedBox(height: 20),

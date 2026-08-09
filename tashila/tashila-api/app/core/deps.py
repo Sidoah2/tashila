@@ -83,6 +83,11 @@ async def get_current_user(token: str = Depends(get_token_from_header)) -> dict[
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account suspended",
         )
+    if user.get("status") == "deleted":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account deleted",
+        )
     return user
 
 
@@ -101,6 +106,11 @@ async def get_current_driver(token: str = Depends(get_token_from_header)) -> dic
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account suspended",
+        )
+    if driver.get("status") == "deleted":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account deleted",
         )
     return driver
 

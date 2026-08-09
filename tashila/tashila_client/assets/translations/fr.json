@@ -171,7 +171,7 @@
   "trait_bad_rough_driving": "Conduite brusque",
   "trait_bad_dirty_vehicle": "Véhicule mal entretenu",
   "trait_bad_wrong_route": "Itinéraire inadapté",
-  "service_area_unavailable": "Ce service n'est pas disponible dans cette zone pour le moment.",
+  "service_area_unavailable": "Impossible de créer un trajet, nous ne couvrons pas cette zone pour le moment.",
   "booking_neighborhoods_title": "Quartier rapide",
   "truck_max_load_700kg": "Charge maximale : 700 kg.",
   "truck_max_load_1400kg": "Charge maximale : 1400 kg.",

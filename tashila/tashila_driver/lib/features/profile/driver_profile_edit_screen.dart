@@ -1,10 +1,16 @@
+import 'dart:async';
+import 'dart:ui' as ui;
+
 import 'package:easy_localization/easy_localization.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/picked_image_io.dart';
 
 class DriverProfileEditScreen extends ConsumerStatefulWidget {
   const DriverProfileEditScreen({super.key});
@@ -14,9 +20,238 @@ class DriverProfileEditScreen extends ConsumerStatefulWidget {
       _DriverProfileEditScreenState();
 }
 
+enum _MediaPickSource { camera, gallery, files }
+
 class _DriverProfileEditScreenState
     extends ConsumerState<DriverProfileEditScreen> {
   final _formKey = GlobalKey<FormState>();
+
+  Future<void> _changeAvatar() async {
+    if (!mounted) return;
+    final source = await _showMediaSourceSheet();
+    if (!mounted || source == null) return;
+
+    final picker = ImagePicker();
+    String? path;
+
+    switch (source) {
+      case _MediaPickSource.camera:
+        final x = await picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 85,
+        );
+        if (x != null) {
+          path = await persistPickedImage(x, 'profile_photo');
+        }
+        break;
+      case _MediaPickSource.gallery:
+        final xg = await picker.pickImage(
+          source: ImageSource.gallery,
+          imageQuality: 85,
+        );
+        if (xg != null) {
+          path = await persistPickedImage(xg, 'profile_photo');
+        }
+        break;
+      case _MediaPickSource.files:
+        final result = await FilePicker.pickFiles(
+          type: FileType.image,
+          allowMultiple: false,
+          withData: false,
+        );
+        if (result != null && result.files.isNotEmpty) {
+          path = result.files.single.path;
+        }
+        break;
+    }
+
+    if (path == null || !mounted) return;
+    setState(() => _saving = true);
+    try {
+      await ref.read(driverAppStateProvider.notifier).setProfilePhotoPath(path);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Row(
+              children: [
+                const Icon(Icons.check_circle_rounded, color: Colors.white),
+                const SizedBox(width: 10),
+                Text('profile_updated_success'.tr()),
+              ],
+            ),
+            backgroundColor: AppColors.success,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('error_updating_profile'.tr()),
+            backgroundColor: Colors.red.shade700,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<_MediaPickSource?> _showMediaSourceSheet() {
+    return showDialog<_MediaPickSource>(
+      context: context,
+      barrierColor: Colors.black.withValues(alpha: 0.6),
+      builder: (ctx) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        elevation: 0,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(24),
+          child: BackdropFilter(
+            filter: ui.ImageFilter.blur(sigmaX: 16, sigmaY: 16),
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 420),
+              decoration: BoxDecoration(
+                color: Colors.white.withValues(alpha: 0.95),
+                borderRadius: BorderRadius.circular(24),
+                border: Border.all(
+                  color: Colors.white.withValues(alpha: 0.8),
+                  width: 1.5,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 30,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
+              ),
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Row(
+                    children: [
+                      Text(
+                        'doc_pick_title'.tr(),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 17,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const Spacer(),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close_rounded,
+                          color: AppColors.textSecondary,
+                        ),
+                        onPressed: () => Navigator.pop(ctx),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  _sourceTile(
+                    ctx,
+                    icon: Icons.camera_alt_rounded,
+                    title: 'doc_pick_camera'.tr(),
+                    subtitle: 'doc_pick_camera_sub'.tr(),
+                    source: _MediaPickSource.camera,
+                  ),
+                  const SizedBox(height: 12),
+                  _sourceTile(
+                    ctx,
+                    icon: Icons.photo_library_rounded,
+                    title: 'doc_pick_gallery'.tr(),
+                    subtitle: 'doc_pick_gallery_sub'.tr(),
+                    source: _MediaPickSource.gallery,
+                  ),
+                  const SizedBox(height: 12),
+                  _sourceTile(
+                    ctx,
+                    icon: Icons.folder_rounded,
+                    title: 'doc_pick_files'.tr(),
+                    subtitle: 'doc_pick_files_sub'.tr(),
+                    source: _MediaPickSource.files,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _sourceTile(
+    BuildContext ctx, {
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required _MediaPickSource source,
+  }) {
+    return InkWell(
+      onTap: () => Navigator.pop(ctx, source),
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade200, width: 1.5),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: AppColors.brandOrange.withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(icon, color: AppColors.brandOrange, size: 22),
+            ),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14.5,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11.5,
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right_rounded,
+              color: AppColors.textSecondary,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   late final TextEditingController _nameCtrl;
   late final TextEditingController _modelCtrl;
   late final TextEditingController _colorCtrl;
@@ -129,66 +364,74 @@ class _DriverProfileEditScreenState
             children: [
               // Avatar Edit Hero Container
               Center(
-                child: Stack(
-                  alignment: Alignment.bottomRight,
-                  children: [
-                    Container(
-                      width: 96,
-                      height: 96,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          colors: [AppColors.brandOrange, Color(0xFFFF9100)],
-                        ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.brandOrange.withValues(alpha: 0.3),
-                            blurRadius: 16,
-                            offset: const Offset(0, 4),
+                child: GestureDetector(
+                  onTap: _changeAvatar,
+                  child: Stack(
+                    alignment: Alignment.bottomRight,
+                    children: [
+                      Container(
+                        width: 96,
+                        height: 96,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [AppColors.brandOrange, Color(0xFFFF9100)],
                           ),
-                        ],
-                      ),
-                      child: Center(
-                        child: CircleAvatar(
-                          radius: 44,
-                          backgroundColor: Colors.white,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.brandOrange.withValues(alpha: 0.3),
+                              blurRadius: 16,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
+                        ),
+                        child: Center(
                           child: CircleAvatar(
-                            radius: 41,
-                            backgroundColor: AppColors.brandOrange.withValues(
-                              alpha: 0.15,
-                            ),
-                            child: Text(
-                              firstLetter,
-                              style: const TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.w900,
-                                color: AppColors.brandOrange,
+                            radius: 44,
+                            backgroundColor: Colors.white,
+                            child: CircleAvatar(
+                              radius: 41,
+                              backgroundColor: AppColors.brandOrange.withValues(
+                                alpha: 0.15,
                               ),
+                              backgroundImage: (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty)
+                                  ? NetworkImage(profile.avatarUrl!)
+                                  : null,
+                              child: (profile?.avatarUrl == null || profile!.avatarUrl!.isEmpty)
+                                  ? Text(
+                                      firstLetter,
+                                      style: const TextStyle(
+                                        fontSize: 36,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.brandOrange,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    Container(
-                      padding: const EdgeInsets.all(8),
-                      decoration: BoxDecoration(
-                        color: AppColors.brandOrange,
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white, width: 2.5),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 6,
-                          ),
-                        ],
+                      Container(
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.brandOrange,
+                          shape: BoxShape.circle,
+                          border: Border.all(color: Colors.white, width: 2.5),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.15),
+                              blurRadius: 6,
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.camera_alt_rounded,
+                          size: 16,
+                          color: Colors.white,
+                        ),
                       ),
-                      child: const Icon(
-                        Icons.camera_alt_rounded,
-                        size: 16,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(height: 20),

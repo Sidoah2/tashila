@@ -636,6 +636,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         break;
       case _MediaPickSource.files:
         final result = await FilePicker.pickFiles(
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'jpeg', 'png', 'pdf'],
           allowMultiple: false,
           withData: false,
         );
@@ -895,6 +897,18 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               ),
               Expanded(child: _WizardProgressBar(step: _wizardStep)),
               const AuthLanguageMenu(),
+              IconButton(
+                tooltip: 'logout'.tr(),
+                onPressed: state.isBusy
+                    ? null
+                    : () async {
+                        await notifier.logout();
+                        if (context.mounted) {
+                          context.go('/login');
+                        }
+                      },
+                icon: const Icon(Icons.logout_rounded, color: Colors.red),
+              ),
             ],
           ),
         ),

@@ -14,6 +14,7 @@
   "otp_title": "Verification OTP",
   "waiting_for_offer_title": "En Service",
   "otp_enter_code": "Saisissez le code de verification recu par SMS.",
+  "invalid_otp": "Code OTP invalide. Veuillez réessayer.",
   "otp_sent_to": "Code envoye a {phone}",
   "otp_no_code": "Vous n'avez pas recu de code ?",
   "otp_resend": "Renvoyer",

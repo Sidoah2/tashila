@@ -528,7 +528,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       otp: otp,
     );
     if (!result.success) {
-      _setState(state.copyWith(error: 'Invalid OTP code.', isBusy: false));
+      _setState(state.copyWith(error: 'invalid_otp'.tr(), isBusy: false));
       return false;
     }
 
@@ -750,29 +750,37 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   Future<void> setProfilePhotoPath(String? localPath) async {
     final current = state.profile ?? DriverProfile.empty();
-    if (current.isReadyForDashboard) {
-      return;
-    }
     _setState(state.copyWith(isBusy: true, clearError: true));
-    var updated = current.copyWith(
-      profilePhotoPath: localPath,
-      clearProfilePhoto: localPath == null,
-    );
-    final profile = await _profileRepository.saveProfile(updated);
+
+    // Only upload to the backend; do NOT call saveProfile which hits the
+    // profile-setup endpoint (wrong for avatar-only changes).
+    String? avatarUrl;
     if (localPath != null && localPath.isNotEmpty) {
       final httpRepo = _profileRepository;
       if (httpRepo is HttpProfileRepository) {
         try {
-          final avatarUrl = await httpRepo.uploadAvatar(localPath);
-          if (avatarUrl != null && avatarUrl.isNotEmpty) {
-            updated = profile.copyWith(avatarUrl: avatarUrl);
-          }
-        } catch (_) {}
+          avatarUrl = await httpRepo.uploadAvatar(localPath);
+        } catch (e) {
+          _setState(
+            state.copyWith(
+              isBusy: false,
+              error: 'error_updating_profile'.tr(),
+            ),
+          );
+          return;
+        }
       }
     }
+
+    final updated = current.copyWith(
+      profilePhotoPath: localPath,
+      clearProfilePhoto: localPath == null,
+      avatarUrl: avatarUrl ?? (localPath == null ? null : current.avatarUrl),
+    );
     await _saveProfile(updated);
     _setState(state.copyWith(profile: updated, isBusy: false));
   }
+
 
   Future<void> setAvailability(AvailabilityStatus status) async {
     if (status == AvailabilityStatus.online &&
@@ -824,7 +832,12 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     } else {
       list.add(offer);
       try {
-        FlutterRingtonePlayer().playNotification();
+        FlutterRingtonePlayer().play(
+          android: AndroidSounds.ringtone,
+          ios: IosSounds.triTone,
+          looping: false,
+          volume: 1.0,
+        );
       } catch (e) {
         debugPrint('Failed to play ringtone: $e');
       }

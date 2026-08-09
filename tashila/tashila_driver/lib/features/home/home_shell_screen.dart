@@ -1,6 +1,7 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/state/driver_app_state.dart';
@@ -16,8 +17,64 @@ class HomeShellScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeShellScreen> createState() => _HomeShellScreenState();
 }
 
-class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
+class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
+    with WidgetsBindingObserver {
   int currentIndex = 0;
+  bool _gpsAllowed = true;
+  bool _checkingGps = true;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _checkGpsPermission();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
+    if (lifecycleState == AppLifecycleState.resumed) {
+      _checkGpsPermission();
+    }
+  }
+
+  Future<void> _checkGpsPermission() async {
+    if (!mounted) return;
+    setState(() => _checkingGps = true);
+    try {
+      final hasService = await Geolocator.isLocationServiceEnabled();
+      if (!hasService) {
+        if (mounted) {
+          setState(() {
+            _gpsAllowed = false;
+            _checkingGps = false;
+          });
+        }
+        return;
+      }
+      final permission = await Geolocator.checkPermission();
+      final allowed = permission == LocationPermission.always ||
+          permission == LocationPermission.whileInUse;
+      if (mounted) {
+        setState(() {
+          _gpsAllowed = allowed;
+          _checkingGps = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) {
+        setState(() {
+          _gpsAllowed = false;
+          _checkingGps = false;
+        });
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,6 +86,81 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen> {
       });
       return const SizedBox.shrink();
     }
+
+    if (_checkingGps) {
+      return const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(color: AppColors.brandOrange),
+        ),
+      );
+    }
+
+    if (!_gpsAllowed) {
+      return Scaffold(
+        backgroundColor: Colors.white,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 30),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const Spacer(),
+                const Icon(
+                  Icons.location_off_rounded,
+                  size: 80,
+                  color: AppColors.brandOrange,
+                ),
+                const SizedBox(height: 24),
+                const Text(
+                  "يجب تمكين صلاحية الموقع (GPS) لاستخدام التطبيق",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                const Text(
+                  "يسجل التطبيق موقعك لربطك بالرحلات القريبة وتتبع مسارك أثناء الرحلة. يرجى تفعيل الموقع ومنح التطبيق صلاحية الوصول للموقع دائماً أو أثناء استخدام التطبيق.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.5,
+                    color: AppColors.textSecondary,
+                    height: 1.4,
+                  ),
+                ),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () async {
+                    await Geolocator.openAppSettings();
+                    await Geolocator.openLocationSettings();
+                    _checkGpsPermission();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.brandOrange,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  child: const Text(
+                    "تفعيل الصلاحية / تشغيل GPS",
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final hasActiveTrip = state.hasActiveTrip;
     final tabs = const [
       DriverHomeScreen(),

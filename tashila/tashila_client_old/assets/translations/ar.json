@@ -161,7 +161,7 @@
   "trait_bad_rough_driving": "قيادة عنيفة",
   "trait_bad_dirty_vehicle": "مركبة غير نظيفة",
   "trait_bad_wrong_route": "مسار غير مناسب",
-  "service_area_unavailable": "هذه الخدمة غير متوفرة حاليا في هذا المكان.",
+  "service_area_unavailable": "تعذر إنشاء رحلة، لانغطي هذه المنطقة حاليا",
   "service_not_in_area_message": "لا تتوفر هذه الخدمة في هذه المنطقة حاليا.",
   "trip_confirm_payment_button": "تأكيد الدفع",
   "trip_confirm_delivery_button": "تأكيد التسليم",
