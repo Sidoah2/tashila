@@ -964,6 +964,16 @@ class AppStateNotifier extends Notifier<AppState> {
           DateTime.tryParse(data['createdAt'] as String? ?? '') ??
           DateTime.now();
       _applyTripLocationsFromPayload(data);
+
+      TripStage initialStage = TripStage.searchingDriver;
+      if (status == 'accepted' || status == 'headingToPickup') {
+        initialStage = TripStage.driverEnRoute;
+      } else if (status == 'inProgress') {
+        initialStage = TripStage.tripStarted;
+      } else if (status == 'awaitingCash' || status == 'completed') {
+        initialStage = TripStage.arrivedSummary;
+      }
+
       state = state.copyWith(
         tripEndTimeNull: true,
         currentTripId: tripId,
@@ -973,7 +983,7 @@ class AppStateNotifier extends Notifier<AppState> {
         driverPlate: '',
         driverVehicleColor: '',
         driverVehicleModel: '',
-        tripStage: TripStage.searchingDriver,
+        tripStage: initialStage,
         tripStartTime: createdAt,
         estimatedPrice: fare ?? state.estimatedPrice,
       );
@@ -1125,6 +1135,7 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   void _startTripPolling(String tripId) {
+    _pollTimer?.cancel();
     _pollTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
       try {
         final res = await _apiClient.get<Map<String, dynamic>>(
