@@ -1212,10 +1212,54 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
     String? addressLabel,
     String? addressText,
     bool showCallClient = true,
+    bool showCancelButton = true,
     required String buttonText,
     required VoidCallback onButtonPressed,
   }) {
     final ratingVal = request.clientRating ?? 5.0;
+
+    final callButton = Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: request.clientPhone.trim().isNotEmpty
+            ? () => _callClient(request.clientPhone)
+            : null,
+        borderRadius: BorderRadius.circular(12),
+        child: Container(
+          height: 42,
+          padding: const EdgeInsets.symmetric(
+            horizontal: 14,
+          ),
+          decoration: BoxDecoration(
+            color: const Color(0xFFF5F6F8),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: Colors.grey.shade300,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(
+                Icons.phone_rounded,
+                size: 16,
+                color: AppColors.brandOrange,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                'call_client'.tr(),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -1350,93 +1394,57 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                             Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                Material(
-                                  color: Colors.transparent,
-                                  child: InkWell(
-                                    onTap: request.clientPhone.trim().isNotEmpty
-                                        ? () => _callClient(request.clientPhone)
-                                        : null,
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Container(
-                                      height: 42,
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 14,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFFF5F6F8),
+                                if (showCancelButton) ...[
+                                  callButton,
+                                ] else ...[
+                                  Expanded(child: callButton),
+                                ],
+                                if (showCancelButton) ...[
+                                  const SizedBox(width: 10),
+                                  Expanded(
+                                    child: Material(
+                                      color: Colors.transparent,
+                                      child: InkWell(
+                                        onTap: () {
+                                          notifier.cancelActiveTrip();
+                                        },
                                         borderRadius: BorderRadius.circular(12),
-                                        border: Border.all(
-                                          color: Colors.grey.shade300,
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisSize: MainAxisSize.min,
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          const Icon(
-                                            Icons.phone_rounded,
-                                            size: 16,
-                                            color: AppColors.brandOrange,
+                                        child: Container(
+                                          height: 42,
+                                          padding: const EdgeInsets.symmetric(
+                                            horizontal: 10,
                                           ),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'call_client'.tr(),
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.bold,
-                                              color: Colors.black,
+                                          decoration: BoxDecoration(
+                                            color: const Color(0xFFF5F6F8),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            border: Border.all(
+                                              color: Colors.grey.shade300,
                                             ),
                                           ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                const SizedBox(width: 10),
-                                Expanded(
-                                  child: Material(
-                                    color: Colors.transparent,
-                                    child: InkWell(
-                                      onTap: () {
-                                        notifier.cancelActiveTrip();
-                                      },
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Container(
-                                        height: 42,
-                                        padding: const EdgeInsets.symmetric(
-                                          horizontal: 10,
-                                        ),
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF5F6F8),
-                                          borderRadius: BorderRadius.circular(
-                                            12,
-                                          ),
-                                          border: Border.all(
-                                            color: Colors.grey.shade300,
-                                          ),
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                'cancel'.tr(),
-                                                style: const TextStyle(
-                                                  fontSize: 13,
-                                                  fontWeight: FontWeight.bold,
-                                                  color: Colors.black,
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.center,
+                                            children: [
+                                              FittedBox(
+                                                fit: BoxFit.scaleDown,
+                                                child: Text(
+                                                  'cancel'.tr(),
+                                                  style: const TextStyle(
+                                                    fontSize: 13,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: Colors.black,
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
+                                            ],
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
-                                ),
+                                ],
                               ],
                             ),
                           ],
@@ -1868,6 +1876,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
         addressText: request.pickup,
         buttonText: 'driver_arrived_at_client'.tr(),
         onButtonPressed: notifier.confirmArrivedAtClient,
+        showCancelButton: true,
       );
     }
 
@@ -1880,6 +1889,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
         addressText: request.dropOff,
         buttonText: 'complete_trip'.tr(),
         onButtonPressed: notifier.completeTrip,
+        showCancelButton: false,
       );
     }
 
