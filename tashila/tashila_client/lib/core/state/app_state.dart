@@ -936,14 +936,12 @@ class AppStateNotifier extends Notifier<AppState> {
       // ───────────────────────────────────────────────────────────────────────
 
       // ─── Guard: post-trip race condition ───────────────────────────────────
-      // After submitRating() tears down state (tripStage → idle), the app
-      // lifecycle may fire resumeActiveTripIfAny() before the backend has
-      // persisted the driverRating (so alreadyRated is still false above).
-      // If we are already idle and the trip is in a terminal post-ride
-      // status (awaitingCash / completed), there is nothing to resume —
-      // the cleanup already happened on the client side.
-      if (state.tripStage == TripStage.idle &&
-          (status == 'awaitingCash' || status == 'completed')) {
+      // Check if we have already rated or cancelled this trip in our local session history.
+      // This prevents the lifecycle resume from restoring a trip that was just finished.
+      final bool alreadyRatedOrCancelledLocally = state.history.any(
+        (record) => record.id == tripId && (record.rating > 0 || record.cancelled),
+      );
+      if (alreadyRatedOrCancelledLocally) {
         return false;
       }
       // ───────────────────────────────────────────────────────────────────────
@@ -1165,7 +1163,9 @@ class AppStateNotifier extends Notifier<AppState> {
         (state.currentTripId != null &&
             state.currentTripId!.isNotEmpty &&
             state.currentTripId != tripId)) {
-      debugPrint('[Tashila] _applyTripData IGNORED: stage is idle or trip ID mismatch');
+      debugPrint(
+        '[Tashila] _applyTripData IGNORED: stage is idle or trip ID mismatch',
+      );
       return;
     }
     _applyTripLocationsFromPayload(data);
