@@ -124,10 +124,14 @@ class DriverProfileViewScreen extends ConsumerWidget {
                               backgroundColor: AppColors.brandOrange.withValues(
                                 alpha: 0.15,
                               ),
-                              backgroundImage: (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty)
+                              backgroundImage:
+                                  (profile?.avatarUrl != null &&
+                                      profile!.avatarUrl!.isNotEmpty)
                                   ? NetworkImage(profile.avatarUrl!)
                                   : null,
-                              child: (profile?.avatarUrl == null || profile!.avatarUrl!.isEmpty)
+                              child:
+                                  (profile?.avatarUrl == null ||
+                                      profile!.avatarUrl!.isEmpty)
                                   ? Text(
                                       firstLetter,
                                       style: const TextStyle(
