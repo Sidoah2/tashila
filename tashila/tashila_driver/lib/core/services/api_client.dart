@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:http_parser/http_parser.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -140,8 +141,21 @@ class ApiClient {
     String filename, {
     String method = 'PUT',
   }) async {
+    final ext = filename.split('.').last.toLowerCase();
+    final contentTypeStr = switch (ext) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      'pdf' => 'application/pdf',
+      _ => 'application/octet-stream',
+    };
+    final mediaType = MediaType.parse(contentTypeStr);
     final formData = FormData.fromMap({
-      fieldName: MultipartFile.fromBytes(bytes, filename: filename),
+      fieldName: MultipartFile.fromBytes(
+        bytes,
+        filename: filename,
+        contentType: mediaType,
+      ),
     });
     if (method == 'POST') {
       return _dio.post<T>(path, data: formData);

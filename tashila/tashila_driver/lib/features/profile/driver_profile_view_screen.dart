@@ -124,14 +124,19 @@ class DriverProfileViewScreen extends ConsumerWidget {
                               backgroundColor: AppColors.brandOrange.withValues(
                                 alpha: 0.15,
                               ),
-                              child: Text(
-                                firstLetter,
-                                style: const TextStyle(
-                                  fontSize: 32,
-                                  fontWeight: FontWeight.w900,
-                                  color: AppColors.brandOrange,
-                                ),
-                              ),
+                              backgroundImage: (profile?.avatarUrl != null && profile!.avatarUrl!.isNotEmpty)
+                                  ? NetworkImage(profile.avatarUrl!)
+                                  : null,
+                              child: (profile?.avatarUrl == null || profile!.avatarUrl!.isEmpty)
+                                  ? Text(
+                                      firstLetter,
+                                      style: const TextStyle(
+                                        fontSize: 32,
+                                        fontWeight: FontWeight.w900,
+                                        color: AppColors.brandOrange,
+                                      ),
+                                    )
+                                  : null,
                             ),
                           ),
                         ),

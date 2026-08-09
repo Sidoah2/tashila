@@ -171,7 +171,7 @@
   "trait_bad_rough_driving": "Rough driving",
   "trait_bad_dirty_vehicle": "Untidy vehicle",
   "trait_bad_wrong_route": "Poor route",
-  "service_area_unavailable": "This service is not currently available in this area.",
+  "service_area_unavailable": "Unable to create a ride; we do not currently cover this area.",
   "booking_neighborhoods_title": "Quick neighborhood",
   "truck_max_load_700kg": "Maximum load does not exceed 700 kg.",
   "truck_max_load_1400kg": "Maximum load does not exceed 1400 kg.",

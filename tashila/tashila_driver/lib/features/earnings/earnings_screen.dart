@@ -207,11 +207,6 @@ class _EarningsListView extends StatelessWidget {
               _detailRow(ctx, 'earnings_trip_detail_status'.tr(), statusLabel),
               _detailRow(
                 ctx,
-                'earnings_trip_detail_client'.tr(),
-                trip.clientName,
-              ),
-              _detailRow(
-                ctx,
                 'earnings_trip_detail_distance'.tr(),
                 '${westernDigits(trip.distanceKm.toStringAsFixed(1))} km',
               ),

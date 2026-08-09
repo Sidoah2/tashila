@@ -1011,7 +1011,7 @@ class _MapLayerState extends ConsumerState<_MapLayer> {
       initialCameraPosition: CameraPosition(target: target, zoom: _mapZoom),
       gestureRecognizers: _gestures,
       myLocationEnabled: true,
-      myLocationButtonEnabled: true,
+      myLocationButtonEnabled: false,
       zoomControlsEnabled: false,
       markers: markers,
       polylines: polylines,
@@ -1398,7 +1398,9 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                                   child: Material(
                                     color: Colors.transparent,
                                     child: InkWell(
-                                      onTap: () {},
+                                      onTap: () {
+                                        notifier.cancelActiveTrip();
+                                      },
                                       borderRadius: BorderRadius.circular(12),
                                       child: Container(
                                         height: 42,
@@ -3343,7 +3345,7 @@ class DriverDrawer extends ConsumerWidget {
                           side: BorderSide(color: Colors.grey.shade300),
                         ),
                         child: Text(
-                          'cancel'.tr(),
+                          'cancelk'.tr(),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w700,

@@ -13,6 +13,7 @@
   "send_otp": "Send OTP",
   "otp_title": "OTP Verification",
   "otp_enter_code": "Enter the verification code sent by SMS.",
+  "invalid_otp": "Invalid OTP code. Please try again.",
   "otp_sent_to": "Code sent to {phone}",
   "otp_no_code": "Did not receive a code?",
   "otp_resend": "Resend",
