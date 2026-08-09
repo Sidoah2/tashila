@@ -79,6 +79,9 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(driverAppStateProvider);
+    if (!state.isAuthenticated) {
+      return const SizedBox.shrink();
+    }
     final ready = state.profile?.isReadyForDashboard ?? false;
     if (!ready) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
