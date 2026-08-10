@@ -113,6 +113,7 @@
   "vehicle_color_label": "Couleur du vehicule",
   "vehicle_color_hint": "ex. Blanc",
   "vehicle_plate_label": "Immatriculation",
+  "vehicle_plate": "Immatriculation",
   "vehicle_plate_hint": "ex. 12345 116 35",
   "validation_required_profile_photo": "Veuillez televerser votre photo de profil.",
   "validation_required_documents": "Veuillez televerser tous les documents requis.",
