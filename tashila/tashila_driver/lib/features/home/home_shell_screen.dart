@@ -58,7 +58,8 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
         return;
       }
       final permission = await Geolocator.checkPermission();
-      final allowed = permission == LocationPermission.always ||
+      final allowed =
+          permission == LocationPermission.always ||
           permission == LocationPermission.whileInUse;
       if (mounted) {
         setState(() {

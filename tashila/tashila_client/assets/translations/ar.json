@@ -268,5 +268,6 @@
   "cancel_button": "إلغاء",
   "settings_button": "الإعدادات",
   "location_disabled_body": "خدمات تحديد الموقع (GPS) مغلقة. يرجى تفعيلها من الإعدادات للمتابعة.",
-  "link_error": "عذراً، تعذر فتح الرابط."
+  "link_error": "عذراً، تعذر فتح الرابط.",
+  "connectivity_no_internet": "لا يوجد اتصال بالإنترنت"
 }

@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -28,6 +29,7 @@ class _DriverProfileEditScreenState
 
   Future<void> _changeAvatar() async {
     if (!mounted) return;
+    final appStateNotifier = ref.read(driverAppStateProvider.notifier);
     final source = await _showMediaSourceSheet();
     if (!mounted || source == null) return;
 
@@ -65,10 +67,12 @@ class _DriverProfileEditScreenState
         break;
     }
 
-    if (path == null || !mounted) return;
-    setState(() => _saving = true);
+    if (path == null) return;
+    if (mounted) {
+      setState(() => _saving = true);
+    }
     try {
-      await ref.read(driverAppStateProvider.notifier).setProfilePhotoPath(path);
+      await appStateNotifier.setProfilePhotoPath(path);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -256,6 +260,9 @@ class _DriverProfileEditScreenState
   late final TextEditingController _modelCtrl;
   late final TextEditingController _colorCtrl;
   late final TextEditingController _plateCtrl;
+  late final TextEditingController _plateSerialCtrl;
+  late final TextEditingController _plateYearCtrl;
+  late final TextEditingController _plateStateCtrl;
   bool _saving = false;
 
   @override
@@ -266,6 +273,18 @@ class _DriverProfileEditScreenState
     _modelCtrl = TextEditingController(text: profile?.vehicleModel ?? '');
     _colorCtrl = TextEditingController(text: profile?.vehicleColor ?? '');
     _plateCtrl = TextEditingController(text: profile?.vehiclePlate ?? '');
+
+    final plate = profile?.vehiclePlate.trim() ?? '';
+    final parts = plate.split(' ');
+    if (parts.length >= 3) {
+      _plateSerialCtrl = TextEditingController(text: parts[0]);
+      _plateYearCtrl = TextEditingController(text: parts[1]);
+      _plateStateCtrl = TextEditingController(text: parts[2]);
+    } else {
+      _plateSerialCtrl = TextEditingController(text: plate);
+      _plateYearCtrl = TextEditingController();
+      _plateStateCtrl = TextEditingController();
+    }
   }
 
   @override
@@ -274,10 +293,40 @@ class _DriverProfileEditScreenState
     _modelCtrl.dispose();
     _colorCtrl.dispose();
     _plateCtrl.dispose();
+    _plateSerialCtrl.dispose();
+    _plateYearCtrl.dispose();
+    _plateStateCtrl.dispose();
     super.dispose();
   }
 
   Future<void> _saveProfile() async {
+    final serial = _plateSerialCtrl.text.trim();
+    final year = _plateYearCtrl.text.trim();
+    final state = _plateStateCtrl.text.trim();
+
+    if (serial.isEmpty || year.isEmpty || state.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('validation_required_vehicle_plate'.tr()),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+    if (year.length != 3 || state.length != 2) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('validation_invalid_plate_format'.tr()),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    _plateCtrl.text = '$serial $year $state';
+
     if (!_formKey.currentState!.validate()) return;
     setState(() => _saving = true);
     final notifier = ref.read(driverAppStateProvider.notifier);
@@ -515,10 +564,115 @@ class _DriverProfileEditScreenState
                       icon: Icons.palette_rounded,
                     ),
                     const SizedBox(height: 16),
-                    _buildModernInputField(
-                      controller: _plateCtrl,
-                      label: 'vehicle_plate'.tr(),
-                      icon: Icons.badge_rounded,
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.only(left: 2, bottom: 6),
+                          child: Text(
+                            'vehicle_plate'.tr(),
+                            style: const TextStyle(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                        Directionality(
+                          textDirection: ui.TextDirection.ltr,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                flex: 3,
+                                child: TextFormField(
+                                  controller: _plateSerialCtrl,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  maxLength: 6,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: '12938',
+                                    counterText: "",
+                                    filled: true,
+                                    fillColor: AppColors.bg,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  onChanged: (val) {
+                                    if (val.length == 6) {
+                                      FocusScope.of(context).nextFocus();
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _plateYearCtrl,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  maxLength: 3,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: '213',
+                                    counterText: "",
+                                    filled: true,
+                                    fillColor: AppColors.bg,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                  onChanged: (val) {
+                                    if (val.length == 3) {
+                                      FocusScope.of(context).nextFocus();
+                                    }
+                                  },
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                flex: 2,
+                                child: TextFormField(
+                                  controller: _plateStateCtrl,
+                                  keyboardType: TextInputType.number,
+                                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                  maxLength: 2,
+                                  style: const TextStyle(
+                                    fontSize: 15,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppColors.textPrimary,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: '29',
+                                    counterText: "",
+                                    filled: true,
+                                    fillColor: AppColors.bg,
+                                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

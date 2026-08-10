@@ -10,6 +10,7 @@ import 'core/router/app_router.dart';
 import 'core/state/driver_app_state.dart';
 import 'core/theme/app_theme.dart';
 import 'package:device_preview/device_preview.dart';
+import 'package:tashila_driver/core/widgets/connectivity_banner.dart';
 
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
 
@@ -91,6 +92,14 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       routerConfig: router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const ConnectivityBanner(),
+          ],
+        );
+      },
     );
   }
 }

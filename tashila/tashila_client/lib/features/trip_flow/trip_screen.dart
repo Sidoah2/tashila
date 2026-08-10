@@ -70,11 +70,13 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     }
   }
 
+  /*
   static bool _showDriverMarker(TripStage stage) {
     return stage != TripStage.idle &&
         stage != TripStage.searchingDriver &&
         stage != TripStage.noDriversFound;
   }
+  */
 
   Future<void> _onCancelTripPressed(BuildContext context) async {
     final reason = await showCancelTripReasonSheet(context);
@@ -98,9 +100,9 @@ class _TripScreenState extends ConsumerState<TripScreen> {
 
     final pickup = LatLng(state.pickupLat, state.pickupLng);
     final dropoff = LatLng(state.dropoffLat, state.dropoffLng);
-    final driverPos = state.hasDriverLocation
-        ? LatLng(state.driverLat!, state.driverLng!)
-        : _driverAlongRoute(pickup, dropoff, state.tripStage);
+    // final driverPos = state.hasDriverLocation
+    //     ? LatLng(state.driverLat!, state.driverLng!)
+    //     : _driverAlongRoute(pickup, dropoff, state.tripStage);
     final mid = LatLng(
       (pickup.latitude + dropoff.latitude) / 2,
       (pickup.longitude + dropoff.longitude) / 2,
@@ -111,8 +113,8 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     );
     final zoom = span > 0.08 ? 11.0 : (span > 0.03 ? 12.5 : 14.0);
 
-    final showDriverMarker =
-        _showDriverMarker(state.tripStage) && state.hasDriverLocation;
+    // final showDriverMarker =
+    //     _showDriverMarker(state.tripStage) && state.hasDriverLocation;
     final maxPanelH = (MediaQuery.sizeOf(context).height * 0.45).clamp(
       320.0,
       480.0,
@@ -131,6 +133,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         icon: BitmapDescriptor.defaultMarkerWithHue(BitmapDescriptor.hueOrange),
       ),
     };
+    /*
     if (showDriverMarker) {
       final driverTitle = state.driverName.isNotEmpty
           ? state.driverName
@@ -151,6 +154,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
         ),
       );
     }
+    */
 
     return PopScope(
       canPop: true,
@@ -569,7 +573,9 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                   const SizedBox(height: 4),
                   Text(
                     state.driverVehicleModel.isNotEmpty
-                        ? state.driverVehicleModel
+                        ? (state.driverVehicleColor.isNotEmpty
+                            ? '${state.driverVehicleModel} (${state.driverVehicleColor})'
+                            : state.driverVehicleModel)
                         : 'trip_vehicle_pending'.tr(),
                     style: const TextStyle(
                       fontSize: 12,
@@ -1178,6 +1184,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
   }
 
+  /*
   static LatLng _driverAlongRoute(LatLng a, LatLng b, TripStage stage) {
     final t = switch (stage) {
       TripStage.searchingDriver => 0.08,
@@ -1193,18 +1200,14 @@ class _TripScreenState extends ConsumerState<TripScreen> {
       a.longitude + (b.longitude - a.longitude) * t,
     );
   }
+  */
 }
 
 String _formatDuration(DateTime? start, DateTime? end) {
   if (start == null || end == null) return '—';
   final d = end.difference(start);
-  if (d.inHours >= 1) {
-    return ltrNumber(
-      '${d.inHours} ${'trip_unit_hours'.tr()} ${d.inMinutes.remainder(60)} ${'trip_unit_minutes'.tr()}',
-    );
-  }
-  if (d.inMinutes >= 1) {
-    return ltrNumber('${d.inMinutes} ${'trip_unit_minutes'.tr()}');
-  }
-  return ltrNumber('${d.inSeconds} ${'trip_unit_seconds'.tr()}');
+  final hours = d.inHours.toString().padLeft(2, '0');
+  final minutes = d.inMinutes.remainder(60).toString().padLeft(2, '0');
+  final seconds = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+  return ltrNumber('$hours:$minutes:$seconds');
 }

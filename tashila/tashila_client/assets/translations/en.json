@@ -268,5 +268,6 @@
   "cancel_button": "Cancel",
   "settings_button": "Settings",
   "location_disabled_body": "Location services (GPS) are disabled. Please enable them in settings to continue.",
-  "link_error": "Sorry, could not open the link."
+  "link_error": "Sorry, could not open the link.",
+  "connectivity_no_internet": "No internet connection"
 }

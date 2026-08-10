@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -9,6 +10,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 
+import '../config/map_config.dart';
 import '../models/models.dart';
 import '../services/api_client.dart';
 import '../services/http_services.dart';
@@ -69,6 +71,7 @@ class DriverAppState {
     this.incomingOffers = const [],
     this.offerCountdownTick = 0,
     this.currentRequest,
+    this.polylinePoints = const [],
     this.tripStatus = TripStatus.idle,
     this.tripHistory = const [],
     this.platformEarnings,
@@ -99,6 +102,7 @@ class DriverAppState {
   }
 
   final TripRequest? currentRequest;
+  final List<LatLng> polylinePoints;
   final TripStatus tripStatus;
   final List<TripRecord> tripHistory;
   final DriverPlatformEarnings? platformEarnings;
@@ -138,6 +142,7 @@ class DriverAppState {
     int? offerCountdownTick,
     TripRequest? currentRequest,
     bool clearCurrentRequest = false,
+    List<LatLng>? polylinePoints,
     TripStatus? tripStatus,
     List<TripRecord>? tripHistory,
     DriverPlatformEarnings? platformEarnings,
@@ -167,6 +172,9 @@ class DriverAppState {
       currentRequest: clearCurrentRequest
           ? null
           : (currentRequest ?? this.currentRequest),
+      polylinePoints: clearCurrentRequest
+          ? const []
+          : (polylinePoints ?? this.polylinePoints),
       tripStatus: tripStatus ?? this.tripStatus,
       tripHistory: tripHistory ?? this.tripHistory,
       platformEarnings: clearPlatformEarnings
@@ -400,6 +408,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         clearIncomingOffers: true,
       ),
     );
+    _fetchRouteDirections(request);
 
     if (reconnectSocket) {
       await _ensureDriverSocket(
@@ -751,7 +760,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Future<void> setProfilePhotoPath(String? localPath) async {
     debugPrint('[AVATAR] setProfilePhotoPath called — localPath=$localPath');
     final current = state.profile ?? DriverProfile.empty();
-    debugPrint('[AVATAR] current.profilePhotoPath=${current.profilePhotoPath}  avatarUrl=${current.avatarUrl}');
+    debugPrint(
+      '[AVATAR] current.profilePhotoPath=${current.profilePhotoPath}  avatarUrl=${current.avatarUrl}',
+    );
     debugPrint('[AVATAR] isReadyForDashboard=${current.isReadyForDashboard}');
     _setState(state.copyWith(isBusy: true, clearError: true));
 
@@ -761,19 +772,27 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     bool uploadFailed = false;
     if (localPath != null && localPath.isNotEmpty) {
       final httpRepo = _profileRepository;
-      debugPrint('[AVATAR] _profileRepository runtimeType=${httpRepo.runtimeType}');
+      debugPrint(
+        '[AVATAR] _profileRepository runtimeType=${httpRepo.runtimeType}',
+      );
       if (httpRepo is HttpProfileRepository) {
-        debugPrint('[AVATAR] Starting uploadAvatar to PUT /drivers/me/avatar ...');
+        debugPrint(
+          '[AVATAR] Starting uploadAvatar to PUT /drivers/me/avatar ...',
+        );
         try {
           avatarUrl = await httpRepo.uploadAvatar(localPath);
-          debugPrint('[AVATAR] uploadAvatar SUCCESS — returned avatarUrl=$avatarUrl');
+          debugPrint(
+            '[AVATAR] uploadAvatar SUCCESS — returned avatarUrl=$avatarUrl',
+          );
         } catch (e, st) {
           debugPrint('[AVATAR] uploadAvatar FAILED — error: $e');
           debugPrint('[AVATAR] stack: $st');
           uploadFailed = true;
         }
       } else {
-        debugPrint('[AVATAR] Repository is NOT HttpProfileRepository — skip backend upload');
+        debugPrint(
+          '[AVATAR] Repository is NOT HttpProfileRepository — skip backend upload',
+        );
       }
     } else {
       debugPrint('[AVATAR] localPath is null/empty — clearing avatar');
@@ -787,7 +806,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       // Only update avatarUrl if backend upload succeeded.
       avatarUrl: avatarUrl ?? (localPath == null ? null : current.avatarUrl),
     );
-    debugPrint('[AVATAR] updated.profilePhotoPath=${updated.profilePhotoPath}  avatarUrl=${updated.avatarUrl}  uploadFailed=$uploadFailed');
+    debugPrint(
+      '[AVATAR] updated.profilePhotoPath=${updated.profilePhotoPath}  avatarUrl=${updated.avatarUrl}  uploadFailed=$uploadFailed',
+    );
     await _saveProfile(updated);
     debugPrint('[AVATAR] local profile saved');
     _setState(
@@ -852,10 +873,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       list.add(offer);
       try {
         FlutterRingtonePlayer().play(
-          android: AndroidSounds.ringtone,
-          ios: IosSounds.triTone,
+          fromAsset: "assets/sounds/notification_sound.mp3",
           looping: false,
-          volume: 1.0,
+          volume: 4.0,
         );
       } catch (e) {
         debugPrint('Failed to play ringtone: $e');
@@ -922,6 +942,15 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           infoMessage: 'trip_cancelled_by_client'.tr(),
         ),
       );
+      try {
+        FlutterRingtonePlayer().play(
+          fromAsset: "assets/sounds/notification_sound.mp3",
+          looping: false,
+          volume: 4.0,
+        );
+      } catch (e) {
+        debugPrint('Failed to play ringtone: $e');
+      }
     }
   }
 
@@ -1156,6 +1185,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         clearError: true,
       ),
     );
+    _fetchRouteDirections(request);
     _startActiveTripPolling();
     return true;
   }
@@ -1382,5 +1412,62 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Future<void> _saveTrips(List<TripRecord> trips) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(kTrips, encodeTrips(trips));
+  }
+
+  Future<void> _fetchRouteDirections(TripRequest request) async {
+    final origin = request.pickupLatLng;
+    final dest = request.dropOffLatLng;
+    try {
+      final dio = Dio();
+      final response = await dio.get<Map<String, dynamic>>(
+        'https://maps.googleapis.com/maps/api/directions/json',
+        queryParameters: {
+          'origin': '${origin.latitude},${origin.longitude}',
+          'destination': '${dest.latitude},${dest.longitude}',
+          'key': MapConfig.mapApiKey,
+        },
+      );
+      final data = response.data;
+      if (data == null || data['status'] != 'OK') return;
+      final routes = data['routes'] as List<dynamic>?;
+      if (routes == null || routes.isEmpty) return;
+      final firstRoute = routes.first as Map<String, dynamic>;
+      final overviewPolyline =
+          firstRoute['overview_polyline'] as Map<String, dynamic>?;
+      final pointsStr = overviewPolyline?['points'] as String?;
+      if (pointsStr == null || pointsStr.isEmpty) return;
+      final points = _decodePolyline(pointsStr);
+      _setState(state.copyWith(polylinePoints: points));
+    } catch (_) {}
+  }
+
+  List<LatLng> _decodePolyline(String encoded) {
+    List<LatLng> points = [];
+    int index = 0, len = encoded.length;
+    int lat = 0, lng = 0;
+
+    while (index < len) {
+      int b, shift = 0, result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlat = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lat += dlat;
+
+      shift = 0;
+      result = 0;
+      do {
+        b = encoded.codeUnitAt(index++) - 63;
+        result |= (b & 0x1f) << shift;
+        shift += 5;
+      } while (b >= 0x20);
+      int dlng = ((result & 1) != 0 ? ~(result >> 1) : (result >> 1));
+      lng += dlng;
+
+      points.add(LatLng(lat / 1E5, lng / 1E5));
+    }
+    return points;
   }
 }

@@ -9,6 +9,7 @@ import 'package:tashila_client/core/router/app_router.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_theme.dart';
 import 'package:tashila_client/core/widgets/rating_sheet_host.dart';
+import 'package:tashila_client/core/widgets/connectivity_banner.dart';
 
 const _supportedLocales = [Locale('ar'), Locale('en'), Locale('fr')];
 
@@ -98,6 +99,26 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
           _showGlobalRatingSheet();
         });
       }
+      if (next.showDriverCancelledDialog) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!mounted) return;
+          ref.read(appStateProvider.notifier).clearDriverCancelledDialog();
+          showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: Text('order_cancelled'.tr()),
+              content: Text('driver_cancelled'.tr()),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: Text('ok'.tr()),
+                ),
+              ],
+            ),
+          );
+        });
+      }
     });
 
     final router = ref.watch(appRouterProvider);
@@ -109,6 +130,14 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
       supportedLocales: context.supportedLocales,
       localizationsDelegates: context.localizationDelegates,
       routerConfig: router,
+      builder: (context, child) {
+        return Stack(
+          children: [
+            if (child != null) child,
+            const ConnectivityBanner(),
+          ],
+        );
+      },
     );
   }
 }
