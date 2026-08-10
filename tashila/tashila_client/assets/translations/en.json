@@ -242,7 +242,7 @@
   "truck_type_label": "Truck Type",
   "no_drivers_found": "No drivers found",
   "client_cancelled": "Cancelled by client",
-  "driver_cancelled": "Cancelled by driver",
+  "driver_cancelled": "The driver has cancelled the trip. Please try searching for other trips.",
   "timeout": "Timeout",
   "rating_how_was_driver": "How was your driver?",
   "rating_poor": "Poor",
