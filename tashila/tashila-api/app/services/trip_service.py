@@ -781,7 +781,12 @@ async def driver_cancel_trip(trip_id: str, driver_id: str, reason: str | None = 
     await dispatch_service.on_trip_finished(driver_id)
     await publish(
         "trip:status_changed",
-        _json_safe({"tripId": trip_id, "status": "cancelled", "driverId": driver_id}),
+        _json_safe({
+            "tripId": trip_id,
+            "status": "cancelled",
+            "driverId": driver_id,
+            "cancelledReason": normalized_reason,
+        }),
     )
     await notify_trip_status_changed(
         trip_id,

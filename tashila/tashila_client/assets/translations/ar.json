@@ -242,7 +242,7 @@
   "truck_type_label": "نوع الشاحنة",
   "no_drivers_found": "لم يتم العثور على سائقين",
   "client_cancelled": "ألغيت من قبل العميل",
-  "driver_cancelled": "ألغيت من قبل السائق",
+  "driver_cancelled": "لقد ألغى السائق الرحلة. يرجى محاولة البحث عن رحلات أخرى.",
   "timeout": "انتهت المهلة",
   "rating_how_was_driver": "كيف كان السائق؟",
   "rating_poor": "سيئ",

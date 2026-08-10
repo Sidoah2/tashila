@@ -242,7 +242,7 @@
   "truck_type_label": "Type de camion",
   "no_drivers_found": "Aucun chauffeur trouvé",
   "client_cancelled": "Annulé par le client",
-  "driver_cancelled": "Annulé par le chauffeur",
+  "driver_cancelled": "Le chauffeur a annulé la course. Veuillez essayer de rechercher d'autres trajets.",
   "timeout": "Délai expiré",
   "rating_how_was_driver": "Comment était votre chauffeur ?",
   "rating_poor": "Médiocre",
