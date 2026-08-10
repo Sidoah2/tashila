@@ -4,6 +4,7 @@ import 'dart:ui' as ui;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -39,6 +40,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   final _phoneController = TextEditingController();
   final _emailController = TextEditingController();
   final _vehiclePlateController = TextEditingController();
+  final _plateSerialController = TextEditingController();
+  final _plateYearController = TextEditingController();
+  final _plateStateController = TextEditingController();
   final _vehicleColorController = TextEditingController();
   final _vehicleModelController = TextEditingController();
   String? _truckType;
@@ -65,11 +69,17 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   @override
   void dispose() {
+    print(
+      "[DEBUG_PHOTO] ProfileSetupScreenState dispose() called! Is it really dead?",
+    );
     _approvalPollTimer?.cancel();
     _nameController.dispose();
     _phoneController.dispose();
     _emailController.dispose();
     _vehiclePlateController.dispose();
+    _plateSerialController.dispose();
+    _plateYearController.dispose();
+    _plateStateController.dispose();
     _vehicleColorController.dispose();
     _vehicleModelController.dispose();
     super.dispose();
@@ -550,6 +560,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   Future<void> _pickProfilePhoto() async {
     print("[DEBUG_PHOTO] _pickProfilePhoto called");
     if (!mounted) return;
+    final appStateNotifier = ref.read(driverAppStateProvider.notifier);
     final source = await _showMediaSourceSheet();
     print("[DEBUG_PHOTO] Selected source: $source");
     if (!mounted || source == null) {
@@ -588,7 +599,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       case _MediaPickSource.files:
         print("[DEBUG_PHOTO] Launching file picker...");
         final result = await FilePicker.pickFiles(
-          type: FileType.image,
+          type: FileType.custom,
+          allowedExtensions: ['jpg', 'jpeg', 'png'],
           allowMultiple: false,
           withData: false,
         );
@@ -603,20 +615,28 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
 
     print("[DEBUG_PHOTO] Final path to save: $path");
-    if (path == null || !mounted) {
-      print(
-        "[DEBUG_PHOTO] Path is null or widget not mounted, aborting upload",
-      );
+    if (path == null) {
+      print("[DEBUG_PHOTO] Path is null, aborting upload");
       return;
     }
+    final ext = path.split('.').last.toLowerCase();
+    if (['mp4', 'mov', 'avi', 'mkv', '3gp', 'webm', 'gif'].contains(ext)) {
+      setState(() {
+        _profilePhotoError = 'validation_video_not_allowed'.tr();
+      });
+      return;
+    }
+    setState(() {
+      _profilePhotoError = null;
+    });
     print("[DEBUG_PHOTO] Invoking setProfilePhotoPath in AppState...");
-    await ref.read(driverAppStateProvider.notifier).setProfilePhotoPath(path);
+    await appStateNotifier.setProfilePhotoPath(path);
     print("[DEBUG_PHOTO] setProfilePhotoPath execution finished");
   }
 
   Future<void> _pickDocument(DocumentType type) async {
-    final notifier = ref.read(driverAppStateProvider.notifier);
     if (!mounted) return;
+    final appStateNotifier = ref.read(driverAppStateProvider.notifier);
     final source = await _showMediaSourceSheet();
     if (!mounted || source == null) return;
 
@@ -632,13 +652,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         if (x != null) {
           fileName = _fileNameFromXFile(x, type.name);
           final stablePath = await persistPickedImage(x, type.name);
-          if (!mounted) return;
-          await notifier.uploadDocument(
+          await appStateNotifier.uploadDocument(
             type,
             fileName: fileName,
             filePath: stablePath,
           );
-          return;
+          break;
         }
         break;
       case _MediaPickSource.gallery:
@@ -649,13 +668,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         if (xg != null) {
           fileName = _fileNameFromXFile(xg, type.name);
           final stablePath = await persistPickedImage(xg, type.name);
-          if (!mounted) return;
-          await notifier.uploadDocument(
+          await appStateNotifier.uploadDocument(
             type,
             fileName: fileName,
             filePath: stablePath,
           );
-          return;
+          break;
         }
         break;
       case _MediaPickSource.files:
@@ -671,8 +689,8 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               ? f.name
               : '${type.name}_${DateTime.now().millisecondsSinceEpoch}';
           final path = f.path;
-          if (path != null && mounted) {
-            await notifier.uploadDocument(
+          if (path != null) {
+            await appStateNotifier.uploadDocument(
               type,
               fileName: fileName,
               filePath: path,
@@ -682,10 +700,12 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
         break;
     }
 
-    if (!mounted) return;
-    final updated = ref.read(driverAppStateProvider).profile;
-    if (updated != null && updated.documents.every((d) => d.hasUploadedImage)) {
-      setState(() => _documentsError = null);
+    if (mounted) {
+      final updated = ref.read(driverAppStateProvider).profile;
+      if (updated != null &&
+          updated.documents.every((d) => d.hasUploadedImage)) {
+        setState(() => _documentsError = null);
+      }
     }
   }
 
@@ -798,14 +818,24 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     }
 
     if (_wizardStep == 2) {
+      final serial = _plateSerialController.text.trim();
+      final year = _plateYearController.text.trim();
+      final state = _plateStateController.text.trim();
+
       setState(() {
         _didAttemptSubmit = true;
         _truckTypeError = isValidCabinTruckType(_truckType ?? '')
             ? null
             : 'validation_required_truck_type'.tr();
-        _vehiclePlateError = _vehiclePlateController.text.trim().length >= 2
-            ? null
-            : 'validation_required_vehicle_plate'.tr();
+
+        if (serial.isEmpty || year.isEmpty || state.isEmpty) {
+          _vehiclePlateError = 'validation_required_vehicle_plate'.tr();
+        } else if (year.length != 3 || state.length != 2) {
+          _vehiclePlateError = 'validation_invalid_plate_format'.tr();
+        } else {
+          _vehiclePlateError = null;
+        }
+
         _vehicleColorError = _vehicleColorController.text.trim().isNotEmpty
             ? null
             : 'validation_required_vehicle_color'.tr();
@@ -822,6 +852,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           _vehicleModelError != null) {
         return;
       }
+      _vehiclePlateController.text = '$serial $year $state';
       await notifier.saveProfile(
         name: _nameController.text.trim(),
         phone: _phoneController.text.trim(),
@@ -910,29 +941,20 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                 tooltip: 'back'.tr(),
                 onPressed: state.isBusy
                     ? null
-                    : () {
+                    : () async {
                         if (_wizardStep > 0) {
                           setState(() => _wizardStep--);
-                        } else if (context.canPop()) {
-                          context.pop();
+                        } else {
+                          await notifier.logout();
+                          if (context.mounted) {
+                            context.go('/login');
+                          }
                         }
                       },
                 icon: const Icon(Icons.arrow_back),
               ),
               Expanded(child: _WizardProgressBar(step: _wizardStep)),
               const AuthLanguageMenu(),
-              IconButton(
-                tooltip: 'logout'.tr(),
-                onPressed: state.isBusy
-                    ? null
-                    : () async {
-                        await notifier.logout();
-                        if (context.mounted) {
-                          context.go('/login');
-                        }
-                      },
-                icon: const Icon(Icons.logout_rounded, color: Colors.red),
-              ),
             ],
           ),
         ),
@@ -1402,40 +1424,114 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                         const SizedBox(height: 12),
                         const Divider(height: 1, color: Colors.black12),
                         const SizedBox(height: 12),
-                        TextField(
-                          controller: _vehiclePlateController,
-                          scrollPadding: const EdgeInsets.only(bottom: 250),
-                          decoration: InputDecoration(
-                            hintText: 'vehicle_plate_hint'.tr(),
-                            errorText: _vehiclePlateError,
-                            filled: true,
-                            fillColor: AppColors.bg,
-                            prefixIcon: const Icon(
-                              Icons.badge_outlined,
-                              color: AppColors.brandOrange,
-                              size: 20,
-                            ),
-                            contentPadding: const EdgeInsets.symmetric(
-                              horizontal: 16,
-                              vertical: 16,
-                            ),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: BorderSide.none,
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(14),
-                              borderSide: const BorderSide(
-                                color: AppColors.brandOrange,
-                                width: 2,
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 8.0),
+                              child: Text(
+                                'vehicle_plate'.tr(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
                               ),
                             ),
-                          ),
-                          textInputAction: TextInputAction.done,
+                            Directionality(
+                              textDirection: ui.TextDirection.ltr,
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    flex: 3,
+                                    child: TextField(
+                                      controller: _plateSerialController,
+                                      scrollPadding: const EdgeInsets.only(bottom: 250),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      maxLength: 6,
+                                      decoration: InputDecoration(
+                                        hintText: '12938',
+                                        counterText: "",
+                                        filled: true,
+                                        fillColor: AppColors.bg,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                      onChanged: (val) {
+                                        if (val.length == 6) {
+                                          FocusScope.of(context).nextFocus();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _plateYearController,
+                                      scrollPadding: const EdgeInsets.only(bottom: 250),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      maxLength: 3,
+                                      decoration: InputDecoration(
+                                        hintText: '213',
+                                        counterText: "",
+                                        filled: true,
+                                        fillColor: AppColors.bg,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                      onChanged: (val) {
+                                        if (val.length == 3) {
+                                          FocusScope.of(context).nextFocus();
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    flex: 2,
+                                    child: TextField(
+                                      controller: _plateStateController,
+                                      scrollPadding: const EdgeInsets.only(bottom: 250),
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                                      maxLength: 2,
+                                      decoration: InputDecoration(
+                                        hintText: '29',
+                                        counterText: "",
+                                        filled: true,
+                                        fillColor: AppColors.bg,
+                                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                                        border: OutlineInputBorder(
+                                          borderRadius: BorderRadius.circular(12),
+                                          borderSide: BorderSide.none,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            if (_vehiclePlateError != null)
+                              Padding(
+                                padding: const EdgeInsets.only(top: 8.0, left: 4, right: 4),
+                                child: Text(
+                                  _vehiclePlateError!,
+                                  style: const TextStyle(
+                                    color: Colors.red,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ),
                       ],
                     ),
@@ -1527,6 +1623,15 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
       _phoneController.text = profile.phone;
       _emailController.text = profile.email;
       _vehiclePlateController.text = profile.vehiclePlate;
+      final plate = profile.vehiclePlate.trim();
+      final parts = plate.split(' ');
+      if (parts.length >= 3) {
+        _plateSerialController.text = parts[0];
+        _plateYearController.text = parts[1];
+        _plateStateController.text = parts[2];
+      } else {
+        _plateSerialController.text = plate;
+      }
       _vehicleColorController.text = profile.vehicleColor;
       _vehicleModelController.text = profile.vehicleModel;
       if (isValidCabinTruckType(profile.truckType)) {
@@ -2727,152 +2832,142 @@ class _DeleteAccountDialogContentState
               ],
             ),
             padding: const EdgeInsets.all(20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.red.shade50,
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: Icon(
-                        Icons.delete_forever_rounded,
-                        color: Colors.red.shade700,
-                        size: 24,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'profile_delete_account_confirm_title'.tr(),
-                        style: TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          color: Colors.red.shade800,
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(10),
+                        decoration: BoxDecoration(
+                          color: Colors.red.shade50,
+                          borderRadius: BorderRadius.circular(14),
+                        ),
+                        child: Icon(
+                          Icons.delete_forever_rounded,
+                          color: Colors.red.shade700,
+                          size: 24,
                         ),
                       ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'profile_delete_account_confirm_body'.tr(),
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            height: 1.45,
-                            color: AppColors.textSecondary,
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          'profile_delete_account_confirm_title'.tr(),
+                          style: TextStyle(
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                            color: Colors.red.shade800,
                           ),
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'profile_delete_type_hint'.tr(
-                            namedArgs: {'word': word},
-                          ),
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.textPrimary,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 10),
-                        Semantics(
-                          label: 'profile_delete_type_hint'.tr(
-                            namedArgs: {'word': word},
-                          ),
-                          child: TextField(
-                            controller: _ctrl,
-                            decoration: InputDecoration(
-                              hintText: word,
-                              filled: true,
-                              fillColor: AppColors.bg,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide.none,
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(14),
-                                borderSide: BorderSide(
-                                  color: Colors.red.shade400,
-                                  width: 2,
-                                ),
-                              ),
-                            ),
-                            onChanged: (_) => setState(() {}),
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        CheckboxListTile(
-                          contentPadding: EdgeInsets.zero,
-                          value: _understood,
-                          activeColor: Colors.red.shade700,
-                          onChanged: (v) =>
-                              setState(() => _understood = v ?? false),
-                          title: Text(
-                            'profile_delete_understand'.tr(),
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          controlAffinity: ListTileControlAffinity.leading,
-                        ),
-                      ],
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
+                  Text(
+                    'profile_delete_account_confirm_body'.tr(),
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      height: 1.45,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      style: TextButton.styleFrom(
-                        foregroundColor: AppColors.textSecondary,
-                        padding: const EdgeInsets.symmetric(
+                  const SizedBox(height: 16),
+                  Text(
+                    'profile_delete_type_hint'.tr(namedArgs: {'word': word}),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                      height: 1.35,
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Semantics(
+                    label: 'profile_delete_type_hint'.tr(
+                      namedArgs: {'word': word},
+                    ),
+                    child: TextField(
+                      controller: _ctrl,
+                      decoration: InputDecoration(
+                        hintText: word,
+                        filled: true,
+                        fillColor: AppColors.bg,
+                        contentPadding: const EdgeInsets.symmetric(
                           horizontal: 16,
-                          vertical: 10,
+                          vertical: 14,
+                        ),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(
+                            color: Colors.red.shade400,
+                            width: 2,
+                          ),
                         ),
                       ),
-                      child: Text('profile_delete_account_cancel'.tr()),
+                      onChanged: (_) => setState(() {}),
                     ),
-                    const SizedBox(width: 8),
-                    ElevatedButton(
-                      onPressed: _understood && typedOk
-                          ? () => widget.onConfirmDelete()
-                          : null,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red.shade700,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 20,
-                          vertical: 12,
-                        ),
-                      ),
-                      child: Text(
-                        'profile_delete_account_action'.tr(),
-                        style: const TextStyle(fontWeight: FontWeight.w700),
+                  ),
+                  const SizedBox(height: 12),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _understood,
+                    activeColor: Colors.red.shade700,
+                    onChanged: (v) => setState(() => _understood = v ?? false),
+                    title: Text(
+                      'profile_delete_understand'.tr(),
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
                       ),
                     ),
-                  ],
-                ),
-              ],
+                    controlAffinity: ListTileControlAffinity.leading,
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context),
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.textSecondary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 10,
+                          ),
+                        ),
+                        child: Text('profile_delete_account_cancel'.tr()),
+                      ),
+                      const SizedBox(width: 8),
+                      ElevatedButton(
+                        onPressed: _understood && typedOk
+                            ? () => widget.onConfirmDelete()
+                            : null,
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red.shade700,
+                          foregroundColor: Colors.white,
+                          elevation: 0,
+                          minimumSize: const Size(100, 40),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        child: Text(
+                          'profile_delete_account_confirm'.tr(),
+                          style: const TextStyle(fontWeight: FontWeight.w700),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

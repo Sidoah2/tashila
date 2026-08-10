@@ -295,5 +295,9 @@
   "profile_link_tiktok": "تيك توك",
   "profile_link_instagram": "إنستغرام",
   "profile_link_website": "الموقع",
-  "cancel": "إلغاء"
+  "no_earnings_records": "لا توجد سجلات أرباح",
+  "cancel": "إلغاء",
+  "connectivity_no_internet": "لا يوجد اتصال بالإنترنت",
+  "validation_video_not_allowed": "غير مسموح برفع الفيديو. يرجى اختيار صورة.",
+  "validation_invalid_plate_format": "يرجى إدخال رقم اللوحة بشكل صحيح (مثال: 12938 213 29)."
 }

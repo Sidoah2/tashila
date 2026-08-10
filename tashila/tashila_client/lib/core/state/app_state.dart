@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -142,6 +143,7 @@ class AppState {
     this.driverLat,
     this.driverLng,
     this.routePoints = const [],
+    this.showDriverCancelledDialog = false,
   });
 
   final bool initialized;
@@ -197,6 +199,7 @@ class AppState {
   final String driverAvatarUrl;
   final double? driverLat;
   final double? driverLng;
+  final bool showDriverCancelledDialog;
 
   bool get hasDriverLocation => driverLat != null && driverLng != null;
 
@@ -252,6 +255,7 @@ class AppState {
     double? driverLng,
     bool clearDriverLocation = false,
     List<LatLng>? routePoints,
+    bool? showDriverCancelledDialog,
   }) {
     return AppState(
       initialized: initialized ?? this.initialized,
@@ -297,6 +301,7 @@ class AppState {
       driverLat: clearDriverLocation ? null : (driverLat ?? this.driverLat),
       driverLng: clearDriverLocation ? null : (driverLng ?? this.driverLng),
       routePoints: routePoints ?? this.routePoints,
+      showDriverCancelledDialog: showDriverCancelledDialog ?? this.showDriverCancelledDialog,
     );
   }
 }
@@ -1324,9 +1329,22 @@ class AppStateNotifier extends Notifier<AppState> {
           _handleNoDriversFound();
           break;
         }
-        if (state.tripStage != TripStage.idle &&
-            state.tripStage != TripStage.noDriversFound) {
+        final wasActive = state.tripStage != TripStage.idle &&
+            state.tripStage != TripStage.noDriversFound;
+        if (wasActive) {
           unawaited(_teardownActiveTrip());
+        }
+        if (reason == 'driver_cancelled') {
+          state = state.copyWith(showDriverCancelledDialog: true);
+        }
+        try {
+          FlutterRingtonePlayer().play(
+            fromAsset: "assets/sounds/notification_sound.mp3",
+            looping: false,
+            volume: 4.0,
+          );
+        } catch (e) {
+          debugPrint('Failed to play ringtone: $e');
         }
     }
   }
@@ -1585,5 +1603,9 @@ class AppStateNotifier extends Notifier<AppState> {
     final list = [updated, ...state.history.skip(1)];
     state = state.copyWith(history: list);
     return true;
+  }
+
+  void clearDriverCancelledDialog() {
+    state = state.copyWith(showDriverCancelledDialog: false);
   }
 }

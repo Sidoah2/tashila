@@ -989,18 +989,24 @@ class _MapLayerState extends ConsumerState<_MapLayer> {
     final routeRequest = state.currentRequest;
     final polylines = <Polyline>{};
     if (routeRequest != null) {
-      final mid = LatLng(
-        (routeRequest.pickupLatLng.latitude +
-                routeRequest.dropOffLatLng.latitude) /
-            2,
-        (routeRequest.pickupLatLng.longitude +
-                routeRequest.dropOffLatLng.longitude) /
-            2,
-      );
+      final List<LatLng> points;
+      if (state.polylinePoints.isNotEmpty) {
+        points = state.polylinePoints;
+      } else {
+        final mid = LatLng(
+          (routeRequest.pickupLatLng.latitude +
+                  routeRequest.dropOffLatLng.latitude) /
+              2,
+          (routeRequest.pickupLatLng.longitude +
+                  routeRequest.dropOffLatLng.longitude) /
+              2,
+        );
+        points = [routeRequest.pickupLatLng, mid, routeRequest.dropOffLatLng];
+      }
       polylines.add(
         Polyline(
           polylineId: const PolylineId('route'),
-          points: [routeRequest.pickupLatLng, mid, routeRequest.dropOffLatLng],
+          points: points,
           width: 4,
           color: AppColors.brandOrange,
         ),
@@ -1227,15 +1233,11 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
         borderRadius: BorderRadius.circular(12),
         child: Container(
           height: 42,
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14),
           decoration: BoxDecoration(
             color: const Color(0xFFF5F6F8),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(
-              color: Colors.grey.shade300,
-            ),
+            border: Border.all(color: Colors.grey.shade300),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1284,174 +1286,181 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
             ),
             child: Directionality(
               textDirection: ui.TextDirection.ltr,
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Column(
                 children: [
-                  // ── LEFT SIDE: PROFILE PICTURE ──
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Container(
-                      width: 72,
-                      height: 80,
-                      color: AppColors.brandOrange.withValues(alpha: 0.12),
-                      child:
-                          request.clientAvatar != null &&
-                              request.clientAvatar!.trim().isNotEmpty
-                          ? Image.network(
-                              request.clientAvatar!,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => const Icon(
-                                Icons.person_rounded,
-                                size: 44,
-                                color: AppColors.brandOrange,
-                              ),
-                            )
-                          : const Icon(
-                              Icons.person_rounded,
-                              size: 44,
-                              color: AppColors.brandOrange,
-                            ),
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-
-                  // ── RIGHT SIDE: DETAILS & RATING (In app locale direction) ──
-                  Expanded(
-                    child: Directionality(
-                      textDirection: Directionality.of(context),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Client Name & Rating Badge Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  request.clientName.isNotEmpty
-                                      ? request.clientName
-                                      : 'client_label'.tr(),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 17,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.black,
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // ── LEFT SIDE: PROFILE PICTURE ──
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Container(
+                          width: 72,
+                          height: 80,
+                          color: AppColors.brandOrange.withValues(alpha: 0.12),
+                          child:
+                              request.clientAvatar != null &&
+                                  request.clientAvatar!.trim().isNotEmpty
+                              ? Image.network(
+                                  request.clientAvatar!,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (_, __, ___) => const Icon(
+                                    Icons.person_rounded,
+                                    size: 44,
+                                    color: AppColors.brandOrange,
                                   ),
+                                )
+                              : const Icon(
+                                  Icons.person_rounded,
+                                  size: 44,
+                                  color: AppColors.brandOrange,
                                 ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
 
-                          // 5 Stars Client Rating Row
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: List.generate(5, (index) {
-                              final starNum = index + 1;
-                              IconData iconData;
-                              Color iconColor;
-                              if (ratingVal >= starNum) {
-                                iconData = Icons.star_rounded;
-                                iconColor = const Color(0xFFFFB800);
-                              } else if (ratingVal >= starNum - 0.5) {
-                                iconData = Icons.star_half_rounded;
-                                iconColor = const Color(0xFFFFB800);
-                              } else {
-                                iconData = Icons.star_rounded;
-                                iconColor = Colors.grey.shade300;
-                              }
-                              return Icon(iconData, size: 18, color: iconColor);
-                            }),
-                          ),
-                          if (addressLabel != null && addressText != null) ...[
-                            const SizedBox(height: 8),
-                            // Location Address Label & Text
-                            Text(
-                              addressLabel,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                            Text(
-                              addressText,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w500,
-                                color: Colors.grey.shade600,
-                              ),
-                            ),
-                          ],
-                          if (showCallClient) ...[
-                            const SizedBox(height: 12),
-                            // Call Client Action Row
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                if (showCancelButton) ...[
-                                  callButton,
-                                ] else ...[
-                                  Expanded(child: callButton),
-                                ],
-                                if (showCancelButton) ...[
-                                  const SizedBox(width: 10),
+                      // ── RIGHT SIDE: DETAILS & RATING (In app locale direction) ──
+                      Expanded(
+                        child: Directionality(
+                          textDirection: Directionality.of(context),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Client Name & Rating Badge Row
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
                                   Expanded(
-                                    child: Material(
-                                      color: Colors.transparent,
-                                      child: InkWell(
-                                        onTap: () {
-                                          notifier.cancelActiveTrip();
-                                        },
-                                        borderRadius: BorderRadius.circular(12),
-                                        child: Container(
-                                          height: 42,
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 10,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            color: const Color(0xFFF5F6F8),
-                                            borderRadius: BorderRadius.circular(
-                                              12,
-                                            ),
-                                            border: Border.all(
-                                              color: Colors.grey.shade300,
-                                            ),
-                                          ),
-                                          child: Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.center,
-                                            children: [
-                                              FittedBox(
-                                                fit: BoxFit.scaleDown,
-                                                child: Text(
-                                                  'cancel'.tr(),
-                                                  style: const TextStyle(
-                                                    fontSize: 13,
-                                                    fontWeight: FontWeight.bold,
-                                                    color: Colors.black,
-                                                  ),
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
+                                    child: Text(
+                                      request.clientName.isNotEmpty
+                                          ? request.clientName
+                                          : 'client_label'.tr(),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 17,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
                                       ),
                                     ),
                                   ),
                                 ],
+                              ),
+                              const SizedBox(height: 4),
+
+                              // 5 Stars Client Rating Row
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: List.generate(5, (index) {
+                                  final starNum = index + 1;
+                                  IconData iconData;
+                                  Color iconColor;
+                                  if (ratingVal >= starNum) {
+                                    iconData = Icons.star_rounded;
+                                    iconColor = const Color(0xFFFFB800);
+                                  } else if (ratingVal >= starNum - 0.5) {
+                                    iconData = Icons.star_half_rounded;
+                                    iconColor = const Color(0xFFFFB800);
+                                  } else {
+                                    iconData = Icons.star_rounded;
+                                    iconColor = Colors.grey.shade300;
+                                  }
+                                  return Icon(
+                                    iconData,
+                                    size: 18,
+                                    color: iconColor,
+                                  );
+                                }),
+                              ),
+                              if (addressLabel != null &&
+                                  addressText != null) ...[
+                                const SizedBox(height: 8),
+                                // Location Address Label & Text
+                                Text(
+                                  addressLabel,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
+                                Text(
+                                  addressText,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontSize: 12.5,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.grey.shade600,
+                                  ),
+                                ),
                               ],
-                            ),
-                          ],
-                        ],
+                            ],
+                          ),
+                        ),
                       ),
-                    ),
+                    ],
                   ),
+                  if (showCallClient) ...[
+                    const SizedBox(height: 12),
+                    // Call Client Action Row
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        if (showCancelButton) ...[
+                          callButton,
+                        ] else ...[
+                          Expanded(child: callButton),
+                        ],
+                        if (showCancelButton) ...[
+                          const SizedBox(width: 10),
+                          Expanded(
+                            child: Material(
+                              color: Colors.transparent,
+                              child: InkWell(
+                                onTap: () {
+                                  notifier.cancelActiveTrip();
+                                },
+                                borderRadius: BorderRadius.circular(12),
+                                child: Container(
+                                  height: 42,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 10,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    color: const Color(0xFFF5F6F8),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(
+                                      color: Colors.grey.shade300,
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: Text(
+                                          'cancel'.tr(),
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.black,
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

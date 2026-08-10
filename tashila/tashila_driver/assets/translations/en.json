@@ -295,5 +295,9 @@
   "profile_link_tiktok": "TikTok",
   "profile_link_instagram": "Instagram",
   "profile_link_website": "Website",
-  "cancel": "Cancel"
+  "no_earnings_records": "No earnings records found",
+  "cancel": "Cancel",
+  "connectivity_no_internet": "No internet connection",
+  "validation_video_not_allowed": "Videos are not allowed. Please select an image.",
+  "validation_invalid_plate_format": "Please enter a valid plate format (e.g. 12938 213 29)."
 }

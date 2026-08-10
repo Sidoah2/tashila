@@ -297,20 +297,22 @@ async def _wait_offer_window(trip_id: str, expires_at: datetime) -> str:
     """Wait until offer expires or dispatch is woken (reject/accept). Returns reason."""
     wake = _dispatch_wake.setdefault(trip_id, asyncio.Event())
     wake.clear()
-    remaining = (expires_at - datetime.now(timezone.utc)).total_seconds()
-    if remaining <= 0:
-        return "timeout"
-    try:
-        await asyncio.wait_for(wake.wait(), timeout=remaining)
-    except asyncio.TimeoutError:
-        return "timeout"
-    current = await trip_service.get_trip_by_id(trip_id)
-    if current.get("status") != "requested":
-        return "accepted"
-    offer = await get_trip_offer(trip_id)
-    if offer is None:
-        return "reject"
-    return "timeout"
+    while True:
+        remaining = (expires_at - datetime.now(timezone.utc)).total_seconds()
+        if remaining <= 0:
+            return "timeout"
+        try:
+            await asyncio.wait_for(wake.wait(), timeout=remaining)
+        except asyncio.TimeoutError:
+            return "timeout"
+        current = await trip_service.get_trip_by_id(trip_id)
+        if current.get("status") != "requested":
+            return "accepted"
+        offer = await get_trip_offer(trip_id)
+        if offer is None:
+            return "reject"
+        # Spurious wake-up (e.g. from previous offer's redis publish event)
+        wake.clear()
 
 
 async def fail_trip_no_drivers(trip_id: str) -> None:

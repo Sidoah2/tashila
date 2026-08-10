@@ -260,5 +260,6 @@
   "cancel_button": "Annuler",
   "settings_button": "Paramètres",
   "location_disabled_body": "Les services de localisation (GPS) sont désactivés. Veuillez les activer dans les paramètres pour continuer.",
-  "link_error": "Désolé, impossible d'ouvrir le lien."
+  "link_error": "Désolé, impossible d'ouvrir le lien.",
+  "connectivity_no_internet": "Pas de connexion internet"
 }
