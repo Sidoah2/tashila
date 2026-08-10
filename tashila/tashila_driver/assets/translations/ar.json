@@ -111,6 +111,7 @@
   "vehicle_color_label": "لون المركبة",
   "vehicle_color_hint": "مثال: أبيض",
   "vehicle_plate_label": "رقم اللوحة",
+  "vehicle_plate": "رقم اللوحة",
   "vehicle_plate_hint": "مثال: 12345 116 35",
   "validation_required_profile_photo": "يرجى رفع صورة الملف الشخصي.",
   "validation_required_documents": "يرجى رفع جميع المستندات المطلوبة.",

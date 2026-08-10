@@ -111,6 +111,7 @@
   "vehicle_color_label": "Vehicle color",
   "vehicle_color_hint": "e.g. White",
   "vehicle_plate_label": "License plate",
+  "vehicle_plate": "License plate",
   "vehicle_plate_hint": "e.g. 12345 116 35",
   "validation_required_profile_photo": "Please upload your profile photo.",
   "validation_required_documents": "Please upload all required documents.",
