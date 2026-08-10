@@ -103,20 +103,23 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           ref.read(appStateProvider.notifier).clearDriverCancelledDialog();
-          showDialog<void>(
-            context: context,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text('order_cancelled'.tr()),
-              content: Text('driver_cancelled'.tr()),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: Text('ok'.tr()),
-                ),
-              ],
-            ),
-          );
+          final navContext = rootNavigatorKey.currentContext;
+          if (navContext != null) {
+            showDialog<void>(
+              context: navContext,
+              barrierDismissible: false,
+              builder: (context) => AlertDialog(
+                title: Text('order_cancelled'.tr()),
+                content: Text('driver_cancelled'.tr()),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: Text('ok'.tr()),
+                  ),
+                ],
+              ),
+            );
+          }
         });
       }
     });
@@ -132,10 +135,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
       routerConfig: router,
       builder: (context, child) {
         return Stack(
-          children: [
-            if (child != null) child,
-            const ConnectivityBanner(),
-          ],
+          children: [if (child != null) child, const ConnectivityBanner()],
         );
       },
     );
