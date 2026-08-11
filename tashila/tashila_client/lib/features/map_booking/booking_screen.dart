@@ -761,7 +761,7 @@ class _BookingMapLayerState extends ConsumerState<_BookingMapLayer> {
         if (_mapReady)
           Positioned(
             right: 16,
-            bottom: MediaQuery.sizeOf(context).height * 0.40 + 36,
+            bottom: 344, // 106 (bottom padding) + 222 (bottom panel height) + 16 (gap)
             child: FloatingActionButton(
               mini: true,
               backgroundColor: Colors.white,
