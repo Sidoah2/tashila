@@ -232,7 +232,9 @@
     "dispatch_offer_chip": "Offering: {driver}",
     "dispatch_offer_expires": "Offer expires {time}",
     "final_fare": "Final fare",
-    "resolve_dispute_confirm_cash": "Resolve dispute / confirm cash"
+    "resolve_dispute_confirm_cash": "Resolve dispute / confirm cash",
+    "guide_title": "💡 Platform Trips Control Guide",
+    "guide_body": "• Trip Lifecycle: Dispatched trips start as Accepted immediately. Client app bookings start as Requested (Searching) and transition sequentially when drivers accept them.\n• Search & Filter: Use the search bar to query by Trip ID, Client Name, Driver Name, or specific route endpoints.\n• Cash Settlement: When a driver completes a cash-payment trip, it moves to Awaiting Cash. Platform admins can review the details drawer and click Confirm Cash Collected once settled.\n• Routes & Map: Click on any trip row to open the details sidebar and view the exact path on the dynamic Google Map."
   },
   "dispatch": {
     "title": "Dispatch a trip manually",
@@ -247,6 +249,8 @@
     "live_map_title": "Driver locations",
     "nearby_hint": "Drivers are sorted by distance from pickup.",
     "send_nearest": "Select nearest",
+    "guide_title": "💡 Dispatcher Guidelines & Tips",
+    "guide_body": "• Custom Coordinates (Anywhere): Enter custom coordinates and addresses to dispatch trips anywhere in Algeria.\n• Search & Drag Pins: Use the search boxes with Google Places Autocomplete to lookup towns, or drag the green 🟢 and red 🔴 pins directly on the map to fine-tune locations.\n• Driver Auto-sorting: The driver dropdown list auto-sorts eligible drivers by distance to the pickup coordinate. Online drivers matching the chosen truck type are shown on the live map.\n• Client vs. Phone Order: Choose an app-registered client or check \"External / phone order\" to type a custom name.",
     "client_label": "Client",
     "client_placeholder": "Search by name or phone",
     "pickup_label": "Pickup",

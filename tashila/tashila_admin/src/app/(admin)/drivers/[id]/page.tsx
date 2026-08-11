@@ -176,8 +176,9 @@ export default function DriverDetailPage({
                 fontWeight: 800,
               }}
             >
-              {driver.name
+              {(driver.name || "")
                 .split(" ")
+                .filter(Boolean)
                 .map((s) => s[0])
                 .slice(0, 2)
                 .join("")}

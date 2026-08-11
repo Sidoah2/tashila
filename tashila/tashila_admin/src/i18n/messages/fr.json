@@ -225,7 +225,9 @@
     "status_timeline_title": "Chronologie",
     "trip_cancelled": "Course annulee",
     "dispatch_offer_chip": "Offre: {driver}",
-    "dispatch_offer_expires": "Offre expire {time}"
+    "dispatch_offer_expires": "Offre expire {time}",
+    "guide_title": "💡 Guide de contrôle des trajets de la plateforme",
+    "guide_body": "• Cycle de vie du trajet : Les trajets répartis commencent immédiatement à l'état Accepté. Les réservations de l'application client commencent à l'état Demandé (Recherche) et transitent séquentiellement lorsque les chauffeurs les acceptent.\n• Recherche et filtrage : Utilisez la barre de recherche pour effectuer des requêtes par ID de trajet, nom du client, nom du chauffeur ou points de départ/arrivée de l'itinéraire.\n• Règlement en espèces : Lorsqu'un chauffeur termine un trajet avec paiement en espèces, il passe à l'état En attente d'espèces. Les administrateurs de la plateforme peuvent consulter le volet des détails et cliquer sur Confirmer la collecte d'espèces une fois réglé.\n• Itinéraires et carte : Cliquez sur n'importe quelle ligne de trajet pour ouvrir le volet des détails et afficher le tracé exact sur la carte Google dynamique."
   },
   "dispatch": {
     "title": "Affecter une course manuellement",
@@ -239,6 +241,8 @@
     "external_order_default_name": "Commande externe",
     "live_map_title": "Positions chauffeurs",
     "nearby_hint": "Chauffeurs tries par distance au point de prise en charge.",
+    "guide_title": "💡 Lignes directrices et conseils du répartiteur",
+    "guide_body": "• Coordonnées personnalisées (Partout) : Entrez des coordonnées et des adresses personnalisées pour répartir des trajets partout en Algérie.\n• Rechercher et faire glisser les repères : Utilisez les champs de recherche avec la saisie semi-automatique Google Places pour rechercher des villes, ou faites glisser les repères vert 🟢 et rouge 🔴 directement sur la carte pour affiner les emplacements.\n• Tri automatique des chauffeurs : La liste déroulante des chauffeurs trie automatiquement les chauffeurs éligibles par distance par rapport aux coordonnées de départ. Les chauffeurs en ligne correspondant au type de camion choisi sont affichés sur la carte en direct.\n• Client vs Commande par téléphone : Choisissez un client enregistré sur l'application ou cochez \"Commande externe / par téléphone\" pour saisir un nom personnalisé.",
     "client_label": "Client",
     "client_placeholder": "Rechercher par nom ou telephone",
     "pickup_label": "Pickup",
