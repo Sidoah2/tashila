@@ -12,8 +12,17 @@ _driver_auth = Depends(require_role("driver"))
 
 
 @router.post("/estimate")
-async def estimate_trip(body: TripEstimateRequest, _user: dict = _client_auth) -> dict:
-    return await trip_service.estimate_trip(body.pickup, body.dropoff, body.truckType)
+async def estimate_trip(
+    body: TripEstimateRequest,
+    bypass_service_area: bool = Query(default=False),
+    _user: dict = _client_auth,
+) -> dict:
+    return await trip_service.estimate_trip(
+        body.pickup,
+        body.dropoff,
+        body.truckType,
+        bypass_service_area=bypass_service_area,
+    )
 
 
 @router.post("", status_code=201)

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useTranslation } from "@/i18n/useTranslation";
@@ -12,6 +13,118 @@ type Props = {
 
 export default function MapPreview({ pickup, dropOff }: Props) {
   const { t } = useTranslation();
+  const ref = useRef<HTMLDivElement | null>(null);
+  const key = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+
+  useEffect(() => {
+    if (!key || !ref.current) return;
+
+    const el = ref.current;
+    let cancelled = false;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let map: any = null;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const elements: any[] = [];
+
+    const bootstrap = () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const g = (window as any).google?.maps;
+      if (cancelled || !g) return;
+
+      map = new g.Map(el, {
+        center: { lat: pickup.lat, lng: pickup.lng },
+        zoom: 12,
+        mapTypeControl: false,
+        streetViewControl: false,
+        fullscreenControl: false,
+      });
+
+      const pMarker = new g.Marker({
+        map,
+        position: { lat: pickup.lat, lng: pickup.lng },
+        title: `Pickup: ${pickup.label}`,
+        icon: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+      });
+      elements.push(pMarker);
+
+      const dMarker = new g.Marker({
+        map,
+        position: { lat: dropOff.lat, lng: dropOff.lng },
+        title: `Drop-off: ${dropOff.label}`,
+        icon: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+      });
+      elements.push(dMarker);
+
+      const polyline = new g.Polyline({
+        path: [
+          { lat: pickup.lat, lng: pickup.lng },
+          { lat: dropOff.lat, lng: dropOff.lng },
+        ],
+        geodesic: true,
+        strokeColor: brand.orange,
+        strokeOpacity: 0.8,
+        strokeWeight: 4,
+        map,
+      });
+      elements.push(polyline);
+
+      const bounds = new g.LatLngBounds();
+      bounds.extend({ lat: pickup.lat, lng: pickup.lng });
+      bounds.extend({ lat: dropOff.lat, lng: dropOff.lng });
+      map.fitBounds(bounds);
+
+      const listener = map.addListener("bounds_changed", () => {
+        if (map.getZoom() > 14) map.setZoom(14);
+        g.event.removeListener(listener);
+      });
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const w = window as any;
+    if (w.google?.maps) {
+      bootstrap();
+      return () => {
+        cancelled = true;
+        elements.forEach((e) => e.setMap(null));
+      };
+    }
+
+    const existing = document.querySelector(
+      "script[data-tashila-google-maps]"
+    ) as HTMLScriptElement | null;
+    const script =
+      existing ??
+      Object.assign(document.createElement("script"), {
+        async: true,
+        defer: true,
+        src: `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`,
+        dataset: { tashilaGoogleMaps: "1" },
+      });
+    script.addEventListener("load", bootstrap);
+    if (!existing) document.head.appendChild(script);
+
+    return () => {
+      cancelled = true;
+      elements.forEach((e) => e.setMap(null));
+    };
+  }, [key, pickup, dropOff]);
+
+  if (key) {
+    return (
+      <Box
+        ref={ref}
+        sx={{
+          width: "100%",
+          height: 220,
+          borderRadius: 2,
+          overflow: "hidden",
+          border: `1px solid ${brand.border}`,
+        }}
+      />
+    );
+  }
+
+  // Fallback to SVG curve
   return (
     <Box
       sx={{
