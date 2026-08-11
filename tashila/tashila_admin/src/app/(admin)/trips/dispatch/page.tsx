@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Box from "@mui/material/Box";
@@ -65,14 +65,116 @@ export default function DispatchTripPage() {
   const [externalOrder, setExternalOrder] = useState(false);
   const [externalLabel, setExternalLabel] = useState("");
   const [client, setClient] = useState<(typeof users)[number] | null>(null);
+
+  // Preset location selection
   const [pickup, setPickup] = useState<LocationOption | null>(
     ADMIN_NEIGHBORHOODS[0] ?? null
   );
   const [dropOff, setDropOff] = useState<LocationOption | null>(
     ADMIN_NEIGHBORHOODS[1] ?? ADMIN_NEIGHBORHOODS[0] ?? null
   );
+
+  // Custom Location selection
+  const [customLocation, setCustomLocation] = useState(false);
+  const [customPickupAddress, setCustomPickupAddress] = useState("");
+  const [customPickupLat, setCustomPickupLat] = useState<number>(22.785);
+  const [customPickupLng, setCustomPickupLng] = useState<number>(5.523);
+
+  const [customDropOffAddress, setCustomDropOffAddress] = useState("");
+  const [customDropOffLat, setCustomDropOffLat] = useState<number>(22.812);
+  const [customDropOffLng, setCustomDropOffLng] = useState<number>(5.451);
+
+  const pickupInputRef = useRef<HTMLInputElement | null>(null);
+  const dropOffInputRef = useRef<HTMLInputElement | null>(null);
+
   const [driver, setDriver] = useState<(typeof drivers)[number] | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  // Sync default presets when custom mode is disabled
+  useEffect(() => {
+    if (!customLocation && pickup && dropOff) {
+      setCustomPickupAddress(neighborhoodLabel(pickup, locale));
+      setCustomPickupLat(pickup.lat);
+      setCustomPickupLng(pickup.lng);
+
+      setCustomDropOffAddress(neighborhoodLabel(dropOff, locale));
+      setCustomDropOffLat(dropOff.lat);
+      setCustomDropOffLng(dropOff.lng);
+    }
+  }, [customLocation, pickup, dropOff, locale]);
+
+  // Setup Google Autocomplete on text fields when custom location mode is active
+  useEffect(() => {
+    if (!customLocation) return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const g = (window as any).google?.maps;
+    if (!g || !g.places) return;
+
+    let pickupAutocomplete: any = null;
+    let dropOffAutocomplete: any = null;
+
+    if (pickupInputRef.current) {
+      pickupAutocomplete = new g.places.Autocomplete(pickupInputRef.current);
+      pickupAutocomplete.addListener("place_changed", () => {
+        const place = pickupAutocomplete.getPlace();
+        if (place.geometry?.location) {
+          setCustomPickupAddress(place.formatted_address || place.name || "");
+          setCustomPickupLat(place.geometry.location.lat());
+          setCustomPickupLng(place.geometry.location.lng());
+        }
+      });
+    }
+
+    if (dropOffInputRef.current) {
+      dropOffAutocomplete = new g.places.Autocomplete(dropOffInputRef.current);
+      dropOffAutocomplete.addListener("place_changed", () => {
+        const place = dropOffAutocomplete.getPlace();
+        if (place.geometry?.location) {
+          setCustomDropOffAddress(place.formatted_address || place.name || "");
+          setCustomDropOffLat(place.geometry.location.lat());
+          setCustomDropOffLng(place.geometry.location.lng());
+        }
+      });
+    }
+
+    return () => {
+      if (pickupAutocomplete) g.event.clearInstanceListeners(pickupAutocomplete);
+      if (dropOffAutocomplete) g.event.clearInstanceListeners(dropOffAutocomplete);
+    };
+  }, [customLocation]);
+
+  const effectivePickup = useMemo(() => {
+    if (customLocation) {
+      return {
+        label: customPickupAddress || "Custom Pickup Point",
+        lat: Number(customPickupLat),
+        lng: Number(customPickupLng),
+      };
+    }
+    if (!pickup) return null;
+    return {
+      label: neighborhoodLabel(pickup, locale),
+      lat: pickup.lat,
+      lng: pickup.lng,
+    };
+  }, [customLocation, pickup, customPickupAddress, customPickupLat, customPickupLng, locale]);
+
+  const effectiveDropOff = useMemo(() => {
+    if (customLocation) {
+      return {
+        label: customDropOffAddress || "Custom Drop-off Point",
+        lat: Number(customDropOffLat),
+        lng: Number(customDropOffLng),
+      };
+    }
+    if (!dropOff) return null;
+    return {
+      label: neighborhoodLabel(dropOff, locale),
+      lat: dropOff.lat,
+      lng: dropOff.lng,
+    };
+  }, [customLocation, dropOff, customDropOffAddress, customDropOffLat, customDropOffLng, locale]);
 
   const eligibleDrivers = useMemo(
     () =>
@@ -86,23 +188,23 @@ export default function DispatchTripPage() {
   );
 
   const sortedEligibleDrivers = useMemo(() => {
-    if (!pickup) return eligibleDrivers;
+    if (!effectivePickup) return eligibleDrivers;
     return [...eligibleDrivers].sort((a, b) => {
       const da = haversineKm(
-        pickup.lat,
-        pickup.lng,
+        effectivePickup.lat,
+        effectivePickup.lng,
         a.lastLocation.lat,
         a.lastLocation.lng
       );
       const db = haversineKm(
-        pickup.lat,
-        pickup.lng,
+        effectivePickup.lat,
+        effectivePickup.lng,
         b.lastLocation.lat,
         b.lastLocation.lng
       );
       return da - db;
     });
-  }, [eligibleDrivers, pickup]);
+  }, [eligibleDrivers, effectivePickup]);
 
   useEffect(() => {
     if (driver && !sortedEligibleDrivers.some((d) => d.id === driver.id)) {
@@ -139,11 +241,16 @@ export default function DispatchTripPage() {
   }, [locale]);
 
   const distanceKm = useMemo(() => {
-    if (!pickup || !dropOff) return 0;
+    if (!effectivePickup || !effectiveDropOff) return 0;
     return Number(
-      haversineKm(pickup.lat, pickup.lng, dropOff.lat, dropOff.lng).toFixed(1)
+      haversineKm(
+        effectivePickup.lat,
+        effectivePickup.lng,
+        effectiveDropOff.lat,
+        effectiveDropOff.lng
+      ).toFixed(1)
     );
-  }, [pickup, dropOff]);
+  }, [effectivePickup, effectiveDropOff]);
 
   const rule = useMemo(() => findRule(rules, truckType), [rules, truckType]);
   const estimatedMinutes = useMemo(
@@ -154,16 +261,17 @@ export default function DispatchTripPage() {
   const [fareLoading, setFareLoading] = useState(false);
 
   useEffect(() => {
-    if (!pickup || !dropOff || distanceKm <= 0) {
+    if (!effectivePickup || !effectiveDropOff || distanceKm <= 0) {
       setApiFare(null);
       return;
     }
     let cancelled = false;
     setFareLoading(true);
     estimateFareFromApi(
-      { lat: pickup.lat, lng: pickup.lng, address: pickup.label },
-      { lat: dropOff.lat, lng: dropOff.lng, address: dropOff.label },
+      { lat: effectivePickup.lat, lng: effectivePickup.lng, address: effectivePickup.label },
+      { lat: effectiveDropOff.lat, lng: effectiveDropOff.lng, address: effectiveDropOff.label },
       truckType,
+      customLocation
     )
       .then((fare) => {
         if (!cancelled) setApiFare(fare);
@@ -177,10 +285,10 @@ export default function DispatchTripPage() {
     return () => {
       cancelled = true;
     };
-  }, [pickup, dropOff, truckType, distanceKm]);
+  }, [effectivePickup, effectiveDropOff, truckType, distanceKm, customLocation]);
 
-  const mapCenter = pickup
-    ? { lat: pickup.lat, lng: pickup.lng }
+  const mapCenter = effectivePickup
+    ? { lat: effectivePickup.lat, lng: effectivePickup.lng }
     : { lat: 22.785, lng: 5.523 };
 
   const handleSelectFromMap = useCallback(
@@ -193,8 +301,8 @@ export default function DispatchTripPage() {
 
   const canSubmit =
     (externalOrder || Boolean(client)) &&
-    pickup &&
-    dropOff &&
+    effectivePickup &&
+    effectiveDropOff &&
     driver &&
     rule &&
     rule.active &&
@@ -209,7 +317,7 @@ export default function DispatchTripPage() {
   };
 
   const handleSubmit = async () => {
-    if (!canSubmit || !pickup || !dropOff || !driver) return;
+    if (!canSubmit || !effectivePickup || !effectiveDropOff || !driver) return;
     setSubmitting(true);
     try {
       const clientId = externalOrder ? null : client!.id;
@@ -222,12 +330,12 @@ export default function DispatchTripPage() {
         externalLabel: externalOrder ? clientName : undefined,
         driverId: driver.id,
         driverName: driver.name,
-        pickup: pickup.label,
-        dropOff: dropOff.label,
-        pickupLat: pickup.lat,
-        pickupLng: pickup.lng,
-        dropOffLat: dropOff.lat,
-        dropOffLng: dropOff.lng,
+        pickup: effectivePickup.label,
+        dropOff: effectiveDropOff.label,
+        pickupLat: effectivePickup.lat,
+        pickupLng: effectivePickup.lng,
+        dropOffLat: effectiveDropOff.lat,
+        dropOffLng: effectiveDropOff.lng,
         truckType,
         fare: apiFare!,
       });
@@ -245,6 +353,23 @@ export default function DispatchTripPage() {
 
   return (
     <Box sx={{ maxWidth: 1100, mx: "auto" }}>
+      {/* Notes & Tips Alert Box */}
+      <Box sx={{ mb: 3 }}>
+        <Alert severity="info" sx={{ borderRadius: 2, border: `1px solid ${brand.border}` }}>
+          <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
+            💡 Dispatcher Guidelines & Tips
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            • <b>Custom Coordinates (Anywhere):</b> Toggle the custom coordinates checkbox below to dispatch trips outside the core service area center.
+            <br />
+            • <b>Search & Drag Pins:</b> Use the search boxes with Google Places Autocomplete to lookup towns, or drag the green 🟢 and red 🔴 pins directly on the map to fine-tune locations.
+            <br />
+            • <b>Driver Auto-sorting:</b> The driver dropdown list auto-sorts eligible drivers by distance to the pickup coordinate. Online drivers matching the chosen truck type are shown on the live map.
+            <br />
+            • <b>Client vs. Phone Order:</b> Choose an app-registered client or check &quot;External / phone order&quot; to type a custom name.
+          </Typography>
+        </Alert>
+      </Box>
       <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
         <IconButton component={Link} href="/trips" size="small">
           <ArrowBackRoundedIcon />
@@ -330,52 +455,132 @@ export default function DispatchTripPage() {
                 )}
               />
 
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <Autocomplete
-                  fullWidth
-                  value={pickup}
-                  onChange={(_, v) => setPickup(v)}
-                  options={ADMIN_NEIGHBORHOODS}
-                  getOptionLabel={(o) => neighborhoodLabel(o, locale)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t("dispatch.pickup_label")}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <LocationOnRoundedIcon
-                            sx={{ color: brand.success, mr: 1, ml: 0.5 }}
-                            fontSize="small"
-                          />
-                        ),
-                      }}
-                    />
-                  )}
-                />
-                <Autocomplete
-                  fullWidth
-                  value={dropOff}
-                  onChange={(_, v) => setDropOff(v)}
-                  options={ADMIN_NEIGHBORHOODS}
-                  getOptionLabel={(o) => neighborhoodLabel(o, locale)}
-                  renderInput={(params) => (
-                    <TextField
-                      {...params}
-                      label={t("dispatch.dropoff_label")}
-                      InputProps={{
-                        ...params.InputProps,
-                        startAdornment: (
-                          <FlagRoundedIcon
-                            sx={{ color: brand.danger, mr: 1, ml: 0.5 }}
-                            fontSize="small"
-                          />
-                        ),
-                      }}
-                    />
-                  )}
-                />
-              </Stack>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={customLocation}
+                    onChange={(_, c) => setCustomLocation(c)}
+                  />
+                }
+                label="Use custom coordinates & address (Anywhere in Algeria)"
+              />
+
+              {!customLocation ? (
+                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                  <Autocomplete
+                    fullWidth
+                    value={pickup}
+                    onChange={(_, v) => setPickup(v)}
+                    options={ADMIN_NEIGHBORHOODS}
+                    getOptionLabel={(o) => neighborhoodLabel(o, locale)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={t("dispatch.pickup_label")}
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <LocationOnRoundedIcon
+                              sx={{ color: brand.success, mr: 1, ml: 0.5 }}
+                              fontSize="small"
+                            />
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                  <Autocomplete
+                    fullWidth
+                    value={dropOff}
+                    onChange={(_, v) => setDropOff(v)}
+                    options={ADMIN_NEIGHBORHOODS}
+                    getOptionLabel={(o) => neighborhoodLabel(o, locale)}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={t("dispatch.dropoff_label")}
+                        InputProps={{
+                          ...params.InputProps,
+                          startAdornment: (
+                            <FlagRoundedIcon
+                              sx={{ color: brand.danger, mr: 1, ml: 0.5 }}
+                              fontSize="small"
+                            />
+                          ),
+                        }}
+                      />
+                    )}
+                  />
+                </Stack>
+              ) : (
+                <Stack spacing={2}>
+                  {/* Pickup Search & Lat/Lng Inputs */}
+                  <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.success }}>
+                      🟢 Custom Pickup Location
+                    </Typography>
+                    <Stack spacing={1.5}>
+                      <TextField
+                        fullWidth
+                        inputRef={pickupInputRef}
+                        label="Search or enter Pickup Address"
+                        value={customPickupAddress}
+                        onChange={(e) => setCustomPickupAddress(e.target.value)}
+                        placeholder="Type address (e.g. In Salah Center)"
+                      />
+                      <Stack direction="row" spacing={2}>
+                        <TextField
+                          type="number"
+                          label="Latitude"
+                          value={customPickupLat}
+                          onChange={(e) => setCustomPickupLat(Number(e.target.value) || 0)}
+                          sx={{ flex: 1 }}
+                        />
+                        <TextField
+                          type="number"
+                          label="Longitude"
+                          value={customPickupLng}
+                          onChange={(e) => setCustomPickupLng(Number(e.target.value) || 0)}
+                          sx={{ flex: 1 }}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Card>
+
+                  {/* Drop-off Search & Lat/Lng Inputs */}
+                  <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.danger }}>
+                      🔴 Custom Drop-off Location
+                    </Typography>
+                    <Stack spacing={1.5}>
+                      <TextField
+                        fullWidth
+                        inputRef={dropOffInputRef}
+                        label="Search or enter Drop-off Address"
+                        value={customDropOffAddress}
+                        onChange={(e) => setCustomDropOffAddress(e.target.value)}
+                        placeholder="Type address (e.g. Tamanrasset Airport)"
+                      />
+                      <Stack direction="row" spacing={2}>
+                        <TextField
+                          type="number"
+                          label="Latitude"
+                          value={customDropOffLat}
+                          onChange={(e) => setCustomDropOffLat(Number(e.target.value) || 0)}
+                          sx={{ flex: 1 }}
+                        />
+                        <TextField
+                          type="number"
+                          label="Longitude"
+                          value={customDropOffLng}
+                          onChange={(e) => setCustomDropOffLng(Number(e.target.value) || 0)}
+                          sx={{ flex: 1 }}
+                        />
+                      </Stack>
+                    </Stack>
+                  </Card>
+                </Stack>
+              )}
 
               <Autocomplete
                 value={driver}
@@ -550,6 +755,16 @@ export default function DispatchTripPage() {
                   center={mapCenter}
                   selectedDriverId={driver?.id ?? null}
                   onSelectDriver={handleSelectFromMap}
+                  pickup={effectivePickup}
+                  dropOff={effectiveDropOff}
+                  onDragPickup={customLocation ? (lat, lng) => {
+                    setCustomPickupLat(lat);
+                    setCustomPickupLng(lng);
+                  } : undefined}
+                  onDragDropOff={customLocation ? (lat, lng) => {
+                    setCustomDropOffLat(lat);
+                    setCustomDropOffLng(lng);
+                  } : undefined}
                 />
               </CardContent>
             </Card>

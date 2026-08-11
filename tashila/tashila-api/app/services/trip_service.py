@@ -260,11 +260,17 @@ def _normalize_cancel_reason(reason: str | None) -> str | None:
     return key
 
 
-async def estimate_trip(pickup: TripCoord, dropoff: TripCoord, truck_type: str) -> dict[str, Any]:
+async def estimate_trip(
+    pickup: TripCoord,
+    dropoff: TripCoord,
+    truck_type: str,
+    bypass_service_area: bool = False,
+) -> dict[str, Any]:
     _validate_truck_type(truck_type)
-    await validate_coords_in_service_area(
-        pickup.lat, pickup.lng, dropoff.lat, dropoff.lng,
-    )
+    if not bypass_service_area:
+        await validate_coords_in_service_area(
+            pickup.lat, pickup.lng, dropoff.lat, dropoff.lng,
+        )
     dist = haversine_km(pickup.lat, pickup.lng, dropoff.lat, dropoff.lng)
     minutes = estimate_minutes(dist)
     fare = tashila_dynamic_fare(dist, minutes)
@@ -886,7 +892,7 @@ async def admin_dispatch_trip(data: AdminTripDispatchRequest) -> dict[str, Any]:
     if active is not None:
         raise ConflictError("Driver already has an active trip")
 
-    estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType)
+    estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType, bypass_service_area=True)
     now = datetime.now(timezone.utc)
     client_id = data.clientId or ""
     notes = data.notes
