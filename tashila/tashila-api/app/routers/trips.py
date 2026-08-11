@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, Query
 from starlette.responses import Response
 
-from app.core.deps import get_current_client_or_driver, get_idempotency_key, require_role
+from app.core.deps import get_current_client_or_driver, get_idempotency_key, require_role, get_authenticated_principal
 from app.models.trip import RatingRequest, TripCreateRequest, TripEstimateRequest, TripStatusUpdate
 from app.services import trip_service
 
@@ -15,7 +15,7 @@ _driver_auth = Depends(require_role("driver"))
 async def estimate_trip(
     body: TripEstimateRequest,
     bypass_service_area: bool = Query(default=False),
-    _user: dict = _client_auth,
+    _user: dict = Depends(get_authenticated_principal),
 ) -> dict:
     return await trip_service.estimate_trip(
         body.pickup,

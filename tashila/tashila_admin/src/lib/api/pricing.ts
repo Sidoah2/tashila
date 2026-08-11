@@ -58,7 +58,6 @@ export async function estimateFareFromApi(
   const data = await apiFetch<{ fare: number }>(url, {
     method: "POST",
     body: JSON.stringify({ pickup, dropoff, truckType }),
-    skipAuth: true,
   });
   return data.fare;
 }
