@@ -1061,6 +1061,16 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           state.currentRequest != null) {
         return;
       }
+
+      // Check if admin has dispatched/assigned a trip directly to this driver
+      try {
+        final activeTrip = await _tripRepository.fetchActiveTrip();
+        if (activeTrip != null) {
+          await _applyActiveTripFromServer(activeTrip, reconnectSocket: true);
+          return;
+        }
+      } catch (_) {}
+
       if (state.incomingOffers.isNotEmpty) {
         final now = DateTime.now().toUtc();
         final nonExpired = state.incomingOffers
