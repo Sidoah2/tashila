@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_logger/easy_logger.dart';
 import 'package:flutter/material.dart';
@@ -22,13 +23,16 @@ Future<void> main() async {
     LevelMessages.error,
   ];
   runApp(
-    EasyLocalization(
-      supportedLocales: _supportedLocales,
-      path: 'assets/translations',
-      fallbackLocale: const Locale('ar'),
-      startLocale: const Locale('ar'),
-      useOnlyLangCode: true,
-      child: const ProviderScope(child: AppBootstrap()),
+    DevicePreview(
+      enabled: true,
+      builder: (context) => EasyLocalization(
+        supportedLocales: _supportedLocales,
+        path: 'assets/translations',
+        fallbackLocale: const Locale('ar'),
+        startLocale: const Locale('ar'),
+        useOnlyLangCode: true,
+        child: const ProviderScope(child: AppBootstrap()),
+      ),
     ),
   );
 }

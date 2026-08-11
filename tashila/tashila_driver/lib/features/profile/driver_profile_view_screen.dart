@@ -17,6 +17,13 @@ class DriverProfileViewScreen extends ConsumerWidget {
     final approved = profile?.documentsApproved ?? false;
     final firstLetter = (profile?.name ?? 'D').characters.first.toUpperCase();
 
+    final completedTrips = state.tripHistory.where((t) => t.isCompleted).toList();
+    final ratedTrips = completedTrips.where((t) => t.rating != null).toList();
+    final avgRating = ratedTrips.isEmpty
+        ? 5.0
+        : ratedTrips.map((t) => t.rating!.toDouble()).reduce((a, b) => a + b) /
+            ratedTrips.length;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -253,7 +260,7 @@ class DriverProfileViewScreen extends ConsumerWidget {
                     child: _StatCardItem(
                       icon: Icons.local_shipping_rounded,
                       iconColor: AppColors.brandOrange,
-                      value: '${state.tripHistory.length}',
+                      value: '${completedTrips.length}',
                       label: 'total_trips'.tr(),
                     ),
                   ),
@@ -262,7 +269,7 @@ class DriverProfileViewScreen extends ConsumerWidget {
                     child: _StatCardItem(
                       icon: Icons.star_rounded,
                       iconColor: Colors.amber.shade700,
-                      value: '5.0',
+                      value: avgRating.toStringAsFixed(1),
                       label: 'driver_rating'.tr(),
                     ),
                   ),
