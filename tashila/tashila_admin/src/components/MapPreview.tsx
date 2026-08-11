@@ -55,18 +55,44 @@ export default function MapPreview({ pickup, dropOff }: Props) {
       });
       elements.push(dMarker);
 
-      const polyline = new g.Polyline({
-        path: [
-          { lat: pickup.lat, lng: pickup.lng },
-          { lat: dropOff.lat, lng: dropOff.lng },
-        ],
-        geodesic: true,
-        strokeColor: brand.orange,
-        strokeOpacity: 0.8,
-        strokeWeight: 4,
+      const directionsService = new g.DirectionsService();
+      const directionsRenderer = new g.DirectionsRenderer({
         map,
+        suppressMarkers: true,
+        polylineOptions: {
+          strokeColor: brand.orange,
+          strokeOpacity: 0.8,
+          strokeWeight: 5,
+        },
       });
-      elements.push(polyline);
+      elements.push(directionsRenderer);
+
+      directionsService.route(
+        {
+          origin: { lat: pickup.lat, lng: pickup.lng },
+          destination: { lat: dropOff.lat, lng: dropOff.lng },
+          travelMode: g.TravelMode.DRIVING,
+        },
+        (result: any, status: any) => {
+          if (status === g.DirectionsStatus.OK) {
+            directionsRenderer.setDirections(result);
+          } else {
+            // Fallback to straight line polyline if directions fail
+            const polyline = new g.Polyline({
+              path: [
+                { lat: pickup.lat, lng: pickup.lng },
+                { lat: dropOff.lat, lng: dropOff.lng },
+              ],
+              geodesic: true,
+              strokeColor: brand.orange,
+              strokeOpacity: 0.8,
+              strokeWeight: 4,
+              map,
+            });
+            elements.push(polyline);
+          }
+        }
+      );
 
       const bounds = new g.LatLngBounds();
       bounds.extend({ lat: pickup.lat, lng: pickup.lng });

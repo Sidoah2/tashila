@@ -111,17 +111,43 @@ export default function LiveTruckMap({
         mapElements.push(dropoffMarker);
       }
 
-      // 4. Render polyline path
+      // 4. Render directions path (actual road route)
       if (pickup && dropOff) {
-        const polyline = new g.Polyline({
-          path: [pickup, dropOff],
-          geodesic: true,
-          strokeColor: brand.orange,
-          strokeOpacity: 0.8,
-          strokeWeight: 4,
+        const directionsService = new g.DirectionsService();
+        const directionsRenderer = new g.DirectionsRenderer({
           map,
+          suppressMarkers: true,
+          polylineOptions: {
+            strokeColor: brand.orange,
+            strokeOpacity: 0.8,
+            strokeWeight: 5,
+          },
         });
-        mapElements.push(polyline);
+        mapElements.push(directionsRenderer);
+
+        directionsService.route(
+          {
+            origin: pickup,
+            destination: dropOff,
+            travelMode: g.TravelMode.DRIVING,
+          },
+          (result: any, status: any) => {
+            if (status === g.DirectionsStatus.OK) {
+              directionsRenderer.setDirections(result);
+            } else {
+              // Fallback to straight line polyline if directions fail
+              const polyline = new g.Polyline({
+                path: [pickup, dropOff],
+                geodesic: true,
+                strokeColor: brand.orange,
+                strokeOpacity: 0.8,
+                strokeWeight: 4,
+                map,
+              });
+              mapElements.push(polyline);
+            }
+          }
+        );
       }
 
       // 5. Adjust bounds to fit pickup and dropoff

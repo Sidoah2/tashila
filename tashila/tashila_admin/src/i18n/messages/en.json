@@ -359,6 +359,13 @@
     "phone_format": "Use digits, spaces, dashes or +.",
     "vehicle_color_min": "Enter vehicle color.",
     "vehicle_model_min": "Enter vehicle model.",
-    "vehicle_plate_min": "Enter license plate."
+    "vehicle_plate_min": "Enter license plate.",
+    "client_required": "Please select a client or check External Order.",
+    "driver_required": "Please select a driver.",
+    "pickup_required": "Please enter a pickup location.",
+    "dropoff_required": "Please enter a drop-off location.",
+    "fare_required": "Estimated fare could not be calculated. Please check coordinates.",
+    "rule_disabled": "Pricing is currently disabled for this truck type.",
+    "external_name_required": "Please enter a client name/label for the external order."
   }
 }

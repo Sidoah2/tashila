@@ -317,7 +317,39 @@ export default function DispatchTripPage() {
   };
 
   const handleSubmit = async () => {
-    if (!canSubmit || !effectivePickup || !effectiveDropOff || !driver) return;
+    if (!effectivePickup) {
+      showToast(t("validation.pickup_required"), "error");
+      return;
+    }
+    if (!effectiveDropOff) {
+      showToast(t("validation.dropoff_required"), "error");
+      return;
+    }
+    if (!externalOrder && !client) {
+      showToast(t("validation.client_required"), "error");
+      return;
+    }
+    if (externalOrder && !externalLabel.trim()) {
+      showToast(t("validation.external_name_required"), "error");
+      return;
+    }
+    if (!driver) {
+      showToast(t("validation.driver_required"), "error");
+      return;
+    }
+    if (!rule || !rule.active) {
+      showToast(t("validation.rule_disabled"), "error");
+      return;
+    }
+    if (fareLoading) {
+      showToast(t("common.loading"), "info");
+      return;
+    }
+    if (apiFare == null || apiFare <= 0) {
+      showToast(t("validation.fare_required"), "error");
+      return;
+    }
+
     setSubmitting(true);
     try {
       const clientId = externalOrder ? null : client!.id;
@@ -343,6 +375,8 @@ export default function DispatchTripPage() {
         t("toast.trip_dispatched", { id: trip.id, name: driver.name })
       );
       router.push("/trips");
+    } catch {
+      showToast(t("toast.action_failed"), "error");
     } finally {
       setSubmitting(false);
     }
@@ -655,7 +689,7 @@ export default function DispatchTripPage() {
                   size="large"
                   startIcon={<SendRoundedIcon />}
                   onClick={handleSubmit}
-                  disabled={!canSubmit || submitting}
+                  disabled={submitting}
                 >
                   {submitting
                     ? t("dispatch.sending")
