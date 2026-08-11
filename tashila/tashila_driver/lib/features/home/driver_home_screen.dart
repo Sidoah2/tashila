@@ -542,6 +542,7 @@ double _todayEarnings(List<TripRecord> trips) {
   return trips
       .where(
         (t) =>
+            t.isCompleted &&
             t.completedAt.year == now.year &&
             t.completedAt.month == now.month &&
             t.completedAt.day == now.day,

@@ -2523,7 +2523,7 @@ class _ProfileOverviewCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final trips = tripHistory;
+    final trips = tripHistory.where((t) => t.isCompleted).toList();
     final totalEarnings = trips.fold<double>(0, (s, t) => s + t.fare);
     final rated = trips.where((t) => t.rating != null).toList();
     final avgRating = rated.isEmpty

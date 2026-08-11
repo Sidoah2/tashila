@@ -72,12 +72,14 @@ class TripHistoryEarningsRepository implements EarningsRepository {
     final startOfDay = DateTime(now.year, now.month, now.day);
     final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
 
-    final todayTrips = trips.where(
+    final completedTrips = trips.where((t) => t.isCompleted).toList();
+
+    final todayTrips = completedTrips.where(
       (t) => t.completedAt.isAfter(
         startOfDay.subtract(const Duration(seconds: 1)),
       ),
     );
-    final weekTrips = trips.where(
+    final weekTrips = completedTrips.where(
       (t) => t.completedAt.isAfter(
         startOfWeek.subtract(const Duration(seconds: 1)),
       ),
