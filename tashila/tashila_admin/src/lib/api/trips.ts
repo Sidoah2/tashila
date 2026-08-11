@@ -23,11 +23,13 @@ interface ApiTrip {
   clientName?: string;
   driverId: string | null;
   driverName?: string | null;
+  driver?: { id?: string; name?: string | null; phone?: string | null } | null;
   pickup: ApiTripCoord;
   dropoff: ApiTripCoord;
   truckType: string;
   fare: number;
   finalFare?: number | null;
+  distanceKm?: number;
   paymentMethod: string;
   createdAt: string;
   completedAt: string | null;
@@ -51,7 +53,7 @@ function mapTrip(t: ApiTrip): Trip {
     clientId: t.clientId,
     clientName: t.clientName ?? t.clientId,
     driverId: t.driverId ?? null,
-    driverName: t.driverName ?? null,
+    driverName: t.driverName ?? t.driver?.name ?? null,
     pickup: t.pickup.address || `${t.pickup.lat},${t.pickup.lng}`,
     dropOff: t.dropoff.address || `${t.dropoff.lat},${t.dropoff.lng}`,
     pickupLat: t.pickup.lat,
@@ -60,7 +62,7 @@ function mapTrip(t: ApiTrip): Trip {
     dropOffLng: t.dropoff.lng,
     fare: t.finalFare ?? t.fare,
     finalFare: t.finalFare ?? null,
-    distanceKm: 0,
+    distanceKm: t.distanceKm ?? 0,
     truckType: t.truckType as Trip["truckType"],
     status: t.status as TripStatus,
     createdAt: t.createdAt,
