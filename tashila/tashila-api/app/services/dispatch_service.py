@@ -94,6 +94,25 @@ async def _driver_ids_with_active_trips() -> set[str]:
 
 
 async def find_dispatch_candidates(trip: dict[str, Any]) -> list[dict[str, Any]]:
+    targeted_driver_id = trip.get("targetedDriverId")
+    if targeted_driver_id:
+        try:
+            oid = ObjectId(targeted_driver_id)
+            driver = await get_database()[DRIVERS_COLLECTION].find_one({"_id": oid})
+            if driver:
+                driver_id = str(driver["_id"])
+                if (
+                    driver.get("availability") == "online"
+                    and driver.get("approvalStatus") == "approved"
+                ):
+                    busy_mongo = await _driver_ids_with_active_trips()
+                    if driver_id not in busy_mongo and not await is_driver_busy(driver_id):
+                        from app.services.trip_service import _serialize_doc
+                        return [{**_serialize_doc(driver), "id": driver_id, "distanceMeters": 0}]
+        except Exception:
+            logger.exception("Failed finding targeted driver %s", targeted_driver_id)
+        return []
+
     truck_type = trip.get("truckType")
     near = _pickup_near_point(trip)
     busy_mongo = await _driver_ids_with_active_trips()
