@@ -100,6 +100,7 @@ class AdminTripDispatchRequest(BaseModel):
     externalLabel: str | None = None
     notes: str | None = None
     paymentMethod: str = "cash"
+    dispatchMode: str = "accepted"
 
 
 class AdminTripStatusUpdate(BaseModel):

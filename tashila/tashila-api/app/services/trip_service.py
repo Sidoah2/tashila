@@ -900,10 +900,14 @@ async def admin_dispatch_trip(data: AdminTripDispatchRequest) -> dict[str, Any]:
         external_note = f"External order: {data.externalLabel}"
         notes = f"{notes}\n{external_note}" if notes else external_note
 
+    dispatch_mode = getattr(data, "dispatchMode", "accepted")
+    is_accepted = dispatch_mode == "accepted"
+
     doc = {
-        "status": "accepted",
+        "status": "accepted" if is_accepted else "requested",
         "clientId": client_id,
-        "driverId": data.driverId,
+        "driverId": data.driverId if is_accepted else None,
+        "targetedDriverId": None if is_accepted else data.driverId,
         "pickup": data.pickup.model_dump(),
         "dropoff": data.dropoff.model_dump(),
         "pickupLocation": _pickup_location(data.pickup),
@@ -923,18 +927,29 @@ async def admin_dispatch_trip(data: AdminTripDispatchRequest) -> dict[str, Any]:
         "createdAt": now,
         "updatedAt": now,
         "completedAt": None,
+        "dispatchedByAdmin": True,
     }
     result = await get_database()[TRIPS_COLLECTION].insert_one(doc)
     trip_id = str(result.inserted_id)
-    await dispatch_service.on_trip_accepted(trip_id, data.driverId)
-    await publish(
-        "trip:accepted",
-        _json_safe({"tripId": trip_id, "driverId": data.driverId, "dispatchedByAdmin": True}),
-    )
-    if client_id:
-        dispatched = await _find_trip(trip_id)
-        if dispatched:
-            await _notify_client_status_push(dispatched, "accepted")
+
+    if is_accepted:
+        await dispatch_service.on_trip_accepted(trip_id, data.driverId)
+        await publish(
+            "trip:accepted",
+            _json_safe({"tripId": trip_id, "driverId": data.driverId, "dispatchedByAdmin": True}),
+        )
+        if client_id:
+            dispatched = await _find_trip(trip_id)
+            if dispatched:
+                await _notify_client_status_push(dispatched, "accepted")
+    else:
+        doc["_id"] = trip_id
+        serialized = _serialize_doc(doc)
+        client_info = await _get_client_info(client_id)
+        trip_payload = {**serialized, "client": client_info}
+        await publish("trip:new", _json_safe(trip_payload))
+        trip_full = await trip_with_client(trip_id)
+        await dispatch_service.start_dispatch(trip_full)
 
     return await _find_trip(trip_id)  # type: ignore[return-value]
 
