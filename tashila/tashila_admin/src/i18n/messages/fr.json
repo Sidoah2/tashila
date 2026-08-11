@@ -345,6 +345,13 @@
     "phone_format": "Utilisez chiffres, espaces, tirets ou +.",
     "vehicle_color_min": "Indiquez la couleur du vehicule.",
     "vehicle_model_min": "Indiquez le modele du vehicule.",
-    "vehicle_plate_min": "Indiquez l'immatriculation."
+    "vehicle_plate_min": "Indiquez l'immatriculation.",
+    "client_required": "Veuillez sélectionner un client ou cocher Commande Externe.",
+    "driver_required": "Veuillez sélectionner un chauffeur.",
+    "pickup_required": "Veuillez entrer un lieu de départ.",
+    "dropoff_required": "Veuillez entrer un lieu d'arrivée.",
+    "fare_required": "Impossible de calculer le tarif. Veuillez vérifier les coordonnées.",
+    "rule_disabled": "La tarification est désactivée pour ce type de camion.",
+    "external_name_required": "Veuillez entrer un nom/libellé de client pour la commande externe."
   }
 }
