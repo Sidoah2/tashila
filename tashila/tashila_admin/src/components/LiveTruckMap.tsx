@@ -151,16 +151,18 @@ export default function LiveTruckMap({
     const existing = document.querySelector(
       "script[data-tashila-google-maps]"
     ) as HTMLScriptElement | null;
-    const script =
-      existing ??
-      Object.assign(document.createElement("script"), {
-        async: true,
-        defer: true,
-        src: `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`,
-        dataset: { tashilaGoogleMaps: "1" },
-      });
+    let script: HTMLScriptElement;
+    if (existing) {
+      script = existing;
+    } else {
+      script = document.createElement("script");
+      script.async = true;
+      script.defer = true;
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+      script.dataset.tashilaGoogleMaps = "1";
+      document.head.appendChild(script);
+    }
     script.addEventListener("load", bootstrap);
-    if (!existing) document.head.appendChild(script);
 
     return () => {
       cancelled = true;
