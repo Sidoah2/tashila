@@ -190,16 +190,10 @@ export default function TripsPage() {
       <Box sx={{ mb: 3 }}>
         <Alert severity="info" sx={{ borderRadius: 2, border: `1px solid ${brand.border}` }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
-            💡 Platform Trips Control Guide
+            {t("trips.guide_title")}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            • <b>Trip Lifecycle:</b> Dispatched trips start as <b>Accepted</b> immediately. Client app bookings start as <b>Requested</b> (Searching) and transition sequentially when drivers accept them.
-            <br />
-            • <b>Search & Filter:</b> Use the search bar to query by Trip ID, Client Name, Driver Name, or specific route endpoints.
-            <br />
-            • <b>Cash Settlement:</b> When a driver completes a cash-payment trip, it moves to <b>Awaiting Cash</b>. Platform admins can review the details drawer and click <b>Confirm Cash Collected</b> once settled.
-            <br />
-            • <b>Routes & Map:</b> Click on any trip row to open the details sidebar and view the exact path on the dynamic Google Map.
+          <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
+            {t("trips.guide_body")}
           </Typography>
         </Alert>
       </Box>

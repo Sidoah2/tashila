@@ -66,16 +66,8 @@ export default function DispatchTripPage() {
   const [externalLabel, setExternalLabel] = useState("");
   const [client, setClient] = useState<(typeof users)[number] | null>(null);
 
-  // Preset location selection
-  const [pickup, setPickup] = useState<LocationOption | null>(
-    ADMIN_NEIGHBORHOODS[0] ?? null
-  );
-  const [dropOff, setDropOff] = useState<LocationOption | null>(
-    ADMIN_NEIGHBORHOODS[1] ?? ADMIN_NEIGHBORHOODS[0] ?? null
-  );
-
-  // Custom Location selection
-  const [customLocation, setCustomLocation] = useState(false);
+  const customLocation = true;
+  const [dispatchMode, setDispatchMode] = useState<"accepted" | "requested">("accepted");
   const [customPickupAddress, setCustomPickupAddress] = useState("");
   const [customPickupLat, setCustomPickupLat] = useState<number>(22.785);
   const [customPickupLng, setCustomPickupLng] = useState<number>(5.523);
@@ -89,19 +81,6 @@ export default function DispatchTripPage() {
 
   const [driver, setDriver] = useState<(typeof drivers)[number] | null>(null);
   const [submitting, setSubmitting] = useState(false);
-
-  // Sync default presets when custom mode is disabled
-  useEffect(() => {
-    if (!customLocation && pickup && dropOff) {
-      setCustomPickupAddress(neighborhoodLabel(pickup, locale));
-      setCustomPickupLat(pickup.lat);
-      setCustomPickupLng(pickup.lng);
-
-      setCustomDropOffAddress(neighborhoodLabel(dropOff, locale));
-      setCustomDropOffLat(dropOff.lat);
-      setCustomDropOffLng(dropOff.lng);
-    }
-  }, [customLocation, pickup, dropOff, locale]);
 
   // Setup Google Autocomplete on text fields when custom location mode is active
   useEffect(() => {
@@ -145,36 +124,20 @@ export default function DispatchTripPage() {
   }, [customLocation]);
 
   const effectivePickup = useMemo(() => {
-    if (customLocation) {
-      return {
-        label: customPickupAddress || "Custom Pickup Point",
-        lat: Number(customPickupLat),
-        lng: Number(customPickupLng),
-      };
-    }
-    if (!pickup) return null;
     return {
-      label: neighborhoodLabel(pickup, locale),
-      lat: pickup.lat,
-      lng: pickup.lng,
+      label: customPickupAddress || "Custom Pickup Point",
+      lat: Number(customPickupLat),
+      lng: Number(customPickupLng),
     };
-  }, [customLocation, pickup, customPickupAddress, customPickupLat, customPickupLng, locale]);
+  }, [customPickupAddress, customPickupLat, customPickupLng]);
 
   const effectiveDropOff = useMemo(() => {
-    if (customLocation) {
-      return {
-        label: customDropOffAddress || "Custom Drop-off Point",
-        lat: Number(customDropOffLat),
-        lng: Number(customDropOffLng),
-      };
-    }
-    if (!dropOff) return null;
     return {
-      label: neighborhoodLabel(dropOff, locale),
-      lat: dropOff.lat,
-      lng: dropOff.lng,
+      label: customDropOffAddress || "Custom Drop-off Point",
+      lat: Number(customDropOffLat),
+      lng: Number(customDropOffLng),
     };
-  }, [customLocation, dropOff, customDropOffAddress, customDropOffLat, customDropOffLng, locale]);
+  }, [customDropOffAddress, customDropOffLat, customDropOffLng]);
 
   const eligibleDrivers = useMemo(
     () =>
@@ -370,6 +333,7 @@ export default function DispatchTripPage() {
         dropOffLng: effectiveDropOff.lng,
         truckType,
         fare: apiFare!,
+        dispatchMode,
       });
       showToast(
         t("toast.trip_dispatched", { id: trip.id, name: driver.name })
@@ -391,16 +355,10 @@ export default function DispatchTripPage() {
       <Box sx={{ mb: 3 }}>
         <Alert severity="info" sx={{ borderRadius: 2, border: `1px solid ${brand.border}` }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
-            💡 Dispatcher Guidelines & Tips
+            {t("dispatch.guide_title")}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
-            • <b>Custom Coordinates (Anywhere):</b> Toggle the custom coordinates checkbox below to dispatch trips outside the core service area center.
-            <br />
-            • <b>Search & Drag Pins:</b> Use the search boxes with Google Places Autocomplete to lookup towns, or drag the green 🟢 and red 🔴 pins directly on the map to fine-tune locations.
-            <br />
-            • <b>Driver Auto-sorting:</b> The driver dropdown list auto-sorts eligible drivers by distance to the pickup coordinate. Online drivers matching the chosen truck type are shown on the live map.
-            <br />
-            • <b>Client vs. Phone Order:</b> Choose an app-registered client or check &quot;External / phone order&quot; to type a custom name.
+          <Typography variant="body2" color="text.secondary" sx={{ whiteSpace: "pre-line" }}>
+            {t("dispatch.guide_body")}
           </Typography>
         </Alert>
       </Box>
@@ -453,6 +411,28 @@ export default function DispatchTripPage() {
                 </Stack>
               </Box>
 
+              <Box>
+                <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                  Dispatch Mode (Status of Depart)
+                </Typography>
+                <Stack direction="row" spacing={1.5} flexWrap="wrap" useFlexGap>
+                  <Chip
+                    label="Directly Accepted (Auto-assigned)"
+                    onClick={() => setDispatchMode("accepted")}
+                    color={dispatchMode === "accepted" ? "primary" : "default"}
+                    variant={dispatchMode === "accepted" ? "filled" : "outlined"}
+                    sx={{ px: 2, py: 2.5, fontSize: 14 }}
+                  />
+                  <Chip
+                    label="Normal Dispatch Order (Requires Driver Acceptance)"
+                    onClick={() => setDispatchMode("requested")}
+                    color={dispatchMode === "requested" ? "primary" : "default"}
+                    variant={dispatchMode === "requested" ? "filled" : "outlined"}
+                    sx={{ px: 2, py: 2.5, fontSize: 14 }}
+                  />
+                </Stack>
+              </Box>
+
               <FormControlLabel
                 control={
                   <Checkbox
@@ -489,142 +469,83 @@ export default function DispatchTripPage() {
                 )}
               />
 
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={customLocation}
-                    onChange={(_, c) => setCustomLocation(c)}
-                  />
-                }
-                label="Use custom coordinates & address (Anywhere in Algeria)"
-              />
-
-              {!customLocation ? (
-                <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                  <Autocomplete
-                    fullWidth
-                    value={pickup}
-                    onChange={(_, v) => setPickup(v)}
-                    options={ADMIN_NEIGHBORHOODS}
-                    getOptionLabel={(o) => neighborhoodLabel(o, locale)}
-                    renderInput={(params) => (
+              <Stack spacing={2}>
+                {/* Pickup Search & Lat/Lng Inputs */}
+                <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.success }}>
+                    🟢 Custom Pickup Location
+                  </Typography>
+                  <Stack spacing={1.5}>
+                    <TextField
+                      fullWidth
+                      inputRef={pickupInputRef}
+                      label="Search or enter Pickup Address"
+                      value={customPickupAddress}
+                      onChange={(e) => setCustomPickupAddress(e.target.value)}
+                      placeholder="Type address (e.g. In Salah Center)"
+                    />
+                    <Stack direction="row" spacing={2}>
                       <TextField
-                        {...params}
-                        label={t("dispatch.pickup_label")}
-                        InputProps={{
-                          ...params.InputProps,
-                          startAdornment: (
-                            <LocationOnRoundedIcon
-                              sx={{ color: brand.success, mr: 1, ml: 0.5 }}
-                              fontSize="small"
-                            />
-                          ),
-                        }}
+                        type="number"
+                        label="Latitude"
+                        value={customPickupLat}
+                        onChange={(e) => setCustomPickupLat(Number(e.target.value) || 0)}
+                        sx={{ flex: 1 }}
                       />
-                    )}
-                  />
-                  <Autocomplete
-                    fullWidth
-                    value={dropOff}
-                    onChange={(_, v) => setDropOff(v)}
-                    options={ADMIN_NEIGHBORHOODS}
-                    getOptionLabel={(o) => neighborhoodLabel(o, locale)}
-                    renderInput={(params) => (
                       <TextField
-                        {...params}
-                        label={t("dispatch.dropoff_label")}
-                        InputProps={{
-                          ...params.InputProps,
-                          startAdornment: (
-                            <FlagRoundedIcon
-                              sx={{ color: brand.danger, mr: 1, ml: 0.5 }}
-                              fontSize="small"
-                            />
-                          ),
-                        }}
+                        type="number"
+                        label="Longitude"
+                        value={customPickupLng}
+                        onChange={(e) => setCustomPickupLng(Number(e.target.value) || 0)}
+                        sx={{ flex: 1 }}
                       />
-                    )}
-                  />
-                </Stack>
-              ) : (
-                <Stack spacing={2}>
-                  {/* Pickup Search & Lat/Lng Inputs */}
-                  <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.success }}>
-                      🟢 Custom Pickup Location
-                    </Typography>
-                    <Stack spacing={1.5}>
-                      <TextField
-                        fullWidth
-                        inputRef={pickupInputRef}
-                        label="Search or enter Pickup Address"
-                        value={customPickupAddress}
-                        onChange={(e) => setCustomPickupAddress(e.target.value)}
-                        placeholder="Type address (e.g. In Salah Center)"
-                      />
-                      <Stack direction="row" spacing={2}>
-                        <TextField
-                          type="number"
-                          label="Latitude"
-                          value={customPickupLat}
-                          onChange={(e) => setCustomPickupLat(Number(e.target.value) || 0)}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          type="number"
-                          label="Longitude"
-                          value={customPickupLng}
-                          onChange={(e) => setCustomPickupLng(Number(e.target.value) || 0)}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
                     </Stack>
-                  </Card>
+                  </Stack>
+                </Card>
 
-                  {/* Drop-off Search & Lat/Lng Inputs */}
-                  <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
-                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.danger }}>
-                      🔴 Custom Drop-off Location
-                    </Typography>
-                    <Stack spacing={1.5}>
+                {/* Drop-off Search & Lat/Lng Inputs */}
+                <Card variant="outlined" sx={{ p: 2, bgcolor: "rgba(0,0,0,0.01)" }}>
+                  <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1, color: brand.danger }}>
+                    🔴 Custom Drop-off Location
+                  </Typography>
+                  <Stack spacing={1.5}>
+                    <TextField
+                      fullWidth
+                      inputRef={dropOffInputRef}
+                      label="Search or enter Drop-off Address"
+                      value={customDropOffAddress}
+                      onChange={(e) => setCustomDropOffAddress(e.target.value)}
+                      placeholder="Type address (e.g. Tamanrasset Airport)"
+                    />
+                    <Stack direction="row" spacing={2}>
                       <TextField
-                        fullWidth
-                        inputRef={dropOffInputRef}
-                        label="Search or enter Drop-off Address"
-                        value={customDropOffAddress}
-                        onChange={(e) => setCustomDropOffAddress(e.target.value)}
-                        placeholder="Type address (e.g. Tamanrasset Airport)"
+                        type="number"
+                        label="Latitude"
+                        value={customDropOffLat}
+                        onChange={(e) => setCustomDropOffLat(Number(e.target.value) || 0)}
+                        sx={{ flex: 1 }}
                       />
-                      <Stack direction="row" spacing={2}>
-                        <TextField
-                          type="number"
-                          label="Latitude"
-                          value={customDropOffLat}
-                          onChange={(e) => setCustomDropOffLat(Number(e.target.value) || 0)}
-                          sx={{ flex: 1 }}
-                        />
-                        <TextField
-                          type="number"
-                          label="Longitude"
-                          value={customDropOffLng}
-                          onChange={(e) => setCustomDropOffLng(Number(e.target.value) || 0)}
-                          sx={{ flex: 1 }}
-                        />
-                      </Stack>
+                      <TextField
+                        type="number"
+                        label="Longitude"
+                        value={customDropOffLng}
+                        onChange={(e) => setCustomDropOffLng(Number(e.target.value) || 0)}
+                        sx={{ flex: 1 }}
+                      />
                     </Stack>
-                  </Card>
-                </Stack>
-              )}
+                  </Stack>
+                </Card>
+              </Stack>
 
               <Autocomplete
                 value={driver}
                 onChange={(_, v) => setDriver(v)}
                 options={sortedEligibleDrivers}
                 getOptionLabel={(o) => {
-                  if (!pickup) return `${o.name} · ${o.phone}`;
+                  if (!effectivePickup) return `${o.name} · ${o.phone}`;
                   const km = haversineKm(
-                    pickup.lat,
-                    pickup.lng,
+                    effectivePickup.lat,
+                    effectivePickup.lng,
                     o.lastLocation.lat,
                     o.lastLocation.lng
                   );
@@ -648,7 +569,7 @@ export default function DispatchTripPage() {
                 )}
               />
 
-              {sortedEligibleDrivers.length > 0 && pickup && (
+              {sortedEligibleDrivers.length > 0 && effectivePickup && (
                 <Stack direction="row" spacing={1} alignItems="center">
                   <Alert severity="info" sx={{ flex: 1 }}>
                     {t("dispatch.nearby_hint")}

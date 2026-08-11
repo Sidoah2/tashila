@@ -126,6 +126,7 @@ export type DispatchInput = {
   dropOffLng: number;
   truckType: string;
   fare: number;
+  dispatchMode: "accepted" | "requested";
 };
 
 export async function dispatchTrip(input: DispatchInput): Promise<Trip> {
@@ -145,6 +146,7 @@ export async function dispatchTrip(input: DispatchInput): Promise<Trip> {
     clientId: input.clientId,
     externalLabel: input.externalLabel ?? null,
     paymentMethod: "cash",
+    dispatchMode: input.dispatchMode,
   };
   const t = await apiFetch<ApiTrip>("/admin/trips/dispatch", {
     method: "POST",
@@ -154,7 +156,7 @@ export async function dispatchTrip(input: DispatchInput): Promise<Trip> {
     ...mapTrip(t),
     clientName: input.clientName,
     driverName: input.driverName,
-    distanceKm: 0,
+    distanceKm: t.distanceKm ?? 0,
   };
 }
 

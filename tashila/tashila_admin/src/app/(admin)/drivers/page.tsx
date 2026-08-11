@@ -127,8 +127,9 @@ export default function DriversPage() {
               fontWeight: 700,
             }}
           >
-            {params.row.name
+            {(params.row.name || "")
               .split(" ")
+              .filter(Boolean)
               .map((s) => s[0])
               .slice(0, 2)
               .join("")}
