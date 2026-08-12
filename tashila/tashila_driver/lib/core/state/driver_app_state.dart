@@ -722,7 +722,10 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final approved = approval == 'approved';
     final profile = state.profile;
     if (profile == null) return;
-    final updated = profile.copyWith(documentsApproved: approved);
+    final updated = profile.copyWith(
+      documentsApproved: approved,
+      approvalStatus: approval,
+    );
     await _saveProfile(updated);
     _setState(state.copyWith(profile: updated));
   }
@@ -733,13 +736,15 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final docsPayload = await _profileRepository.fetchDocuments();
     final profile = state.profile ?? DriverProfile.empty();
     final profileComplete = me['profileComplete'] as bool? ?? false;
+    final rawApproval = me['approvalStatus'] as String? ?? 'pending';
     final updated = profile.copyWith(
       name: me['name'] as String? ?? profile.name,
       phone: me['phone'] as String? ?? profile.phone,
       truckType: migrateTruckType(
         me['truckType'] as String? ?? profile.truckType,
       ),
-      documentsApproved: (me['approvalStatus'] as String?) == 'approved',
+      documentsApproved: rawApproval == 'approved',
+      approvalStatus: rawApproval,
       avatarUrl: me['avatarUrl'] as String? ?? profile.avatarUrl,
       vehiclePlate: me['vehiclePlate'] as String? ?? profile.vehiclePlate,
       vehicleColor: me['vehicleColor'] as String? ?? profile.vehicleColor,
