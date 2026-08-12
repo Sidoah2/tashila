@@ -292,7 +292,7 @@
   },
   "pricing": {
     "formula_title": "How fares are calculated",
-    "formula_tashila": "Tashila dynamic (DZD): Raw = 1000 + max(0,d-5)×100 + max(0,t-60)×20 → Final = ceil(Raw/100)×100",
+    "formula_tashila": "Fare calculation (DZD): Fare = Base Fare + (Price Per Km × Distance) rounded up to the nearest 100 DZD (Example: base 1000, per km 100 for 8 km, fare = 1000 + 100×8 = 1800 DZD)",
     "geofence_title": "Service area (geofence)",
     "geofence_body": "Drag the center pin and set the radius. Pickup or dropoff outside this circle is blocked in customer apps.",
     "geofence_radius_label": "Coverage radius",
@@ -309,7 +309,7 @@
     "per_minute": "Per minute (DZD)",
     "min_fare": "Min fare (DZD)",
     "surge_multiplier": "Surge multiplier",
-    "example_label": "Example for an 8 km / ~19 min trip",
+    "example_label": "Example for an 8 km trip",
     "example_rule_fare": "Rule-based estimate: {amount}",
     "example_tashila_fare": "Tashila dynamic formula: {amount}",
     "example_api_fare": "Live API estimate (8 km sample): {amount}"

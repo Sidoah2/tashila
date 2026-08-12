@@ -1005,13 +1005,6 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     },
                   ),
                 ),
-                const SizedBox(height: 12),
-                TextButton(
-                  onPressed: () async {
-                    await notifier.syncApprovalFromServer();
-                  },
-                  child: Text('doc_review_check_status'.tr()),
-                ),
               ],
             ),
           ),

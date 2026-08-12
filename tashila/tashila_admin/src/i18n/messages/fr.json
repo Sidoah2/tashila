@@ -284,7 +284,7 @@
   },
   "pricing": {
     "formula_title": "Calcul des tarifs",
-    "formula_tashila": "Tashila dynamique (DZD) : Raw = 1000 + max(0,d-5)×100 + max(0,t-60)×20 → Final = ceil(Raw/100)×100",
+    "formula_tashila": "Calcul du tarif (DZD) : Tarif = Tarif de base + (Prix par Km × Distance) arrondi aux 100 DZD supérieurs (Exemple : base 1000, par km 100 pour 8 km, tarif = 1000 + 100×8 = 1800 DZD)",
     "geofence_title": "Zone de service (geofence)",
     "geofence_body": "Definissez un polygone comme tableau JSON de {lat,lng}. Hors zone : les apps client affichent « service indisponible ».",
     "geofence_json_label": "Points du polygone (JSON)",
@@ -297,7 +297,7 @@
     "per_minute": "Par minute (DZD)",
     "min_fare": "Tarif minimum (DZD)",
     "surge_multiplier": "Multiplicateur",
-    "example_label": "Tarif exemple pour une course de 8 km / 19 min",
+    "example_label": "Exemple de tarif pour une course de 8 km",
     "example_rule_fare": "Estimation selon la regle : {amount}",
     "example_tashila_fare": "Formule dynamique Tashila : {amount}",
     "example_api_fare": "Estimation API en direct (exemple 8 km) : {amount}"

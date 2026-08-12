@@ -273,7 +273,21 @@ async def estimate_trip(
         )
     dist = haversine_km(pickup.lat, pickup.lng, dropoff.lat, dropoff.lng)
     minutes = estimate_minutes(dist)
-    fare = tashila_dynamic_fare(dist, minutes)
+
+    # Fetch pricing rules from DB
+    pricing_collection = get_database()["pricing"]
+    rule = await pricing_collection.find_one({"truckType": truck_type})
+    if rule:
+        base_fare = rule.get("baseFareDzd", 1000.0)
+        price_per_km = rule.get("pricePerKmDzd", 100.0)
+    else:
+        base_fare = 1000.0
+        price_per_km = 100.0
+
+    raw_fare = base_fare + price_per_km * dist
+    import math
+    fare = int(math.ceil(raw_fare / 100.0) * 100)
+
     return {
         "distanceKm": round(dist, 1),
         "estimatedMinutes": minutes,
@@ -851,8 +865,46 @@ async def admin_list_trips(
         .skip(params["skip"])
         .limit(params["limit"])
     )
-    items = [_serialize_doc(doc) async for doc in cursor]
-    return paginated_response(items, total, params["page"], params["limit"])
+    items_raw = [_serialize_doc(doc) async for doc in cursor]
+
+    # Enrich each trip with client and driver name
+    driver_cache: dict[str, str | None] = {}
+    client_cache: dict[str, str | None] = {}
+    enriched_items = []
+    for item in items_raw:
+        # Driver Name
+        driver_id = item.get("driverId")
+        if driver_id:
+            driver_str = str(driver_id)
+            if driver_str not in driver_cache:
+                try:
+                    oid = ObjectId(driver_str)
+                    driver_doc = await get_database()[DRIVERS_COLLECTION].find_one(
+                        {"_id": oid}, {"name": 1}
+                    )
+                    driver_cache[driver_str] = (driver_doc or {}).get("name")
+                except Exception:
+                    driver_cache[driver_str] = None
+            item["driverName"] = driver_cache.get(driver_str)
+
+        # Client Name
+        client_id = item.get("clientId")
+        if client_id:
+            client_str = str(client_id)
+            if client_str not in client_cache:
+                try:
+                    oid = ObjectId(client_str)
+                    client_doc = await get_database()[USERS_COLLECTION].find_one(
+                        {"_id": oid}, {"name": 1}
+                    )
+                    client_cache[client_str] = (client_doc or {}).get("name")
+                except Exception:
+                    client_cache[client_str] = None
+            item["clientName"] = client_cache.get(client_str)
+
+        enriched_items.append(item)
+
+    return paginated_response(enriched_items, total, params["page"], params["limit"])
 
 
 async def admin_get_trip(trip_id: str) -> dict[str, Any]:
