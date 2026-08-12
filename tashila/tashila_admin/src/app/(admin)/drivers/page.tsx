@@ -384,12 +384,13 @@ export default function DriversPage() {
         </Tabs>
       </Box>
       <Divider />
-      <Box sx={{ width: "100%" }}>
+      <Box sx={{ width: "100%", overflow: "hidden" }}>
         <DataGrid
           rows={filtered}
           columns={columns}
           loading={loading}
           autoHeight
+          getRowHeight={() => "auto"}
           disableRowSelectionOnClick
           localeText={dataGridLocale}
           initialState={{
@@ -401,6 +402,7 @@ export default function DriversPage() {
             "& .MuiDataGrid-columnHeaders": { backgroundColor: brand.bg },
             "& .MuiDataGrid-cell:focus": { outline: "none" },
             "& .MuiDataGrid-cell:focus-within": { outline: "none" },
+            "& .MuiDataGrid-cell": { alignItems: "center", display: "flex" },
           }}
         />
       </Box>

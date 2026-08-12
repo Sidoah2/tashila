@@ -88,8 +88,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
   void _syncApprovalPolling() {
     if (!mounted) return;
     final profile = ref.read(driverAppStateProvider).profile;
+    final isRejected = profile?.approvalStatus == 'rejected';
     final awaiting =
-        profile != null && profile.isComplete && !profile.documentsApproved;
+        profile != null && profile.isComplete && !profile.documentsApproved && !isRejected;
     if (awaiting && _approvalPollTimer == null) {
       _approvalPollTimer = Timer.periodic(const Duration(seconds: 15), (
         _,
@@ -929,6 +930,95 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     required bool awaitingApproval,
   }) {
     final bottomAwaiting = _wizardStep == 2 && awaitingApproval;
+    final isRejected = profile.approvalStatus == 'rejected';
+
+    // ---- REJECTION SCREEN ------------------------------------------------
+    if (isRejected) {
+      return Scaffold(
+        backgroundColor: AppColors.bg,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(28.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Container(
+                  width: 88,
+                  height: 88,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFEDED),
+                    borderRadius: BorderRadius.circular(44),
+                  ),
+                  child: const Icon(
+                    Icons.cancel_rounded,
+                    color: Color(0xFFE53935),
+                    size: 44,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  'account_rejected_title'.tr(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.w900,
+                    color: const Color(0xFFE53935),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  'account_rejected_body'.tr(),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppColors.textSecondary,
+                    height: 1.5,
+                  ),
+                ),
+                const SizedBox(height: 32),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFE53935),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    icon: const Icon(Icons.headset_mic_rounded),
+                    label: Text(
+                      'contact_support'.tr(),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w800,
+                        fontSize: 15,
+                      ),
+                    ),
+                    onPressed: () {
+                      launchUrl(
+                        Uri.parse('https://wa.me/$kSupportWhatsAppDigits'),
+                        mode: LaunchMode.externalApplication,
+                      );
+                    },
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextButton(
+                  onPressed: () async {
+                    await notifier.syncApprovalFromServer();
+                  },
+                  child: Text('doc_review_check_status'.tr()),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+    // ---- END REJECTION SCREEN --------------------------------------------
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
