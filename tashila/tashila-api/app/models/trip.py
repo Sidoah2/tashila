@@ -98,6 +98,7 @@ class AdminTripDispatchRequest(BaseModel):
     driverId: str
     clientId: str | None = None
     externalLabel: str | None = None
+    externalPhone: str | None = None
     notes: str | None = None
     paymentMethod: str = "cash"
     dispatchMode: str = "accepted"

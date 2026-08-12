@@ -129,12 +129,30 @@ class _TripOfferCardState extends State<TripOfferCard> {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 // Title "طلب جديد" / "New Order" (RTL: Right side)
-                Text(
-                  'new_order_title'.tr(),
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'new_order_title'.tr(),
+                        style: const TextStyle(
+                          fontSize: 21,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                      if (request.clientName.trim().isNotEmpty) ...[
+                        const SizedBox(height: 4),
+                        Text(
+                          request.clientName,
+                          style: TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.grey.shade700,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ),
 

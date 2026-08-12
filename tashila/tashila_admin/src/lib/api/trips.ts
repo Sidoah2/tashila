@@ -116,6 +116,7 @@ export type DispatchInput = {
   clientId: string | null;
   clientName: string;
   externalLabel?: string;
+  externalPhone?: string;
   driverId: string;
   driverName: string;
   pickup: string;
@@ -145,6 +146,7 @@ export async function dispatchTrip(input: DispatchInput): Promise<Trip> {
     driverId: input.driverId,
     clientId: input.clientId,
     externalLabel: input.externalLabel ?? null,
+    externalPhone: input.externalPhone ?? null,
     paymentMethod: "cash",
     dispatchMode: input.dispatchMode,
   };

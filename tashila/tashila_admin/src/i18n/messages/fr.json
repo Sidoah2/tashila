@@ -253,6 +253,9 @@
     "external_order_label": "Libelle",
     "external_order_placeholder": "ex. Commande tel · +213…",
     "external_order_default_name": "Commande externe",
+    "external_phone_label": "Numéro de téléphone du client",
+    "external_phone_placeholder": "ex. 0791453050",
+    "external_phone_hint": "Le chauffeur appellera ce numéro directement depuis l'application.",
     "live_map_title": "Positions chauffeurs",
     "nearby_hint": "Chauffeurs tries par distance au point de prise en charge.",
     "guide_title": "💡 Lignes directrices et conseils du répartiteur",
@@ -371,6 +374,7 @@
     "dropoff_required": "Veuillez entrer un lieu d'arrivée.",
     "fare_required": "Impossible de calculer le tarif. Veuillez vérifier les coordonnées.",
     "rule_disabled": "La tarification est désactivée pour ce type de camion.",
-    "external_name_required": "Veuillez entrer un nom/libellé de client pour la commande externe."
+    "external_name_required": "Veuillez entrer un nom/libellé de client pour la commande externe.",
+    "external_phone_required": "Veuillez entrer un numéro de téléphone de client pour la commande externe."
   }
 }

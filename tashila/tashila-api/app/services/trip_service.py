@@ -456,6 +456,10 @@ async def get_active_trip_for_driver(driver_id: str) -> dict[str, Any] | None:
     if is_active or is_pending_rating:
         serialized = _serialize_doc(doc)
         client_info = await _get_client_info(serialized.get("clientId", ""))
+        if serialized.get("externalLabel"):
+            client_info["name"] = serialized.get("externalLabel")
+        if serialized.get("externalPhone"):
+            client_info["phone"] = serialized.get("externalPhone")
         return {**serialized, "client": client_info}
     return None
 
@@ -491,7 +495,12 @@ async def get_trip_by_id(trip_id: str) -> dict[str, Any]:
 
 async def trip_with_client(trip_id: str) -> dict[str, Any]:
     trip = await get_trip_by_id(trip_id)
-    return {**trip, "client": await _get_client_info(trip.get("clientId", ""))}
+    client_info = await _get_client_info(trip.get("clientId", ""))
+    if trip.get("externalLabel"):
+        client_info["name"] = trip.get("externalLabel")
+    if trip.get("externalPhone"):
+        client_info["phone"] = trip.get("externalPhone")
+    return {**trip, "client": client_info}
 
 
 async def cancel_trip_no_driver(trip_id: str) -> dict[str, Any]:
@@ -911,9 +920,14 @@ async def admin_get_trip(trip_id: str) -> dict[str, Any]:
     trip = await _find_trip(trip_id)
     if trip is None:
         raise NotFoundError("Trip not found")
+    client_info = await _get_client_info(trip.get("clientId", ""))
+    if trip.get("externalLabel"):
+        client_info["name"] = trip.get("externalLabel")
+    if trip.get("externalPhone"):
+        client_info["phone"] = trip.get("externalPhone")
     result: dict[str, Any] = {
         **trip,
-        "client": await _get_client_info(trip.get("clientId", "")),
+        "client": client_info,
         "driver": await _get_driver_info(trip.get("driverId")),
     }
     if trip.get("status") == "requested":
@@ -971,6 +985,7 @@ async def admin_dispatch_trip(data: AdminTripDispatchRequest) -> dict[str, Any]:
         "paymentMethod": data.paymentMethod,
         "notes": notes,
         "externalLabel": data.externalLabel,
+        "externalPhone": data.externalPhone,
         "driverRating": None,
         "clientRating": None,
         "clientRatingComment": None,
