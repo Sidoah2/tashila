@@ -659,7 +659,7 @@ export default function DriverDetailPage({
                       color="success"
                       variant={doc.status === "approved" ? "contained" : "outlined"}
                       startIcon={<CheckCircleRoundedIcon />}
-                      disabled={doc.status === "pending"}
+                      disabled={!doc.fileName}
                       onClick={() => handleDocStatus(doc.type, "approved")}
                     >
                       {t("common.approve")}
@@ -670,7 +670,7 @@ export default function DriverDetailPage({
                       color="error"
                       variant={doc.status === "rejected" ? "contained" : "outlined"}
                       startIcon={<CancelRoundedIcon />}
-                      disabled={doc.status === "pending"}
+                      disabled={!doc.fileName}
                       onClick={() => {
                         setRejectingDoc(doc.type);
                         setRejectReason(doc.rejectionReason ?? "");
