@@ -456,7 +456,7 @@ export default function DriverDetailPage({
           {/* Trips List */}
           {filteredTrips.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
-              {t("driver_detail.customer_reviews_empty")}
+              {t("driver_detail.trips_empty") || "No trips found."}
             </Typography>
           ) : (
             <List dense sx={{ maxHeight: 400, overflow: "auto" }}>
@@ -604,14 +604,23 @@ export default function DriverDetailPage({
                       justifyContent: "center",
                       mb: 1.5,
                       cursor: doc.fileName ? "pointer" : "default",
+                      overflow: "hidden",
                     }}
                     onClick={() => {
                       if (doc.fileName) setPreviewDoc(doc);
                     }}
                   >
-                    <Typography variant="caption" color="text.secondary">
-                      {doc.fileName ?? t("driver_detail.doc_not_uploaded")}
-                    </Typography>
+                    {doc.fileName ? (
+                      <img
+                        src={doc.fileName}
+                        alt={getDocumentTypeLabel(t, doc.type)}
+                        style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                      />
+                    ) : (
+                      <Typography variant="caption" color="text.secondary">
+                        {t("driver_detail.doc_not_uploaded")}
+                      </Typography>
+                    )}
                   </Box>
                   <Stack
                     direction="row"

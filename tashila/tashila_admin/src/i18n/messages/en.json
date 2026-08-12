@@ -180,6 +180,7 @@
     "doc_preview_body": "Preview of the uploaded document.",
     "vehicle_header": "{model} · {color} · {plate}",
     "trips_title": "Driver Trips",
+    "trips_empty": "No trips found.",
     "filter_status": "Filter by status",
     "filter_date_from": "Date From",
     "filter_date_to": "Date To",
