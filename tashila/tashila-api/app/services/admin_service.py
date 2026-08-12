@@ -122,7 +122,7 @@ async def _driver_average_rating(driver_id: str) -> float | None:
     return round(float(rows[0]["avgRating"]), 2)
 
 
-def _user_list_item(user: dict[str, Any], trip_count: int) -> dict[str, Any]:
+def _user_list_item(user: dict[str, Any], trip_count: int, average_rating: float = 0.0) -> dict[str, Any]:
     return {
         "id": user["id"],
         "phone": user.get("phone"),
@@ -133,7 +133,34 @@ def _user_list_item(user: dict[str, Any], trip_count: int) -> dict[str, Any]:
         "status": user.get("status", "active"),
         "createdAt": user.get("createdAt"),
         "tripCount": trip_count,
+        "averageRating": average_rating,
     }
+
+
+async def _client_average_ratings(client_ids: list[str]) -> dict[str, float]:
+    if not client_ids:
+        return {}
+    pipeline = [
+        {"$match": {"clientId": {"$in": client_ids}, "clientRating": {"$ne": None}}},
+        {"$group": {"_id": "$clientId", "avgRating": {"$avg": "$clientRating"}}},
+    ]
+    ratings: dict[str, float] = {}
+    async for row in get_database()[TRIPS_COLLECTION].aggregate(pipeline):
+        ratings[row["_id"]] = round(float(row["avgRating"]), 2)
+    return ratings
+
+
+async def _trip_counts_by_status_for_client(client_id: str) -> dict[str, int]:
+    pipeline = [
+        {"$match": {"clientId": client_id}},
+        {"$group": {"_id": "$status", "count": {"$sum": 1}}},
+    ]
+    counts = {"completed": 0, "cancelled": 0}
+    async for row in get_database()[TRIPS_COLLECTION].aggregate(pipeline):
+        status = row["_id"]
+        if status in counts:
+            counts[status] = row["count"]
+    return counts
 
 
 # --- Users ---
@@ -164,7 +191,15 @@ async def admin_list_users(
     users = [_serialize_doc(doc) async for doc in cursor]
     client_ids = [u["id"] for u in users]
     trip_counts = await _trip_counts_for_clients(client_ids)
-    items = [_user_list_item(u, trip_counts.get(u["id"], 0)) for u in users]
+    average_ratings = await _client_average_ratings(client_ids)
+    items = [
+        _user_list_item(
+            u,
+            trip_counts.get(u["id"], 0),
+            average_ratings.get(u["id"], 0.0),
+        )
+        for u in users
+    ]
     return paginated_response(items, total, params["page"], params["limit"])
 
 
@@ -175,7 +210,15 @@ async def admin_get_user(user_id: str) -> dict[str, Any]:
     trips = await _last_trips("clientId", user_id)
     reviews = await _client_reviews_for_user(user_id)
     avg_rating = await _client_average_rating(user_id)
-    return {**user, "trips": trips, "reviews": reviews, "averageRating": avg_rating}
+    status_counts = await _trip_counts_by_status_for_client(user_id)
+    return {
+        **user,
+        "trips": trips,
+        "reviews": reviews,
+        "averageRating": avg_rating,
+        "completedTripsCount": status_counts["completed"],
+        "cancelledTripsCount": status_counts["cancelled"],
+    }
 
 
 async def _client_reviews_for_user(user_id: str, limit: int = 20) -> list[dict[str, Any]]:
@@ -351,15 +394,31 @@ async def admin_list_pending_drivers() -> list[dict[str, Any]]:
     return [_serialize_doc(doc) async for doc in cursor]
 
 
+async def _driver_completed_trips_count(driver_id: str) -> int:
+    return await get_database()[TRIPS_COLLECTION].count_documents(
+        {"driverId": driver_id, "status": "completed"}
+    )
+
+
+async def admin_upload_driver_avatar(driver_id: str, file: UploadFile) -> dict[str, Any]:
+    driver = await _find_driver(driver_id)
+    if driver is None:
+        raise NotFoundError("Driver not found")
+    from app.services import driver_service
+    await driver_service.update_avatar(driver_id, file)
+    return await admin_get_driver(driver_id)
+
+
 async def admin_get_driver(driver_id: str) -> dict[str, Any]:
     driver = await _find_driver(driver_id)
     if driver is None:
         raise NotFoundError("Driver not found")
 
-    trips = await _last_trips("driverId", driver_id)
+    trips = await _last_trips("driverId", driver_id, limit=1000)
     avg_rating = await _driver_average_rating(driver_id)
     customer_reviews = await _driver_customer_reviews(driver_id)
     platform_payments = await _driver_platform_payments(driver_id)
+    completed_trips = await _driver_completed_trips_count(driver_id)
     return {
         **driver,
         "documents": driver.get("documents") or {},
@@ -372,6 +431,7 @@ async def admin_get_driver(driver_id: str) -> dict[str, Any]:
         "averageRating": avg_rating,
         "customerReviews": customer_reviews,
         "platformPayments": platform_payments,
+        "completedTrips": completed_trips,
     }
 
 

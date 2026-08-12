@@ -20,11 +20,12 @@ import DialogContent from "@mui/material/DialogContent";
 import DialogActions from "@mui/material/DialogActions";
 import FormHelperText from "@mui/material/FormHelperText";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CloudUploadRoundedIcon from "@mui/icons-material/CloudUploadRounded";
 import CheckRoundedIcon from "@mui/icons-material/CheckRounded";
 import { useDriversStore } from "@/lib/store/drivers";
-import { uploadDriverDocument } from "@/lib/api/drivers";
+import { uploadDriverDocument, uploadDriverAvatar } from "@/lib/api/drivers";
 import { useToast } from "@/components/ToastProvider";
 import { getDocumentTypeLabel, getTruckTypeLabel } from "@/lib/labels";
 import {
@@ -41,8 +42,7 @@ function makeSchema(t: Translator) {
     name: z.string().min(2, t("validation.name_min")),
     phone: z
       .string()
-      .min(8, t("validation.phone_min"))
-      .regex(/^[+\d\s-]+$/, t("validation.phone_format")),
+      .regex(/^(0\d{9}|\d{9})$/, t("validation.phone_min")),
     truckType: z.enum(["single_cabin", "double_cabin"] as const),
     vehicleColor: z.string().min(1, t("validation.vehicle_color_min")),
     vehicleModel: z.string().min(1, t("validation.vehicle_model_min")),
@@ -58,6 +58,8 @@ export default function NewDriverPage() {
   const create = useDriversStore((s) => s.create);
   const showToast = useToast();
   const [docFiles, setDocFiles] = useState<Partial<Record<DocumentType, File>>>({});
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [phoneVal, setPhoneVal] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [previewType, setPreviewType] = useState<DocumentType | null>(null);
 
@@ -67,12 +69,13 @@ export default function NewDriverPage() {
     control,
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: {
       name: "",
-      phone: "+213 ",
+      phone: "",
       truckType: "single_cabin",
       vehicleColor: "",
       vehicleModel: "",
@@ -92,9 +95,13 @@ export default function NewDriverPage() {
   const onSubmit = handleSubmit(async (values) => {
     setSubmitting(true);
     try {
+      const rawPhone = values.phone;
+      const cleanPhone = rawPhone.startsWith("0")
+        ? "+213" + rawPhone.slice(1)
+        : "+213" + rawPhone;
       const driver = await create({
         name: values.name,
-        phone: values.phone,
+        phone: cleanPhone,
         truckType: values.truckType,
         vehicleColor: values.vehicleColor,
         vehicleModel: values.vehicleModel,
@@ -106,8 +113,14 @@ export default function NewDriverPage() {
       ][]) {
         if (file) await uploadDriverDocument(driver.id, type, file);
       }
+      if (avatarFile) {
+        await uploadDriverAvatar(driver.id, avatarFile);
+      }
       showToast(t("toast.driver_created", { name: driver.name }));
       router.push(`/drivers/${driver.id}`);
+    } catch (err: any) {
+      console.error(err);
+      showToast(err.message || t("common.error_occurred"), "error");
     } finally {
       setSubmitting(false);
     }
@@ -146,13 +159,34 @@ export default function NewDriverPage() {
               />
               <TextField
                 label={t("driver_new.phone_with_country")}
-                placeholder={t("driver_new.phone_placeholder")}
+                placeholder={phoneVal.startsWith("0") ? "0661452711" : "661452711"}
                 error={Boolean(errors.phone)}
                 helperText={
                   errors.phone?.message ??
                   t("driver_new.phone_helper_default_country")
                 }
-                {...register("phone")}
+                dir="ltr"
+                slotProps={{
+                  input: {
+                    startAdornment: (
+                      <InputAdornment position="start" sx={{ dir: "ltr" }}>
+                        +213
+                      </InputAdornment>
+                    ),
+                  },
+                }}
+                inputProps={{
+                  style: { textAlign: "left" },
+                }}
+                value={phoneVal}
+                onChange={(e) => {
+                  const val = e.target.value.replace(/\D/g, ""); // digits only
+                  const max = val.startsWith("0") ? 10 : 9;
+                  if (val.length <= max) {
+                    setPhoneVal(val);
+                    setValue("phone", val, { shouldValidate: true });
+                  }
+                }}
               />
               <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
                 <TextField
@@ -209,6 +243,59 @@ export default function NewDriverPage() {
               {errors.truckType && (
                 <FormHelperText error>{errors.truckType.message}</FormHelperText>
               )}
+            </Box>
+
+            <Box>
+              <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>
+                {t("driver_new.avatar_section")}
+              </Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+                {t("driver_new.avatar_help")}
+              </Typography>
+              <Box
+                component="label"
+                sx={{
+                  cursor: "pointer",
+                  p: 2,
+                  borderRadius: 2,
+                  maxWidth: 240,
+                  display: "block",
+                  border: `2px dashed ${
+                    avatarFile ? brand.success : brand.border
+                  }`,
+                  backgroundColor: avatarFile
+                    ? `${brand.success}0F`
+                    : brand.bg,
+                  textAlign: "center",
+                  transition: "all 0.15s",
+                  "&:hover": { borderColor: brand.orange },
+                }}
+              >
+                <input
+                  type="file"
+                  hidden
+                  accept="image/jpeg,image/png,image/webp"
+                  onChange={(e) => setAvatarFile(e.target.files?.[0] ?? null)}
+                />
+                {avatarFile ? (
+                  <CheckRoundedIcon sx={{ color: brand.success }} />
+                ) : (
+                  <CloudUploadRoundedIcon
+                    sx={{ color: brand.textSecondary }}
+                  />
+                )}
+                <Typography
+                  sx={{ fontWeight: 700, mt: 0.5 }}
+                  variant="body2"
+                >
+                  {t("driver_new.avatar")}
+                </Typography>
+                <Typography variant="caption" color="text.secondary" sx={{ display: "block" }}>
+                  {avatarFile
+                    ? avatarFile.name
+                    : t("driver_new.tap_to_upload")}
+                </Typography>
+              </Box>
             </Box>
 
             <Box>
@@ -323,9 +410,19 @@ export default function NewDriverPage() {
           {previewType ? getDocumentTypeLabel(t, previewType) : ""}
         </DialogTitle>
         <DialogContent>
-          <Typography variant="body2" color="text.secondary">
-            {t("driver_detail.doc_preview_body")}
-          </Typography>
+          {previewType && docFiles[previewType] ? (
+            <Box sx={{ mt: 1.5, display: "flex", justifyContent: "center" }}>
+              <img
+                src={URL.createObjectURL(docFiles[previewType]!)}
+                alt={getDocumentTypeLabel(t, previewType)}
+                style={{ maxWidth: "100%", maxHeight: 300, objectFit: "contain", borderRadius: 8 }}
+              />
+            </Box>
+          ) : (
+            <Typography variant="body2" color="text.secondary">
+              {t("driver_detail.doc_preview_body")}
+            </Typography>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewType(null)}>{t("common.cancel")}</Button>

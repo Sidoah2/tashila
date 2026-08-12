@@ -13,6 +13,9 @@ interface ApiUser {
   tripCount?: number;
   totalTrips?: number;
   averageRating?: number;
+  avatarUrl?: string | null;
+  completedTripsCount?: number;
+  cancelledTripsCount?: number;
   reviews?: Array<{
     tripId: string;
     rating: number;
@@ -41,6 +44,9 @@ function mapUser(u: ApiUser): User {
     createdAt: u.createdAt,
     totalTrips: u.tripCount ?? u.totalTrips ?? 0,
     averageRating: u.averageRating ?? 0,
+    avatarUrl: u.avatarUrl ?? null,
+    completedTripsCount: u.completedTripsCount ?? 0,
+    cancelledTripsCount: u.cancelledTripsCount ?? 0,
     driverReviews: (u.reviews ?? []).map((r) => ({
       id: r.tripId,
       rating: r.rating,

@@ -33,7 +33,8 @@ type DriversState = {
   ) => Promise<Driver>;
   setApproval: (
     driverId: string,
-    status: DriverApprovalStatus
+    status: DriverApprovalStatus,
+    reason?: string
   ) => Promise<Driver>;
   applyPlatformPayment: (
     driverId: string,
@@ -79,8 +80,8 @@ export const useDriversStore = create<DriversState>((set, get) => ({
     });
     return updated;
   },
-  setApproval: async (driverId, status) => {
-    const updated = await driversApi.setDriverApproval(driverId, status);
+  setApproval: async (driverId, status, reason) => {
+    const updated = await driversApi.setDriverApproval(driverId, status, reason);
     set({
       drivers: get().drivers.map((d) => (d.id === updated.id ? updated : d)),
     });

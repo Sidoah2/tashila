@@ -22,6 +22,10 @@ import Paper from "@mui/material/Paper";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
+import Select from "@mui/material/Select";
+import MenuItem from "@mui/material/MenuItem";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded";
 import CancelRoundedIcon from "@mui/icons-material/CancelRounded";
@@ -40,6 +44,8 @@ import type { DocumentStatus, DocumentType, DriverDocument } from "@/lib/types";
 import { brand } from "@/theme/colors";
 import { useTranslation } from "@/i18n/useTranslation";
 import { useFormatDate, useFormatDzd, useFormatDateTime } from "@/i18n/format";
+import FiberManualRecordRoundedIcon from "@mui/icons-material/FiberManualRecordRounded";
+import LiveTruckMap from "@/components/LiveTruckMap";
 
 export default function DriverDetailPage({
   params,
@@ -62,8 +68,12 @@ export default function DriverDetailPage({
   const showToast = useToast();
 
   const [rejectingDoc, setRejectingDoc] = useState<DocumentType | null>(null);
+  const [rejectingDriver, setRejectingDriver] = useState(false);
   const [rejectReason, setRejectReason] = useState("");
   const [previewDoc, setPreviewDoc] = useState<DriverDocument | null>(null);
+  const [filterStatus, setFilterStatus] = useState("all");
+  const [filterDateFrom, setFilterDateFrom] = useState("");
+  const [filterDateTo, setFilterDateTo] = useState("");
   const [platformAmount, setPlatformAmount] = useState("");
   const [platformNote, setPlatformNote] = useState("");
   const [platformBusy, setPlatformBusy] = useState(false);
@@ -76,6 +86,29 @@ export default function DriverDetailPage({
     () => drivers.find((d) => d.id === id) ?? null,
     [drivers, id]
   );
+
+  const filteredTrips = useMemo(() => {
+    if (!driver || !driver.trips) return [];
+    return driver.trips.filter((tItem) => {
+      if (filterStatus !== "all" && tItem.status !== filterStatus) return false;
+      if (filterDateFrom) {
+        const fromDate = new Date(filterDateFrom);
+        const tripDate = new Date(tItem.createdAt);
+        if (tripDate < fromDate) return false;
+      }
+      if (filterDateTo) {
+        const toDate = new Date(filterDateTo);
+        toDate.setHours(23, 59, 59, 999);
+        const tripDate = new Date(tItem.createdAt);
+        if (tripDate > toDate) return false;
+      }
+      return true;
+    });
+  }, [driver, filterStatus, filterDateFrom, filterDateTo]);
+
+  const completedCountInPeriod = useMemo(() => {
+    return filteredTrips.filter((tItem) => tItem.status === "completed").length;
+  }, [filteredTrips]);
 
   const ratingFormatter = useMemo(() => {
     const fmt = new Intl.NumberFormat(
@@ -137,10 +170,25 @@ export default function DriverDetailPage({
     showToast(t("toast.driver_fully_approved", { name: driver.name }));
   };
 
-  const handleMasterReject = async () => {
-    await setApproval(driver.id, "rejected");
-    showToast(t("toast.driver_rejected", { name: driver.name }), "warning");
-    router.push("/drivers");
+  const handleMasterReject = () => {
+    setRejectReason("");
+    setRejectingDriver(true);
+  };
+
+  const handleMasterRejectSubmit = async () => {
+    if (!rejectReason.trim()) {
+      showToast("Please enter a rejection reason.", "error");
+      return;
+    }
+    try {
+      await setApproval(driver.id, "rejected", rejectReason);
+      showToast(t("toast.driver_rejected", { name: driver.name }), "warning");
+      setRejectingDriver(false);
+      setRejectReason("");
+      router.push("/drivers");
+    } catch (err: any) {
+      showToast(err.message || "Failed to reject driver.", "error");
+    }
   };
 
   return (
@@ -167,6 +215,7 @@ export default function DriverDetailPage({
             alignItems={{ sm: "center" }}
           >
             <Avatar
+              src={driver.avatarUrl ?? undefined}
               sx={{
                 width: 72,
                 height: 72,
@@ -227,6 +276,34 @@ export default function DriverDetailPage({
               </Stack>
             </Box>
           </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Live Map / Broadcast Card */}
+      <Card>
+        <CardContent>
+          <Stack direction="row" alignItems="center" spacing={1} sx={{ mb: 2 }}>
+            <FiberManualRecordRoundedIcon
+              sx={{
+                fontSize: 14,
+                color:
+                  driver.availability === "online"
+                    ? brand.success
+                    : brand.textSecondary,
+              }}
+            />
+            <Typography variant="h6" sx={{ fontWeight: 800 }}>
+              {t("common.live")} · {driver.availability === "online" ? t("common.online") : t("common.offline")}
+            </Typography>
+          </Stack>
+          <Box sx={{ height: 300, width: "100%", borderRadius: 2, overflow: "hidden" }}>
+            <LiveTruckMap
+              drivers={[driver]}
+              center={driver.lastLocation}
+              selectedDriverId={driver.id}
+              onSelectDriver={() => {}}
+            />
+          </Box>
         </CardContent>
       </Card>
 
@@ -303,6 +380,135 @@ export default function DriverDetailPage({
               {t("driver_detail.platform_record_payment")}
             </Button>
           </Stack>
+        </CardContent>
+      </Card>
+
+      {/* Driver Trips Card */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" sx={{ fontWeight: 800, mb: 2 }}>
+            {t("driver_detail.trips_title")}
+          </Typography>
+
+          {/* Filters Row */}
+          <Stack
+            direction={{ xs: "column", sm: "row" }}
+            spacing={2}
+            sx={{ mb: 3 }}
+          >
+            <FormControl size="small" sx={{ minWidth: 160 }}>
+              <InputLabel id="filter-status-label">
+                {t("driver_detail.filter_status")}
+              </InputLabel>
+              <Select
+                labelId="filter-status-label"
+                value={filterStatus}
+                label={t("driver_detail.filter_status")}
+                onChange={(e) => setFilterStatus(e.target.value)}
+              >
+                <MenuItem value="all">{t("users.filter_all")}</MenuItem>
+                <MenuItem value="requested">{t("trip_status.requested")}</MenuItem>
+                <MenuItem value="accepted">{t("trip_status.accepted")}</MenuItem>
+                <MenuItem value="headingToPickup">{t("trip_status.headingToPickup")}</MenuItem>
+                <MenuItem value="inProgress">{t("trip_status.inProgress")}</MenuItem>
+                <MenuItem value="awaitingCash">{t("trip_status.awaitingCash")}</MenuItem>
+                <MenuItem value="completed">{t("trip_status.completed")}</MenuItem>
+                <MenuItem value="cancelled">{t("trip_status.cancelled")}</MenuItem>
+              </Select>
+            </FormControl>
+
+            <TextField
+              type="date"
+              size="small"
+              label={t("driver_detail.filter_date_from")}
+              slotProps={{ inputLabel: { shrink: true } }}
+              value={filterDateFrom}
+              onChange={(e) => setFilterDateFrom(e.target.value)}
+              sx={{ flex: 1 }}
+            />
+
+            <TextField
+              type="date"
+              size="small"
+              label={t("driver_detail.filter_date_to")}
+              slotProps={{ inputLabel: { shrink: true } }}
+              value={filterDateTo}
+              onChange={(e) => setFilterDateTo(e.target.value)}
+              sx={{ flex: 1 }}
+            />
+          </Stack>
+
+          {/* Completed counter for selected period */}
+          <Box
+            sx={{
+              p: 1.5,
+              borderRadius: 2,
+              bgcolor: `${brand.orange}0F`,
+              border: `1px solid ${brand.orange}33`,
+              mb: 2,
+            }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 700, color: brand.orange }}>
+              {t("driver_detail.completed_count_period")}: {completedCountInPeriod}
+            </Typography>
+          </Box>
+
+          {/* Trips List */}
+          {filteredTrips.length === 0 ? (
+            <Typography variant="body2" color="text.secondary">
+              {t("driver_detail.customer_reviews_empty")}
+            </Typography>
+          ) : (
+            <List dense sx={{ maxHeight: 400, overflow: "auto" }}>
+              {filteredTrips.map((tItem) => (
+                <ListItem
+                  key={tItem.id}
+                  disableGutters
+                  sx={{
+                    borderBottom: `1px solid ${brand.border}`,
+                    py: 1.5,
+                    display: "flex",
+                    flexDirection: { xs: "column", sm: "row" },
+                    alignItems: { xs: "flex-start", sm: "center" },
+                    justifyContent: "space-between",
+                    gap: 1,
+                  }}
+                >
+                  <Box>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      ID: {tItem.id.slice(-6).toUpperCase()} · {formatDzd(tItem.fare)}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {formatDateTime(tItem.createdAt)} · {tItem.clientName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary" display="block">
+                      {tItem.pickup} ➔ {tItem.dropOff}
+                    </Typography>
+                  </Box>
+                  <Stack direction="row" spacing={1} alignItems="center">
+                    <Chip
+                      size="small"
+                      label={
+                        tItem.status === "requested" ? t("trip_status.requested") :
+                        tItem.status === "accepted" ? t("trip_status.accepted") :
+                        tItem.status === "headingToPickup" ? t("trip_status.headingToPickup") :
+                        tItem.status === "inProgress" ? t("trip_status.inProgress") :
+                        tItem.status === "awaitingCash" ? t("trip_status.awaitingCash") :
+                        tItem.status === "completed" ? t("trip_status.completed") :
+                        t("trip_status.cancelled")
+                      }
+                      color={
+                        tItem.status === "completed" ? "success" :
+                        tItem.status === "cancelled" ? "error" :
+                        "warning"
+                      }
+                      variant="outlined"
+                    />
+                  </Stack>
+                </ListItem>
+              ))}
+            </List>
+          )}
         </CardContent>
       </Card>
 
@@ -560,24 +766,75 @@ export default function DriverDetailPage({
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
             {t("driver_detail.doc_preview_body")}
           </Typography>
-          <Box
-            sx={{
-              height: 220,
-              borderRadius: 2,
-              bgcolor: brand.bg,
-              border: `1px solid ${brand.border}`,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            <Typography color="text.secondary">
-              {previewDoc?.fileName ?? "—"}
-            </Typography>
-          </Box>
+          {previewDoc?.fileName ? (
+            <Box sx={{ display: "flex", justifyContent: "center", mt: 1 }}>
+              <img
+                src={previewDoc.fileName}
+                alt={getDocumentTypeLabel(t, previewDoc.type)}
+                style={{ maxWidth: "100%", maxHeight: 350, objectFit: "contain", borderRadius: 8 }}
+              />
+            </Box>
+          ) : (
+            <Box
+              sx={{
+                height: 220,
+                borderRadius: 2,
+                bgcolor: brand.bg,
+                border: `1px solid ${brand.border}`,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <Typography color="text.secondary">
+                {t("driver_detail.doc_not_uploaded")}
+              </Typography>
+            </Box>
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setPreviewDoc(null)}>{t("common.cancel")}</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Driver Account Rejection Dialog */}
+      <Dialog
+        open={rejectingDriver}
+        onClose={() => {
+          setRejectingDriver(false);
+          setRejectReason("");
+        }}
+        fullWidth
+        maxWidth="xs"
+      >
+        <DialogTitle>{t("driver_detail.reject_driver_dialog_title")}</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {t("driver_detail.reject_driver_dialog_helper") || "Please specify the reason for rejecting this driver application:"}
+          </Typography>
+          <TextField
+            autoFocus
+            multiline
+            minRows={3}
+            fullWidth
+            placeholder={t("driver_detail.reject_driver_dialog_placeholder") || "e.g., Expired documents or incomplete profile details."}
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            variant="text"
+            onClick={() => {
+              setRejectingDriver(false);
+              setRejectReason("");
+            }}
+          >
+            {t("common.cancel")}
+          </Button>
+          <Button color="error" onClick={handleMasterRejectSubmit}>
+            {t("common.reject")}
+          </Button>
         </DialogActions>
       </Dialog>
     </Stack>

@@ -98,7 +98,7 @@
     "net_platform_period": "حصة التطبيق الصافية",
     "net_platform_period_hint": "عمولة المنصة على أجور الرحلات المكتملة في الفترة المختارة.",
     "cancellation_rate": "معدل الإلغاء",
-    "cancellation_rate_hint": "{cancelled} رحلة ملغاة من أصل {total} رحلة منتهية ({completed} مكتملة + {cancelled} ملغاة) في الفترة المختارة.",
+    "cancellation_rate_hint": "{cancelled} رحلة ملغاة من إجمالي {total} رحلة ({completed} مكتملة + {cancelled} ملغاة) في الفترة المختارة.",
     "cancellation_breakdown_cancelled": "ملغاة: {count}",
     "cancellation_breakdown_completed": "مكتملة: {count}",
     "chart_period_title": "فترة الرسوم البيانية",
@@ -128,6 +128,8 @@
     "drawer_reviews_title": "تعليقات على السائقين",
     "drawer_reviews_empty": "لا توجد تقييمات مسجّلة بعد.",
     "row_total_trips": "إجمالي الرحلات",
+    "row_completed_trips": "الرحلات المكتملة",
+    "row_cancelled_trips": "الرحلات الملغاة",
     "suspend": "إيقاف",
     "activate": "تفعيل",
     "suspend_account": "إيقاف الحساب",
@@ -175,7 +177,15 @@
     "customer_reviews_empty": "لا توجد تعليقات بعد.",
     "doc_preview_title": "معاينة المستند",
     "doc_preview_body": "معاينة المستند المرفوع.",
-    "vehicle_header": "{model} · {color} · {plate}"
+    "vehicle_header": "{model} · {color} · {plate}",
+    "trips_title": "رحلات السائق",
+    "filter_status": "الحالة",
+    "filter_date_from": "من تاريخ",
+    "filter_date_to": "إلى تاريخ",
+    "completed_count_period": "الرحلات المكتملة في الفترة المحددة",
+    "reject_driver_dialog_title": "رفض طلب السائق",
+    "reject_driver_dialog_helper": "يرجى تحديد سبب رفض طلب السائق:",
+    "reject_driver_dialog_placeholder": "مثال: المستندات المرفقة منتهية الصلاحية أو غير صالحة."
   },
   "driver_new": {
     "back_to_drivers": "العودة إلى السائقين",
@@ -199,7 +209,10 @@
     "uploaded": "تم الرفع",
     "create_driver": "إنشاء السائق",
     "creating": "جارٍ الإنشاء…",
-    "doc_preview_open": "فتح المعاينة"
+    "doc_preview_open": "فتح المعاينة",
+    "avatar": "الصورة الشخصية للسائق",
+    "avatar_section": "صورة السائق (اختياري)",
+    "avatar_help": "يمكنك رفع صورة السائق الشخصية الآن."
   },
   "trips": {
     "search_placeholder": "بحث بالمعرّف أو العميل أو السائق أو الموقع",
@@ -328,7 +341,8 @@
   },
   "user_status": {
     "active": "مفعّل",
-    "suspended": "موقوف"
+    "suspended": "موقوف",
+    "deleted": "محذوف"
   },
   "payment_state": {
     "confirmed": "مؤكد",

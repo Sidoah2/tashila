@@ -75,7 +75,10 @@ async def _count_online_drivers() -> int:
 
 
 def _today_start_utc(now: datetime) -> datetime:
-    return now.replace(hour=0, minute=0, second=0, microsecond=0)
+    algiers_tz = timezone(timedelta(hours=1))
+    local_now = now.astimezone(algiers_tz)
+    local_midnight = local_now.replace(hour=0, minute=0, second=0, microsecond=0)
+    return local_midnight.astimezone(timezone.utc)
 
 
 async def _count_completed_trips_since(since: datetime) -> int:

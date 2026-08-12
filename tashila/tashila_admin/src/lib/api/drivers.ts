@@ -57,6 +57,8 @@ interface ApiDriver {
   earnings?: { platformDueDzd?: number };
   customerReviews?: ApiReview[];
   platformPayments?: ApiPayment[];
+  avatarUrl?: string | null;
+  trips?: any[];
 }
 
 interface PaginatedDrivers {
@@ -141,6 +143,31 @@ function mapDriver(d: ApiDriver): Driver {
     customerReviews: reviews,
     platformDueDzd: d.earnings?.platformDueDzd ?? d.platformDueDzd ?? 0,
     platformPayments: payments,
+    avatarUrl: d.avatarUrl ?? null,
+    trips: (d.trips ?? []).map((t: any) => ({
+      id: t.id ?? t._id ?? "",
+      clientId: t.clientId ?? "",
+      clientName: t.clientName ?? "Client",
+      driverId: t.driverId ?? null,
+      driverName: t.driverName ?? null,
+      pickup: t.pickup ?? "",
+      dropOff: t.dropOff ?? "",
+      pickupLat: t.pickupLat ?? 0,
+      pickupLng: t.pickupLng ?? 0,
+      dropOffLat: t.dropOffLat ?? 0,
+      dropOffLng: t.dropOffLng ?? 0,
+      fare: t.fare ?? t.fareDzd ?? 0,
+      finalFare: t.finalFare ?? null,
+      distanceKm: t.distanceKm ?? 0,
+      truckType: t.truckType ?? "single_cabin",
+      status: t.status ?? "requested",
+      createdAt: t.createdAt ?? "",
+      completedAt: t.completedAt ?? null,
+      rating: t.rating ?? null,
+      cashConfirmed: t.cashConfirmed ?? false,
+      paymentMethod: t.paymentMethod ?? "cash",
+      dispatchedByAdmin: t.dispatchedByAdmin ?? false,
+    })),
   };
 }
 
@@ -257,5 +284,18 @@ export async function applyPlatformPayment(
   const d = "driver" in (res as PaymentResponse)
     ? (res as PaymentResponse).driver
     : (res as ApiDriver);
+  return mapDriver(d);
+}
+
+export async function uploadDriverAvatar(
+  driverId: string,
+  file: File,
+): Promise<Driver> {
+  const form = new FormData();
+  form.append("file", file);
+  const d = await apiFetch<ApiDriver>(
+    `/admin/drivers/${driverId}/avatar`,
+    { method: "POST", body: form },
+  );
   return mapDriver(d);
 }

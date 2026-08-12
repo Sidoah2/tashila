@@ -118,6 +118,7 @@ export default function DriversPage() {
       renderCell: (params: GridRenderCellParams<Driver>) => (
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ py: 1 }}>
           <Avatar
+            src={params.row.avatarUrl ?? undefined}
             sx={{
               bgcolor: `${brand.orange}1F`,
               color: brand.orange,

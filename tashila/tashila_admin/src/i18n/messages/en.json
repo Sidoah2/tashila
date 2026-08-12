@@ -98,7 +98,7 @@
     "net_platform_period": "Net platform share",
     "net_platform_period_hint": "Platform commission on completed fares in the selected period.",
     "cancellation_rate": "Cancellation rate",
-    "cancellation_rate_hint": "{cancelled} cancelled out of {total} finished trips ({completed} completed + {cancelled} cancelled) in the selected period.",
+    "cancellation_rate_hint": "{cancelled} cancelled out of a total of {total} trips ({completed} completed + {cancelled} cancelled) in the selected period.",
     "cancellation_breakdown_cancelled": "Cancelled: {count}",
     "cancellation_breakdown_completed": "Completed: {count}",
     "chart_period_title": "Chart period",
@@ -128,6 +128,8 @@
     "drawer_reviews_title": "Reviews left for drivers",
     "drawer_reviews_empty": "No reviews recorded yet.",
     "row_total_trips": "Total trips",
+    "row_completed_trips": "Completed trips",
+    "row_cancelled_trips": "Cancelled trips",
     "suspend": "Suspend",
     "activate": "Activate",
     "suspend_account": "Suspend account",
@@ -176,7 +178,15 @@
     "customer_reviews_empty": "No customer reviews yet.",
     "doc_preview_title": "Document preview",
     "doc_preview_body": "Preview of the uploaded document.",
-    "vehicle_header": "{model} · {color} · {plate}"
+    "vehicle_header": "{model} · {color} · {plate}",
+    "trips_title": "Driver Trips",
+    "filter_status": "Filter by status",
+    "filter_date_from": "Date From",
+    "filter_date_to": "Date To",
+    "completed_count_period": "Completed trips in selected period",
+    "reject_driver_dialog_title": "Reject Driver",
+    "reject_driver_dialog_helper": "Specify the reason for rejecting this driver application:",
+    "reject_driver_dialog_placeholder": "e.g., Expired documents or incomplete profile details."
   },
   "driver_new": {
     "back_to_drivers": "Back to drivers",
@@ -200,7 +210,10 @@
     "uploaded": "Uploaded",
     "create_driver": "Create driver",
     "creating": "Creating…",
-    "doc_preview_open": "Open preview"
+    "doc_preview_open": "Open preview",
+    "avatar": "Driver Photo",
+    "avatar_section": "Driver Photo (optional)",
+    "avatar_help": "You can upload a driver profile picture now."
   },
   "trips": {
     "search_placeholder": "Search ID, client, driver or location",
@@ -336,7 +349,8 @@
   },
   "user_status": {
     "active": "Active",
-    "suspended": "Suspended"
+    "suspended": "Suspended",
+    "deleted": "Deleted"
   },
   "payment_state": {
     "confirmed": "Confirmed",

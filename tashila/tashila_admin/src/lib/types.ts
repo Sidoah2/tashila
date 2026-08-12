@@ -60,12 +60,13 @@ export type Driver = {
   rating: number;
   completedTrips: number;
   customerReviews: DriverCustomerReview[];
-  /** Outstanding commission owed to platform (DZD). */
   platformDueDzd: number;
   platformPayments: PlatformPayment[];
+  avatarUrl?: string | null;
+  trips?: Trip[];
 };
 
-export type UserStatus = "active" | "suspended";
+export type UserStatus = "active" | "suspended" | "deleted";
 
 /** Review the user left for a driver after a trip. */
 export type UserDriverReview = {
@@ -85,9 +86,12 @@ export type User = {
   status: UserStatus;
   createdAt: string;
   totalTrips: number;
+  completedTripsCount?: number;
+  cancelledTripsCount?: number;
   /** Average of ratings given to drivers (0 if none). */
   averageRating: number;
   driverReviews: UserDriverReview[];
+  avatarUrl?: string | null;
 };
 
 export type TripStatus =

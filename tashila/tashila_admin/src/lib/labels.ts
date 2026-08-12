@@ -83,4 +83,5 @@ export const userStatusColor: Record<
 > = {
   active: "success",
   suspended: "error",
+  deleted: "default",
 };
