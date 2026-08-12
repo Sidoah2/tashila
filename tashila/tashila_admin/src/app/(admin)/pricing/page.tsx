@@ -245,10 +245,9 @@ function PricingCard({
   const { t } = useTranslation();
   const formatDzd = useFormatDzd();
   const previewDistance = 8;
-  const previewMinutes = previewDistance * 2.4;
   const previewFare = useMemo(
-    () => tashilaDynamicFare(previewDistance, previewMinutes),
-    [previewMinutes],
+    () => Math.ceil((rule.baseFare + rule.perKm * previewDistance) / 100) * 100,
+    [rule.baseFare, rule.perKm],
   );
   const [apiPreviewFare, setApiPreviewFare] = useState<number | null>(null);
 
@@ -321,7 +320,6 @@ function PricingCard({
             gridTemplateColumns: {
               xs: "1fr",
               sm: "repeat(2, 1fr)",
-              md: "repeat(5, 1fr)",
             },
             gap: 2,
           }}
@@ -335,23 +333,6 @@ function PricingCard({
             label={t("pricing.per_km")}
             value={rule.perKm}
             onChange={(v) => onChange({ perKm: v })}
-          />
-          <NumberField
-            label={t("pricing.per_minute")}
-            value={rule.perMinute}
-            onChange={(v) => onChange({ perMinute: v })}
-          />
-          <NumberField
-            label={t("pricing.min_fare")}
-            value={rule.minFare}
-            onChange={(v) => onChange({ minFare: v })}
-          />
-          <NumberField
-            label={t("pricing.surge_multiplier")}
-            value={rule.surgeMultiplier}
-            step={0.05}
-            adornment="×"
-            onChange={(v) => onChange({ surgeMultiplier: v })}
           />
         </Box>
 
