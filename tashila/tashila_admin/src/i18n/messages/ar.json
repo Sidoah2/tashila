@@ -179,6 +179,7 @@
     "doc_preview_body": "معاينة المستند المرفوع.",
     "vehicle_header": "{model} · {color} · {plate}",
     "trips_title": "رحلات السائق",
+    "trips_empty": "لا توجد رحلات بعد.",
     "filter_status": "الحالة",
     "filter_date_from": "من تاريخ",
     "filter_date_to": "إلى تاريخ",
