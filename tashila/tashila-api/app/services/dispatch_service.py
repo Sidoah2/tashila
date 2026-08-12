@@ -156,6 +156,8 @@ def _offer_socket_payload(
 ) -> dict[str, Any]:
     trip_id = _trip_id_from_payload(trip)
     client = trip.get("client") or {}
+    client_name = trip.get("externalLabel") or client.get("name")
+    client_phone = trip.get("externalPhone") or client.get("phone")
     route_km, route_minutes = _trip_route_payload(trip)
     pickup_distance_km = round(driver.get("distanceMeters", 0) / 1000, 1)
     offered_at = expires_at - timedelta(seconds=settings.offer_ttl_seconds)
@@ -171,8 +173,8 @@ def _offer_socket_payload(
         "expiresAt": expires_at.isoformat(),
         "offerGeneration": generation,
         "client": {
-            "name": client.get("name"),
-            "phone": client.get("phone"),
+            "name": client_name,
+            "phone": client_phone,
             "avatarUrl": client.get("avatarUrl"),
             "rating": client.get("rating", 5.0),
         },

@@ -64,6 +64,7 @@ export default function DispatchTripPage() {
   const [truckType, setTruckType] = useState<TruckType>("single_cabin");
   const [externalOrder, setExternalOrder] = useState(false);
   const [externalLabel, setExternalLabel] = useState("");
+  const [externalPhone, setExternalPhone] = useState("");
   const [client, setClient] = useState<(typeof users)[number] | null>(null);
 
   const customLocation = true;
@@ -176,7 +177,11 @@ export default function DispatchTripPage() {
   }, [truckType, driver, sortedEligibleDrivers]);
 
   useEffect(() => {
-    if (externalOrder) setClient(null);
+    if (externalOrder) {
+      setClient(null);
+    } else {
+      setExternalPhone("");
+    }
   }, [externalOrder]);
 
   const oneDecimal = useMemo(() => {
@@ -296,6 +301,10 @@ export default function DispatchTripPage() {
       showToast(t("validation.external_name_required"), "error");
       return;
     }
+    if (externalOrder && !externalPhone.trim()) {
+      showToast(t("validation.external_phone_required"), "error");
+      return;
+    }
     if (!driver) {
       showToast(t("validation.driver_required"), "error");
       return;
@@ -323,6 +332,7 @@ export default function DispatchTripPage() {
         clientId,
         clientName,
         externalLabel: externalOrder ? clientName : undefined,
+        externalPhone: externalOrder ? externalPhone.trim() : undefined,
         driverId: driver.id,
         driverName: driver.name,
         pickup: effectivePickup.label,
@@ -443,13 +453,20 @@ export default function DispatchTripPage() {
                 label={t("dispatch.external_order")}
               />
               {externalOrder && (
-                <Stack spacing={0.5}>
+                <Stack spacing={2}>
                   <TextField
                     label={t("dispatch.external_order_label")}
                     placeholder={t("dispatch.external_order_placeholder")}
                     value={externalLabel}
                     onChange={(e) => setExternalLabel(e.target.value)}
                     helperText={t("dispatch.external_order_hint")}
+                  />
+                  <TextField
+                    label={t("dispatch.external_phone_label")}
+                    placeholder={t("dispatch.external_phone_placeholder")}
+                    value={externalPhone}
+                    onChange={(e) => setExternalPhone(e.target.value)}
+                    helperText={t("dispatch.external_phone_hint")}
                   />
                 </Stack>
               )}

@@ -182,7 +182,7 @@ export default function PricingPage() {
               <Slider
                 value={settingsDraft.serviceAreaRadiusKm}
                 min={5}
-                max={200}
+                max={1000}
                 step={5}
                 valueLabelDisplay="auto"
                 onChange={(_, v) =>

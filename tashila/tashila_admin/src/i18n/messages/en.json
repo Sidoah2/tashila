@@ -260,6 +260,9 @@
     "external_order_label": "Order label",
     "external_order_placeholder": "e.g. Client phone order · +213…",
     "external_order_default_name": "External order",
+    "external_phone_label": "Client Phone Number",
+    "external_phone_placeholder": "e.g. 0791453050",
+    "external_phone_hint": "The driver will call this number directly from the app.",
     "live_map_title": "Driver locations",
     "nearby_hint": "Drivers are sorted by distance from pickup.",
     "send_nearest": "Select nearest",
@@ -385,6 +388,7 @@
     "dropoff_required": "Please enter a drop-off location.",
     "fare_required": "Estimated fare could not be calculated. Please check coordinates.",
     "rule_disabled": "Pricing is currently disabled for this truck type.",
-    "external_name_required": "Please enter a client name/label for the external order."
+    "external_name_required": "Please enter a client name/label for the external order.",
+    "external_phone_required": "Please enter a client phone number for the external order."
   }
 }

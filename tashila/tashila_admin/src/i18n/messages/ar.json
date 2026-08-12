@@ -257,6 +257,9 @@
     "external_order_label": "اسم الطلب",
     "external_order_placeholder": "مثال: طلب هاتفي · +213…",
     "external_order_default_name": "طلب خارجي",
+    "external_phone_label": "رقم الهاتف",
+    "external_phone_placeholder": "أدخل رقم هاتف العميل (مثال: 0791453050)",
+    "external_phone_hint": "سيتمكن السائق من الاتصال بهذا الرقم مباشرة من تطبيقه.",
     "live_map_title": "مواقع السائقين",
     "nearby_hint": "السائقون مرتّبون حسب البعد عن نقطة الالتقاط.",
     "guide_title": "💡 إرشادات ونصائح مرسل الرحلات",
@@ -375,6 +378,7 @@
     "dropoff_required": "يرجى إدخال موقع الوصول.",
     "fare_required": "لم نتمكن من حساب التكلفة المقدرة. يرجى التحقق من الإحداثيات.",
     "rule_disabled": "التسعير معطل حاليًا لهذا النوع من الشاحنات.",
-    "external_name_required": "يرجى إدخال اسم/معلومات الزبون للطلب الخارجي."
+    "external_name_required": "يرجى إدخال اسم/معلومات الزبون للطلب الخارجي.",
+    "external_phone_required": "يرجى إدخال رقم هاتف الزبون للطلب الخارجي."
   }
 }
