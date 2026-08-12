@@ -98,7 +98,7 @@
     "net_platform_period": "Part nette plateforme",
     "net_platform_period_hint": "Commission sur les courses terminees dans la periode selectionnee.",
     "cancellation_rate": "Taux d'annulation",
-    "cancellation_rate_hint": "{cancelled} annulees sur {total} courses terminees ({completed} terminees + {cancelled} annulees) sur la periode selectionnee.",
+    "cancellation_rate_hint": "{cancelled} annulées sur un total de {total} courses ({completed} terminées + {cancelled} annulées) sur la période sélectionnée.",
     "cancellation_breakdown_cancelled": "Annulees : {count}",
     "cancellation_breakdown_completed": "Terminees : {count}",
     "chart_period_title": "Periode des graphiques",
@@ -128,6 +128,8 @@
     "drawer_reviews_title": "Avis sur les chauffeurs",
     "drawer_reviews_empty": "Aucun avis enregistre.",
     "row_total_trips": "Courses totales",
+    "row_completed_trips": "Courses terminées",
+    "row_cancelled_trips": "Courses annulées",
     "suspend": "Suspendre",
     "activate": "Activer",
     "suspend_account": "Suspendre le compte",
@@ -175,7 +177,15 @@
     "customer_reviews_empty": "Pas encore d'avis.",
     "doc_preview_title": "Apercu du document",
     "doc_preview_body": "Apercu du document televerse.",
-    "vehicle_header": "{model} · {color} · {plate}"
+    "vehicle_header": "{model} · {color} · {plate}",
+    "trips_title": "Courses du chauffeur",
+    "filter_status": "Filtrer par statut",
+    "filter_date_from": "Du date",
+    "filter_date_to": "Au date",
+    "completed_count_period": "Courses terminées sur la période",
+    "reject_driver_dialog_title": "Refuser le chauffeur",
+    "reject_driver_dialog_helper": "Indiquez la raison du refus de ce chauffeur :",
+    "reject_driver_dialog_placeholder": "ex. Documents expirés ou profil incomplet."
   },
   "driver_new": {
     "back_to_drivers": "Retour aux chauffeurs",
@@ -199,7 +209,10 @@
     "uploaded": "Televerse",
     "create_driver": "Creer le chauffeur",
     "creating": "Creation…",
-    "doc_preview_open": "Ouvrir l'apercu"
+    "doc_preview_open": "Ouvrir l'apercu",
+    "avatar": "Photo du chauffeur",
+    "avatar_section": "Photo du chauffeur (optionnel)",
+    "avatar_help": "Vous pouvez téléverser une photo du chauffeur maintenant."
   },
   "trips": {
     "search_placeholder": "Rechercher par ID, client, chauffeur ou lieu",
@@ -324,7 +337,8 @@
   },
   "user_status": {
     "active": "Actif",
-    "suspended": "Suspendu"
+    "suspended": "Suspendu",
+    "deleted": "Supprimé"
   },
   "payment_state": {
     "confirmed": "Confirme",

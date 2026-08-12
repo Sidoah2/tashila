@@ -139,6 +139,16 @@ async def upload_driver_document(
     return await admin_service.admin_upload_driver_document(driver_id, doc_type, file)
 
 
+@drivers_router.post("/{driver_id}/avatar")
+async def upload_driver_avatar(
+    driver_id: str,
+    _admin: dict = _admin_auth,
+    file: UploadFile = File(...),
+) -> dict:
+    return await admin_service.admin_upload_driver_avatar(driver_id, file)
+
+
+
 @drivers_router.post("/{driver_id}/payments", status_code=201)
 async def record_driver_payment(
     driver_id: str,

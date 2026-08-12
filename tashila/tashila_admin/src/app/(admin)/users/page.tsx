@@ -95,6 +95,7 @@ export default function UsersPage() {
       renderCell: (params: GridRenderCellParams<User>) => (
         <Stack direction="row" spacing={1.25} alignItems="center" sx={{ py: 1 }}>
           <Avatar
+            src={params.row.avatarUrl ?? undefined}
             sx={{
               bgcolor: `${brand.orange}1F`,
               color: brand.orange,
@@ -172,23 +173,25 @@ export default function UsersPage() {
           >
             {t("common.view")}
           </Button>
-          <Button
-            size="small"
-            color={params.row.status === "active" ? "error" : "success"}
-            variant="outlined"
-            startIcon={
-              params.row.status === "active" ? (
-                <BlockRoundedIcon fontSize="small" />
-              ) : (
-                <CheckCircleRoundedIcon fontSize="small" />
-              )
-            }
-            onClick={() => handleToggleStatus(params.row)}
-          >
-            {params.row.status === "active"
-              ? t("users.suspend")
-              : t("users.activate")}
-          </Button>
+          {params.row.status !== "deleted" && (
+            <Button
+              size="small"
+              color={params.row.status === "active" ? "error" : "success"}
+              variant="outlined"
+              startIcon={
+                params.row.status === "active" ? (
+                  <BlockRoundedIcon fontSize="small" />
+                ) : (
+                  <CheckCircleRoundedIcon fontSize="small" />
+                )
+              }
+              onClick={() => handleToggleStatus(params.row)}
+            >
+              {params.row.status === "active"
+                ? t("users.suspend")
+                : t("users.activate")}
+            </Button>
+          )}
         </Stack>
       ),
     },
@@ -272,6 +275,7 @@ export default function UsersPage() {
             </Stack>
             <Stack direction="row" alignItems="center" spacing={2} sx={{ mb: 3 }}>
               <Avatar
+                src={selected.avatarUrl ?? undefined}
                 sx={{
                   width: 56,
                   height: 56,
@@ -299,6 +303,14 @@ export default function UsersPage() {
             <DetailRow
               label={t("users.row_total_trips")}
               value={formatNumber(selected.totalTrips)}
+            />
+            <DetailRow
+              label={t("users.row_completed_trips")}
+              value={formatNumber(selected.completedTripsCount ?? 0)}
+            />
+            <DetailRow
+              label={t("users.row_cancelled_trips")}
+              value={formatNumber(selected.cancelledTripsCount ?? 0)}
             />
             <DetailRow
               label={t("common.joined")}
@@ -340,26 +352,28 @@ export default function UsersPage() {
                 ))}
               </Stack>
             )}
-            <Box sx={{ mt: 3 }}>
-              <Button
-                fullWidth
-                variant="contained"
-                color={selected.status === "active" ? "error" : "success"}
-                size="large"
-                onClick={() => handleToggleStatus(selected)}
-                startIcon={
-                  selected.status === "active" ? (
-                    <BlockRoundedIcon />
-                  ) : (
-                    <CheckCircleRoundedIcon />
-                  )
-                }
-              >
-                {selected.status === "active"
-                  ? t("users.suspend_account")
-                  : t("users.reactivate_account")}
-              </Button>
-            </Box>
+            {selected.status !== "deleted" && (
+              <Box sx={{ mt: 3 }}>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  color={selected.status === "active" ? "error" : "success"}
+                  size="large"
+                  onClick={() => handleToggleStatus(selected)}
+                  startIcon={
+                    selected.status === "active" ? (
+                      <BlockRoundedIcon />
+                    ) : (
+                      <CheckCircleRoundedIcon />
+                    )
+                  }
+                >
+                  {selected.status === "active"
+                    ? t("users.suspend_account")
+                    : t("users.reactivate_account")}
+                </Button>
+              </Box>
+            )}
           </Box>
         )}
       </Drawer>

@@ -113,6 +113,11 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
         user_id = str(result.inserted_id)
         profile_complete = False
     else:
+        if existing.get("status") == "suspended":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account suspended",
+            )
         user_id = str(existing["_id"])
         profile_complete = existing.get("profileComplete", False)
         await collection.update_one(
