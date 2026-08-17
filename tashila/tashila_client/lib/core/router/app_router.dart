@@ -81,6 +81,18 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 
-  ref.listen(appStateProvider, (_, next) => router.refresh());
+  ref.listen<AppState>(
+    appStateProvider,
+    (previous, next) {
+      if (previous?.initialized != next.initialized ||
+          previous?.seenOnboarding != next.seenOnboarding ||
+          previous?.isLoggedIn != next.isLoggedIn ||
+          previous?.profileSetupComplete != next.profileSetupComplete ||
+          previous?.hasActiveTrip != next.hasActiveTrip ||
+          previous?.tripStage != next.tripStage) {
+        router.refresh();
+      }
+    },
+  );
   return router;
 });

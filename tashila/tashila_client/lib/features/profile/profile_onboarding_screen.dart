@@ -80,6 +80,12 @@ class _ProfileOnboardingScreenState extends ConsumerState<ProfileOnboardingScree
         backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded, color: AppColors.textPrimary, size: 20),
+          onPressed: () {
+            ref.read(appStateProvider.notifier).logout();
+          },
+        ),
         title: Text(
           'profile_onboarding_title'.tr(),
           style: theme.textTheme.titleMedium?.copyWith(

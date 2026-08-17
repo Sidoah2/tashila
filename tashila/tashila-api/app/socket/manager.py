@@ -50,6 +50,7 @@ async def connect(sid: str, environ: dict, auth: dict[str, Any] | None = None) -
 
     if role == "driver":
         await set_driver_socket(user_id, sid)
+        await sio.enter_room(sid, f"driver:{user_id}")
     elif role == "admin":
         await sio.enter_room(sid, ADMIN_MAP_ROOM)
 
@@ -96,9 +97,7 @@ async def disconnect(sid: str) -> None:
 
 
 async def emit_to_driver(driver_id: str, event: str, data: dict[str, Any]) -> None:
-    sid = await get_driver_socket(driver_id)
-    if sid:
-        await sio.emit(event, data, to=sid)
+    await sio.emit(event, data, room=f"driver:{driver_id}")
 
 
 async def emit_to_trip_room(trip_id: str, event: str, data: dict[str, Any]) -> None:

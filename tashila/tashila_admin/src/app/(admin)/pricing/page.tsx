@@ -113,6 +113,7 @@ export default function PricingPage() {
     settingsDraft &&
     (settings.commissionRate !== settingsDraft.commissionRate ||
       settings.serviceAreaRadiusKm !== settingsDraft.serviceAreaRadiusKm ||
+      settings.maxDispatchDistanceKm !== settingsDraft.maxDispatchDistanceKm ||
       settings.serviceAreaCenter.lat !== settingsDraft.serviceAreaCenter.lat ||
       settings.serviceAreaCenter.lng !== settingsDraft.serviceAreaCenter.lng);
 
@@ -195,6 +196,28 @@ export default function PricingPage() {
               />
               <Typography variant="body2" sx={{ minWidth: 64 }}>
                 {settingsDraft.serviceAreaRadiusKm} km
+              </Typography>
+            </Stack>
+            <Stack direction="row" spacing={2} alignItems="center" sx={{ mt: 2, mb: 1 }}>
+              <Typography variant="body2" sx={{ minWidth: 120 }}>
+                {t("pricing.max_dispatch_distance_label")}
+              </Typography>
+              <Slider
+                value={settingsDraft.maxDispatchDistanceKm ?? 50}
+                min={1}
+                max={200}
+                step={1}
+                valueLabelDisplay="auto"
+                onChange={(_, v) =>
+                  setSettingsDraft({
+                    ...settingsDraft,
+                    maxDispatchDistanceKm: v as number,
+                  })
+                }
+                sx={{ flex: 1 }}
+              />
+              <Typography variant="body2" sx={{ minWidth: 64 }}>
+                {settingsDraft.maxDispatchDistanceKm ?? 50} km
               </Typography>
             </Stack>
             <Button

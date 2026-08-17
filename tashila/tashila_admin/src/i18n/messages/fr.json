@@ -291,6 +291,7 @@
     "formula_tashila": "Calcul du tarif (DZD) : Tarif = Tarif de base + (Prix par Km × Distance) arrondi aux 100 DZD supérieurs (Exemple : base 1000, par km 100 pour 8 km, tarif = 1000 + 100×8 = 1800 DZD)",
     "geofence_title": "Zone de service (geofence)",
     "geofence_body": "Definissez un polygone comme tableau JSON de {lat,lng}. Hors zone : les apps client affichent « service indisponible ».",
+    "max_dispatch_distance_label": "Distance maximale d'envoi",
     "geofence_json_label": "Points du polygone (JSON)",
     "geofence_helper": "Persistance backend plus tard ; ce champ est UI seulement pour l’instant.",
     "active": "Tarification active",

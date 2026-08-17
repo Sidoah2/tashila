@@ -474,13 +474,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       );
     } catch (e) {
       if (!ref.mounted) return;
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(kAvailability, AvailabilityStatus.offline.name);
-      if (!ref.mounted) return;
       _setState(
         state.copyWith(
-          availability: AvailabilityStatus.offline,
-          error: e.toString(),
+          error: 'Could not restore online session: ${e.toString()}',
         ),
       );
       return;
@@ -1051,22 +1047,10 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       },
       onOfferExpired: (data) {
         final tripId = data['tripId'] as String?;
-        final now = DateTime.now().toUtc();
         if (tripId != null && tripId.isNotEmpty) {
-          final matching = state.incomingOffers
-              .where((o) => o.request.id == tripId)
-              .firstOrNull;
-          if (matching != null && matching.expiresAt.isAfter(now)) {
-            return;
-          }
           _clearActiveOffer(tripId: tripId);
         } else {
-          final anyValid = state.incomingOffers.any(
-            (o) => o.expiresAt.isAfter(now),
-          );
-          if (!anyValid) {
-            _clearActiveOffer();
-          }
+          _clearActiveOffer();
         }
         if (state.availability == AvailabilityStatus.online &&
             state.currentRequest == null) {
