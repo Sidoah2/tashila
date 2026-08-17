@@ -27,11 +27,6 @@ from app.core.security import (
 
 PHONE_PATTERN = re.compile(r"^\+\d{8,15}$")
 
-# =============================================================================
-import os
-_TEST_OTP_ENABLED = True
-_TEST_OTP_CODE = "111111"
-# =============================================================================
 
 USERS_COLLECTION = "users"
 DRIVERS_COLLECTION = "drivers"
@@ -64,15 +59,15 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
             headers={"Retry-After": str(settings.otp_window_seconds)},
         )
 
-    if _TEST_OTP_ENABLED:
-        otp = _TEST_OTP_CODE
+    if settings.test_otp_enabled:
+        otp = settings.test_otp_code
     else:
         otp = str(random.randint(100000, 999999))
     await store_otp(phone, role, otp, ttl=120)
 
     from app.services.notification_service import send_sms
 
-    if not _TEST_OTP_ENABLED:
+    if not settings.test_otp_enabled:
         await send_sms(phone, f"Your Tashila OTP is {otp}")
 
     return {"expiresIn": 120}
@@ -83,7 +78,7 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
     if role not in ("client", "driver"):
         raise ValidationError("Role must be 'client' or 'driver'")
 
-    otp_ok = (_TEST_OTP_ENABLED and otp == _TEST_OTP_CODE) or await redis_verify_otp(
+    otp_ok = (settings.test_otp_enabled and otp == settings.test_otp_code) or await redis_verify_otp(
         phone, role, otp
     )
     if not otp_ok:
