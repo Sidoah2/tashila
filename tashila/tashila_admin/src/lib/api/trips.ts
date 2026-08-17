@@ -21,6 +21,7 @@ interface ApiTrip {
   status: string;
   clientId: string;
   clientName?: string;
+  clientPhone?: string | null;
   driverId: string | null;
   driverName?: string | null;
   driver?: { id?: string; name?: string | null; phone?: string | null } | null;
@@ -71,6 +72,7 @@ function mapTrip(t: ApiTrip): Trip {
     cashConfirmed: t.status === "completed" || t.cashConfirmed === true,
     paymentMethod: "cash",
     dispatchedByAdmin: t.dispatchedByAdmin ?? false,
+    clientPhone: t.clientPhone ?? null,
   };
 }
 

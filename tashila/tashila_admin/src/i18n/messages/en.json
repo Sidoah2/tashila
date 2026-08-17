@@ -185,6 +185,7 @@
     "filter_date_from": "Date From",
     "filter_date_to": "Date To",
     "completed_count_period": "Completed trips in selected period",
+    "cancelled_count_period": "Cancelled trips in selected period",
     "reject_driver_dialog_title": "Reject Driver",
     "reject_driver_dialog_helper": "Specify the reason for rejecting this driver application:",
     "reject_driver_dialog_placeholder": "e.g., Expired documents or incomplete profile details."

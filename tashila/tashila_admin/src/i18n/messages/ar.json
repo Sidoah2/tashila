@@ -184,6 +184,7 @@
     "filter_date_from": "من تاريخ",
     "filter_date_to": "إلى تاريخ",
     "completed_count_period": "الرحلات المكتملة في الفترة المحددة",
+    "cancelled_count_period": "الرحلات الملغاة في الفترة المحددة",
     "reject_driver_dialog_title": "رفض طلب السائق",
     "reject_driver_dialog_helper": "يرجى تحديد سبب رفض طلب السائق:",
     "reject_driver_dialog_placeholder": "مثال: المستندات المرفقة منتهية الصلاحية أو غير صالحة."

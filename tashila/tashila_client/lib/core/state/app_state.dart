@@ -358,33 +358,55 @@ class AppStateNotifier extends Notifier<AppState> {
     }
     profileSetupComplete ??= false;
 
+    var finalLoggedIn = loggedIn;
+    var finalFirstName = firstName;
+    var finalLastName = lastName;
+    var finalEmail = email;
+    var finalProfileImageUrl = profileImageUrl;
+    var finalProfilePhotoPath = profilePhotoPath;
+    var finalProfileSetupComplete = profileSetupComplete;
+
     List<TripRecord> history = [];
     if (loggedIn) {
       try {
         history = await _fetchTripHistory();
         await _syncUserFromServer();
+        finalLoggedIn = prefs.getBool('loggedIn') ?? false;
+        finalFirstName = prefs.getString('firstName') ?? '';
+        finalLastName = prefs.getString('lastName') ?? '';
+        finalEmail = prefs.getString('email') ?? '';
+        finalProfileImageUrl = prefs.getString('profileImageUrl') ?? '';
+        finalProfilePhotoPath = prefs.getString('profilePhotoPath') ?? '';
+        finalProfileSetupComplete = prefs.getBool('profileSetupComplete') ?? false;
       } catch (_) {
         history = [];
+        finalLoggedIn = prefs.getBool('loggedIn') ?? false;
+        finalFirstName = prefs.getString('firstName') ?? '';
+        finalLastName = prefs.getString('lastName') ?? '';
+        finalEmail = prefs.getString('email') ?? '';
+        finalProfileImageUrl = prefs.getString('profileImageUrl') ?? '';
+        finalProfilePhotoPath = prefs.getString('profilePhotoPath') ?? '';
+        finalProfileSetupComplete = prefs.getBool('profileSetupComplete') ?? false;
       }
     }
 
     state = state.copyWith(
       initialized: false,
       seenOnboarding: seen,
-      isLoggedIn: loggedIn,
+      isLoggedIn: finalLoggedIn,
       phone: phone,
-      firstName: firstName,
-      lastName: lastName,
-      email: email,
-      profileImageUrl: profileImageUrl,
-      profilePhotoPath: profilePhotoPath,
-      profileSetupComplete: profileSetupComplete,
+      firstName: finalFirstName,
+      lastName: finalLastName,
+      email: finalEmail,
+      profileImageUrl: finalProfileImageUrl,
+      profilePhotoPath: finalProfilePhotoPath,
+      profileSetupComplete: finalProfileSetupComplete,
       notificationsEnabled: notificationsEnabled,
       locale: Locale(lang),
       history: history,
     );
     await _fetchPublicSettings();
-    if (loggedIn) {
+    if (finalLoggedIn) {
       await resumeActiveTripIfAny();
     }
     state = state.copyWith(initialized: true);

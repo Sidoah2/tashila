@@ -1,5 +1,5 @@
 import type { User, UserStatus } from "../types";
-import { apiFetch } from "./client";
+import { apiFetch, getImageUrl } from "./client";
 
 interface ApiUser {
   id?: string;
@@ -44,7 +44,7 @@ function mapUser(u: ApiUser): User {
     createdAt: u.createdAt,
     totalTrips: u.tripCount ?? u.totalTrips ?? 0,
     averageRating: u.averageRating ?? 0,
-    avatarUrl: u.avatarUrl ?? null,
+    avatarUrl: u.avatarUrl ? getImageUrl(u.avatarUrl) : null,
     completedTripsCount: u.completedTripsCount ?? 0,
     cancelledTripsCount: u.cancelledTripsCount ?? 0,
     driverReviews: (u.reviews ?? []).map((r) => ({

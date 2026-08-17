@@ -83,7 +83,7 @@ def _today_start_utc(now: datetime) -> datetime:
 
 async def _count_completed_trips_since(since: datetime) -> int:
     return await get_database()[TRIPS_COLLECTION].count_documents(
-        {"status": "completed", "createdAt": {"$gte": since}},
+        {"status": "completed", "completedAt": {"$gte": since}},
     )
 
 
@@ -107,15 +107,17 @@ async def get_dashboard_kpis(
     today_start = _today_start_utc(now)
 
     period_match: dict[str, Any] | None = None
+    completed_period_match: dict[str, Any] | None = None
     if from_date is not None or to_date is not None:
         period_match = {}
+        completed_period_match = {}
         if from_date is not None:
-            period_match["createdAt"] = period_match.get("createdAt", {})
-            period_match["createdAt"]["$gte"] = from_date
+            period_match["createdAt"] = {"$gte": from_date}
+            completed_period_match["completedAt"] = {"$gte": from_date}
         if to_date is not None:
             end = to_date.replace(hour=23, minute=59, second=59, microsecond=999999)
-            period_match["createdAt"] = period_match.get("createdAt", {})
-            period_match["createdAt"]["$lte"] = end
+            period_match.setdefault("createdAt", {})["$lte"] = end
+            completed_period_match.setdefault("completedAt", {})["$lte"] = end
 
     (
         active_users,
@@ -136,14 +138,14 @@ async def get_dashboard_kpis(
         _count_approved_drivers(),
         _count_online_drivers(),
         _trips_by_status(),
-        _sum_completed_fare({"createdAt": {"$gte": month_start}}),
+        _sum_completed_fare({"completedAt": {"$gte": month_start}}),
         _sum_completed_fare(),
-        _sum_completed_fare({"createdAt": {"$gte": today_start}}),
+        _sum_completed_fare({"completedAt": {"$gte": today_start}}),
         _count_completed_trips_since(today_start),
         _count_active_trips(),
         _count_pending_approvals(),
-        _sum_completed_fare(period_match) if period_match else _sum_completed_fare(),
-        _count_trips_by_status("completed", period_match),
+        _sum_completed_fare(completed_period_match) if completed_period_match else _sum_completed_fare(),
+        _count_trips_by_status("completed", completed_period_match),
         _count_trips_by_status("cancelled", period_match),
     )
 
@@ -183,7 +185,7 @@ async def get_revenue_chart(
         {
             "$match": {
                 "status": "completed",
-                "createdAt": {"$gte": start_date, "$lte": end},
+                "completedAt": {"$gte": start_date, "$lte": end},
             },
         },
         {
@@ -191,7 +193,8 @@ async def get_revenue_chart(
                 "_id": {
                     "$dateToString": {
                         "format": "%Y-%m-%d",
-                        "date": "$createdAt",
+                        "date": "$completedAt",
+                        "timezone": "+01:00",
                     },
                 },
                 "revenue": {"$sum": {"$ifNull": ["$finalFare", "$fare"]}},
@@ -209,11 +212,15 @@ async def get_revenue_chart(
             "trips": int(row.get("trips") or 0),
         }
 
+    algiers_tz = timezone(timedelta(hours=1))
+    local_start = start_date.astimezone(algiers_tz)
+    local_end = end.astimezone(algiers_tz)
+
     labels: list[str] = []
     revenue: list[float] = []
     trips: list[int] = []
-    current = start_date.date()
-    end_date = end.date()
+    current = local_start.date()
+    end_date = local_end.date()
     while current <= end_date:
         key = current.isoformat()
         labels.append(key)

@@ -123,10 +123,13 @@ async def _driver_average_rating(driver_id: str) -> float | None:
 
 
 def _user_list_item(user: dict[str, Any], trip_count: int, average_rating: float = 0.0) -> dict[str, Any]:
+    name = user.get("name")
+    if not name:
+        name = f"{user.get('firstName') or ''} {user.get('lastName') or ''}".strip()
     return {
         "id": user["id"],
         "phone": user.get("phone"),
-        "name": user.get("name"),
+        "name": name,
         "avatarUrl": user.get("avatarUrl"),
         "locale": user.get("locale"),
         "profileComplete": user.get("profileComplete", False),
@@ -175,7 +178,7 @@ async def admin_list_users(
     query: dict[str, Any] = {}
     if status:
         query["status"] = status
-    search_filter = _build_search_filter(search, ["name", "phone"])
+    search_filter = _build_search_filter(search, ["firstName", "lastName", "phone"])
     if search_filter:
         query = {"$and": [query, search_filter]} if query else search_filter
 
@@ -211,8 +214,12 @@ async def admin_get_user(user_id: str) -> dict[str, Any]:
     reviews = await _client_reviews_for_user(user_id)
     avg_rating = await _client_average_rating(user_id)
     status_counts = await _trip_counts_by_status_for_client(user_id)
+    name = user.get("name")
+    if not name:
+        name = f"{user.get('firstName') or ''} {user.get('lastName') or ''}".strip()
     return {
         **user,
+        "name": name,
         "trips": trips,
         "reviews": reviews,
         "averageRating": avg_rating,
@@ -306,6 +313,8 @@ async def admin_update_user_status(user_id: str, body: AdminUserStatusUpdate) ->
     user = await _find_user(user_id)
     if user is None:
         raise NotFoundError("User not found")
+    if user.get("status") == "deleted":
+        raise ValidationError("Cannot reactivate a deleted account")
 
     now = datetime.now(timezone.utc)
     await get_database()[USERS_COLLECTION].update_one(
@@ -315,6 +324,13 @@ async def admin_update_user_status(user_id: str, body: AdminUserStatusUpdate) ->
 
     if body.status == "suspended":
         await add_suspended_user(user_id)
+        await send_push(
+            user_id,
+            "client",
+            "Account suspended",
+            "Your account has been suspended by the admin.",
+            {"type": "account_suspended"},
+        )
     else:
         await remove_suspended_user(user_id)
 
@@ -329,6 +345,8 @@ async def admin_update_driver_status(driver_id: str, body: AdminUserStatusUpdate
     driver = await _find_driver(driver_id)
     if driver is None:
         raise NotFoundError("Driver not found")
+    if driver.get("status") == "deleted":
+        raise ValidationError("Cannot reactivate a deleted account")
 
     now = datetime.now(timezone.utc)
     await get_database()[DRIVERS_COLLECTION].update_one(
@@ -338,6 +356,13 @@ async def admin_update_driver_status(driver_id: str, body: AdminUserStatusUpdate
 
     if body.status == "suspended":
         await add_suspended_user(driver_id)
+        await send_push(
+            driver_id,
+            "driver",
+            "Account suspended",
+            "Your account has been suspended by the admin.",
+            {"type": "account_suspended"},
+        )
     else:
         await remove_suspended_user(driver_id)
 

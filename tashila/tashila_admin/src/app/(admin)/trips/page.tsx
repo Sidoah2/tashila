@@ -367,6 +367,12 @@ export default function TripsPage() {
                 label={t("common.client")}
                 value={selected.clientName}
               />
+              {selected.clientPhone && (
+                <DetailRow
+                  label={t("common.phone")}
+                  value={selected.clientPhone}
+                />
+              )}
               <DetailRow
                 label={t("common.driver")}
                 value={selected.driverName ?? t("trips.row_unassigned")}

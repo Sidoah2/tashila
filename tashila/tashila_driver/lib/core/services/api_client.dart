@@ -53,6 +53,18 @@ class ApiClient {
           if (error.requestOptions.extra['showOverlay'] == true) {
             ApiOverlayManager.hide();
           }
+          if (error.response?.statusCode == 401 || error.response?.statusCode == 403) {
+            final data = error.response?.data;
+            bool isSuspended = false;
+            if (data is Map && data['detail'] == 'Account suspended') {
+              isSuspended = true;
+            } else if (data is String && data.contains('Account suspended')) {
+              isSuspended = true;
+            }
+            if (isSuspended) {
+              onAccountSuspended?.call();
+            }
+          }
           if (error.response?.statusCode == 401) {
             final refreshed = await _tryRefresh();
             if (refreshed) {
@@ -75,6 +87,7 @@ class ApiClient {
 
   late final Dio _dio;
   VoidCallback? onUnauthorized;
+  VoidCallback? onAccountSuspended;
 
   Future<String?> getAccessToken() async {
     final prefs = await SharedPreferences.getInstance();

@@ -12,13 +12,16 @@ import 'core/theme/app_theme.dart';
 import 'package:device_preview/device_preview.dart';
 import 'package:tashila_driver/core/widgets/connectivity_banner.dart';
 
+import 'core/services/background_service.dart';
+
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
-
-
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await EasyLocalization.ensureInitialized();
+  try {
+    await initializeBackgroundService();
+  } catch (_) {}
   runApp(
     DevicePreview(
       enabled: false,
