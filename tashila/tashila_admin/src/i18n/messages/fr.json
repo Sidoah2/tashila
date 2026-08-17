@@ -184,6 +184,7 @@
     "filter_date_from": "Du date",
     "filter_date_to": "Au date",
     "completed_count_period": "Courses terminées sur la période",
+    "cancelled_count_period": "Courses annulées sur la période",
     "reject_driver_dialog_title": "Refuser le chauffeur",
     "reject_driver_dialog_helper": "Indiquez la raison du refus de ce chauffeur :",
     "reject_driver_dialog_placeholder": "ex. Documents expirés ou profil incomplet."

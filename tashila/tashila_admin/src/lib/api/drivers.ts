@@ -5,7 +5,7 @@ import type {
   DriverApprovalStatus,
   TruckType,
 } from "../types";
-import { apiFetch } from "./client";
+import { apiFetch, getImageUrl } from "./client";
 
 interface ApiDocumentEntry {
   url?: string;
@@ -87,14 +87,14 @@ function mapDocuments(
   if (Array.isArray(documents)) {
     return documents.map((doc) => ({
       type: doc.type as DocumentType,
-      fileName: doc.fileName,
+      fileName: doc.fileName ? getImageUrl(doc.fileName) : null,
       status: mapDocStatus(doc.status),
       rejectionReason: doc.rejectionReason,
     }));
   }
   return Object.entries(documents).map(([type, doc]) => ({
     type: type as DocumentType,
-    fileName: doc.url ?? null,
+    fileName: doc.url ? getImageUrl(doc.url) : null,
     status: mapDocStatus(doc.status),
     rejectionReason: doc.rejectionReason ?? undefined,
   }));
@@ -143,7 +143,7 @@ function mapDriver(d: ApiDriver): Driver {
     customerReviews: reviews,
     platformDueDzd: d.earnings?.platformDueDzd ?? d.platformDueDzd ?? 0,
     platformPayments: payments,
-    avatarUrl: d.avatarUrl ?? null,
+    avatarUrl: d.avatarUrl ? getImageUrl(d.avatarUrl) : null,
     trips: (d.trips ?? []).map((t: any) => ({
       id: t.id ?? t._id ?? "",
       clientId: t.clientId ?? "",
@@ -167,6 +167,7 @@ function mapDriver(d: ApiDriver): Driver {
       cashConfirmed: t.cashConfirmed ?? false,
       paymentMethod: t.paymentMethod ?? "cash",
       dispatchedByAdmin: t.dispatchedByAdmin ?? false,
+      clientPhone: t.clientPhone ?? null,
     })),
   };
 }

@@ -110,6 +110,10 @@ export default function DriverDetailPage({
     return filteredTrips.filter((tItem) => tItem.status === "completed").length;
   }, [filteredTrips]);
 
+  const cancelledCountInPeriod = useMemo(() => {
+    return filteredTrips.filter((tItem) => tItem.status === "cancelled").length;
+  }, [filteredTrips]);
+
   const ratingFormatter = useMemo(() => {
     const fmt = new Intl.NumberFormat(
       locale === "ar" ? "ar-DZ" : locale === "fr" ? "fr-DZ" : "en-DZ",
@@ -438,20 +442,37 @@ export default function DriverDetailPage({
             />
           </Stack>
 
-          {/* Completed counter for selected period */}
-          <Box
-            sx={{
-              p: 1.5,
-              borderRadius: 2,
-              bgcolor: `${brand.orange}0F`,
-              border: `1px solid ${brand.orange}33`,
-              mb: 2,
-            }}
-          >
-            <Typography variant="body2" sx={{ fontWeight: 700, color: brand.orange }}>
-              {t("driver_detail.completed_count_period")}: {completedCountInPeriod}
-            </Typography>
-          </Box>
+          {/* Completed and Cancelled counters for selected period */}
+          <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: `${brand.success}0F`,
+                border: `1px solid ${brand.success}33`,
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 700, color: brand.success }}>
+                {t("driver_detail.completed_count_period")}: {completedCountInPeriod}
+              </Typography>
+            </Box>
+            <Box
+              sx={{
+                p: 1.5,
+                borderRadius: 2,
+                bgcolor: `${brand.danger || "#d32f2f"}0F`,
+                border: `1px solid ${brand.danger || "#d32f2f"}33`,
+                flex: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="body2" sx={{ fontWeight: 700, color: brand.danger || "#d32f2f" }}>
+                {t("driver_detail.cancelled_count_period")}: {cancelledCountInPeriod}
+              </Typography>
+            </Box>
+          </Stack>
 
           {/* Trips List */}
           {filteredTrips.length === 0 ? (
@@ -692,7 +713,7 @@ export default function DriverDetailPage({
             justifyContent="flex-end"
           >
             <Button
-              variant="outlined"
+              variant="contained"
               color="error"
               size="large"
               startIcon={<CancelRoundedIcon />}
@@ -701,6 +722,7 @@ export default function DriverDetailPage({
               {t("driver_detail.reject_driver")}
             </Button>
             <Button
+              variant="contained"
               size="large"
               color="success"
               startIcon={<CheckCircleRoundedIcon />}
@@ -745,10 +767,11 @@ export default function DriverDetailPage({
           />
         </DialogContent>
         <DialogActions>
-          <Button variant="text" onClick={() => setRejectingDoc(null)}>
+          <Button variant="outlined" onClick={() => setRejectingDoc(null)}>
             {t("common.cancel")}
           </Button>
           <Button
+            variant="contained"
             color="error"
             onClick={async () => {
               if (!rejectingDoc) return;
@@ -833,7 +856,7 @@ export default function DriverDetailPage({
         </DialogContent>
         <DialogActions>
           <Button
-            variant="text"
+            variant="outlined"
             onClick={() => {
               setRejectingDriver(false);
               setRejectReason("");
@@ -841,7 +864,7 @@ export default function DriverDetailPage({
           >
             {t("common.cancel")}
           </Button>
-          <Button color="error" onClick={handleMasterRejectSubmit}>
+          <Button variant="contained" color="error" onClick={handleMasterRejectSubmit}>
             {t("common.reject")}
           </Button>
         </DialogActions>

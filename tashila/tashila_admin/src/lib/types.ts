@@ -136,6 +136,7 @@ export type Trip = {
   cashConfirmed: boolean;
   paymentMethod: "cash";
   dispatchedByAdmin: boolean;
+  clientPhone: string | null;
 };
 
 export type PricingRule = {

@@ -175,10 +175,14 @@ async def _get_client_info(client_id: str) -> dict[str, Any]:
         except Exception:
             rating = 5.0
 
+    name = user.get("name")
+    if not name:
+        name = f"{user.get('firstName') or ''} {user.get('lastName') or ''}".strip()
+
     return {
         "id": str(user["_id"]),
         "phone": user.get("phone"),
-        "name": user.get("name"),
+        "name": name,
         "avatarUrl": user.get("avatarUrl"),
         "rating": rating,
     }
@@ -879,6 +883,7 @@ async def admin_list_trips(
     # Enrich each trip with client and driver name
     driver_cache: dict[str, str | None] = {}
     client_cache: dict[str, str | None] = {}
+    client_phone_cache: dict[str, str | None] = {}
     enriched_items = []
     for item in items_raw:
         # Driver Name
@@ -896,7 +901,7 @@ async def admin_list_trips(
                     driver_cache[driver_str] = None
             item["driverName"] = driver_cache.get(driver_str)
 
-        # Client Name
+        # Client Name & Phone
         client_id = item.get("clientId")
         if client_id:
             client_str = str(client_id)
@@ -904,12 +909,24 @@ async def admin_list_trips(
                 try:
                     oid = ObjectId(client_str)
                     client_doc = await get_database()[USERS_COLLECTION].find_one(
-                        {"_id": oid}, {"name": 1}
+                        {"_id": oid}, {"firstName": 1, "lastName": 1, "name": 1, "phone": 1}
                     )
-                    client_cache[client_str] = (client_doc or {}).get("name")
+                    if client_doc:
+                        name = client_doc.get("name")
+                        if not name:
+                            name = f"{client_doc.get('firstName') or ''} {client_doc.get('lastName') or ''}".strip()
+                        client_cache[client_str] = name
+                        client_phone_cache[client_str] = client_doc.get("phone")
+                    else:
+                        client_cache[client_str] = None
+                        client_phone_cache[client_str] = None
                 except Exception:
                     client_cache[client_str] = None
+                    client_phone_cache[client_str] = None
             item["clientName"] = client_cache.get(client_str)
+            item["clientPhone"] = item.get("externalPhone") or client_phone_cache.get(client_str)
+        else:
+            item["clientPhone"] = item.get("externalPhone")
 
         enriched_items.append(item)
 

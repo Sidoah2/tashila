@@ -159,6 +159,7 @@ export default function NewDriverPage() {
               />
               <TextField
                 label={t("driver_new.phone_with_country")}
+                type="tel"
                 placeholder={phoneVal.startsWith("0") ? "0661452711" : "661452711"}
                 error={Boolean(errors.phone)}
                 helperText={
@@ -359,17 +360,19 @@ export default function NewDriverPage() {
                           ? docFiles[type]?.name ?? t("driver_new.uploaded")
                           : t("driver_new.tap_to_upload")}
                       </Typography>
-                      <Button
-                        type="button"
-                        size="small"
-                        sx={{ mt: 0.5 }}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setPreviewType(type);
-                        }}
-                      >
-                        {t("driver_new.doc_preview_open")}
-                      </Button>
+                      {uploaded && (
+                        <Button
+                          type="button"
+                          size="small"
+                          sx={{ mt: 0.5 }}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setPreviewType(type);
+                          }}
+                        >
+                          {t("driver_new.doc_preview_open")}
+                        </Button>
+                      )}
                     </Box>
                   );
                 })}
@@ -390,7 +393,7 @@ export default function NewDriverPage() {
               >
                 {t("common.cancel")}
               </Button>
-              <Button type="submit" disabled={submitting} size="large">
+              <Button type="submit" variant="contained" color="primary" disabled={submitting} size="large">
                 {submitting
                   ? t("driver_new.creating")
                   : t("driver_new.create_driver")}

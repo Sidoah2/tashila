@@ -124,3 +124,13 @@ export async function apiFetch<T = unknown>(
   if (res.status === 204) return undefined as T;
   return res.json() as Promise<T>;
 }
+
+export function getImageUrl(path: string | null | undefined): string {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://") || path.startsWith("data:")) {
+    return path;
+  }
+  const base = BASE_URL.endsWith("/") ? BASE_URL.slice(0, -1) : BASE_URL;
+  const formattedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${formattedPath}`;
+}

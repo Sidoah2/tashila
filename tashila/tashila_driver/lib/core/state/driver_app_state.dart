@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -16,6 +17,7 @@ import '../services/api_client.dart';
 import '../services/http_services.dart';
 import '../services/repositories.dart';
 import '../services/driver_socket_service.dart';
+import '../router/app_router.dart';
 
 const kSession = 'driver_session';
 const kPhone = 'driver_phone';
@@ -216,6 +218,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _apiClient = ref.read(apiClientProvider);
     _apiClient.onUnauthorized = () {
       unawaited(logout());
+    };
+    _apiClient.onAccountSuspended = () {
+      unawaited(handleAccountSuspended());
     };
     ref.onDispose(() {
       _requestPollTimer?.cancel();
@@ -532,39 +537,53 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   Future<bool> verifyOtp(String otp) async {
     _setState(state.copyWith(isBusy: true, clearError: true));
-    final result = await _authRepository.verifyOtp(
-      phone: state.phone,
-      otp: otp,
-    );
-    if (!result.success) {
-      _setState(state.copyWith(error: 'invalid_otp'.tr(), isBusy: false));
+    try {
+      final result = await _authRepository.verifyOtp(
+        phone: state.phone,
+        otp: otp,
+      );
+      if (!result.success) {
+        _setState(state.copyWith(error: 'invalid_otp'.tr(), isBusy: false));
+        return false;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(kSession, true);
+      await prefs.setString(kPhone, state.phone);
+      await prefs.setBool(kProfileSetupComplete, result.profileComplete);
+
+      await refreshProfileFromServer();
+
+      _setState(
+        state.copyWith(
+          isAuthenticated: true,
+          profileSetupComplete: result.profileComplete,
+          isBusy: false,
+        ),
+      );
+      await _resumeActiveTripIfAny();
+      await syncTripHistoryFromServer();
+      await syncPlatformEarningsFromServer();
+      if (state.availability == AvailabilityStatus.online) {
+        await _restoreOnlineSession();
+      } else {
+        await refreshDriverLocation(sendToServer: false);
+        _syncLocationTracking();
+      }
+      return true;
+    } catch (e) {
+      String errMsg = e.toString();
+      if (e is DioException) {
+        final data = e.response?.data;
+        if (data is Map && data['detail'] == 'Account suspended') {
+          errMsg = 'account_suspended_err'.tr();
+        } else if (data is String && data.contains('Account suspended')) {
+          errMsg = 'account_suspended_err'.tr();
+        }
+      }
+      _setState(state.copyWith(error: errMsg, isBusy: false));
       return false;
     }
-
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(kSession, true);
-    await prefs.setString(kPhone, state.phone);
-    await prefs.setBool(kProfileSetupComplete, result.profileComplete);
-
-    await refreshProfileFromServer();
-
-    _setState(
-      state.copyWith(
-        isAuthenticated: true,
-        profileSetupComplete: result.profileComplete,
-        isBusy: false,
-      ),
-    );
-    await _resumeActiveTripIfAny();
-    await syncTripHistoryFromServer();
-    await syncPlatformEarningsFromServer();
-    if (state.availability == AvailabilityStatus.online) {
-      await _restoreOnlineSession();
-    } else {
-      await refreshDriverLocation(sendToServer: false);
-      _syncLocationTracking();
-    }
-    return true;
   }
 
   Future<void> logout() async {
@@ -584,6 +603,38 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         profile: null,
       ),
     );
+  }
+
+  Future<void> handleAccountSuspended() async {
+    await logout();
+    final ctx = rootNavigatorKey.currentContext;
+    if (ctx != null) {
+      final locale = Localizations.localeOf(ctx);
+      final isAr = locale.languageCode == 'ar';
+      final isFr = locale.languageCode == 'fr';
+
+      final title = isAr ? 'الحساب موقوف' : (isFr ? 'Compte Suspendu' : 'Account Suspended');
+      final message = isAr
+          ? 'تم إيقاف حسابك من قبل المسؤول. يرجى الاتصال بالدعم الفني.'
+          : (isFr
+              ? 'Votre compte a été suspendu par l\'administrateur. Veuillez contacter le support client.'
+              : 'Your account has been suspended by the administrator. Please contact customer support.');
+
+      showDialog<void>(
+        context: ctx,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   void clearInfoMessage() {
