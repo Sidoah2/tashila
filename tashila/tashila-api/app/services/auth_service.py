@@ -3,6 +3,8 @@ import re
 from datetime import datetime, timezone
 from typing import Any
 
+import firebase_admin
+from firebase_admin import auth as firebase_auth_sdk, credentials as firebase_credentials
 from fastapi import HTTPException, status
 
 from app.core.config import settings
@@ -26,6 +28,92 @@ from app.core.security import (
 )
 
 PHONE_PATTERN = re.compile(r"^\+\d{8,15}$")
+
+# Initialize Firebase Admin SDK lazily (only once)
+_firebase_app = None
+
+def _get_firebase_app():
+    global _firebase_app
+    if _firebase_app is not None:
+        return _firebase_app
+    creds_path = getattr(settings, "firebase_credentials_path", "firebase-adminsdk.json")
+    import os
+    if os.path.exists(creds_path):
+        cred = firebase_credentials.Certificate(creds_path)
+        _firebase_app = firebase_admin.initialize_app(cred)
+    else:
+        # Use application default credentials (works on Railway with env vars)
+        _firebase_app = firebase_admin.initialize_app()
+    return _firebase_app
+
+
+async def verify_firebase_token(firebase_token: str, role: str) -> dict[str, Any]:
+    """Verify a Firebase Phone Auth ID token and return our own JWT tokens."""
+    if role not in ("client", "driver"):
+        raise ValidationError("Role must be 'client' or 'driver'")
+
+    try:
+        _get_firebase_app()
+        decoded = firebase_auth_sdk.verify_id_token(firebase_token)
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid Firebase token: {e}",
+        )
+
+    phone = decoded.get("phone_number")
+    if not phone:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Firebase token does not contain a phone number",
+        )
+
+    # Reuse the same user-creation/lookup logic as verify_otp
+    collection_name = USERS_COLLECTION if role == "client" else DRIVERS_COLLECTION
+    collection = get_database()[collection_name]
+    now = datetime.now(timezone.utc)
+
+    existing = await collection.find_one({"phone": phone})
+    if existing is None:
+        new_doc: dict[str, Any] = {
+            "phone": phone,
+            "createdAt": now,
+            "updatedAt": now,
+            "profileComplete": False,
+            "status": "active",
+        }
+        if role == "driver":
+            new_doc["truckType"] = ""
+            new_doc["availability"] = "offline"
+            new_doc["approvalStatus"] = "pending"
+        result = await collection.insert_one(new_doc)
+        user_id = str(result.inserted_id)
+        profile_complete = False
+    else:
+        if existing.get("status") == "suspended":
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Account suspended",
+            )
+        user_id = str(existing["_id"])
+        profile_complete = existing.get("profileComplete", False)
+        await collection.update_one(
+            {"_id": existing["_id"]},
+            {"$set": {"updatedAt": now}},
+        )
+
+    access_token = create_access_token(user_id, role)
+    refresh_token = create_refresh_token(user_id, role)
+
+    return {
+        "accessToken": access_token,
+        "refreshToken": refresh_token,
+        "user": {
+            "id": user_id,
+            "phone": phone,
+            "profileComplete": profile_complete,
+        },
+    }
 
 
 USERS_COLLECTION = "users"

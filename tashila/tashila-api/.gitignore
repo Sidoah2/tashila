@@ -49,3 +49,6 @@ htmlcov/
 /tmp/
 uploads/
 *.log
+
+# Secrets
+firebase-adminsdk.json
