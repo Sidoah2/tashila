@@ -707,6 +707,28 @@ async def _verify_driver_assigned(trip: dict[str, Any], driver_id: str) -> None:
         raise ForbiddenError("You are not assigned to this trip")
 
 
+async def calculate_final_fare_for_trip(trip: dict[str, Any], started_at: datetime | None, completed_at: datetime) -> float:
+    estimated_eta = float(trip.get("estimatedMinutes") or 0)
+    if started_at:
+        actual_time = (completed_at.timestamp() - started_at.timestamp()) / 60.0
+    else:
+        actual_time = estimated_eta
+    allowed_time = estimated_eta + 5.0
+    extra_time = max(0.0, actual_time - allowed_time)
+    time_fare = extra_time * 25.0
+
+    pricing_collection = get_database()["pricing"]
+    rule = await pricing_collection.find_one({"truckType": trip.get("truckType")})
+    price_per_km = rule.get("pricePerKmDzd", 100.0) if rule else 100.0
+    distance_km = float(trip.get("distanceKm") or 0.0)
+    distance_fare = price_per_km * distance_km
+
+    subtotal = (1000.0 + distance_fare + time_fare) * 1.0 + 0.0
+    raw_fare = max(1000.0, subtotal)
+    import math
+    return float(math.ceil(raw_fare / 100.0) * 100)
+
+
 async def advance_trip_status(trip_id: str, driver_id: str, new_status: str) -> dict[str, Any]:
     trip = await _find_trip(trip_id)
     if trip is None:
@@ -723,8 +745,9 @@ async def advance_trip_status(trip_id: str, driver_id: str, new_status: str) -> 
     if new_status == "inProgress":
         updates["startedAt"] = now
     if new_status == "awaitingCash":
-        updates["finalFare"] = float(trip.get("fare") or 0)
         updates["completedAt"] = now
+        started_at = trip.get("startedAt")
+        updates["finalFare"] = await calculate_final_fare_for_trip(trip, started_at, now)
     if new_status == "completed":
         fare = float(trip.get("finalFare") or trip.get("fare") or 0)
         await _apply_trip_completion_earnings(driver_id, fare)
@@ -1051,8 +1074,9 @@ async def admin_force_status(trip_id: str, new_status: str) -> dict[str, Any]:
     updates: dict[str, Any] = {"status": new_status, "updatedAt": now}
     if new_status == "completed" and current != "completed":
         updates["completedAt"] = now
-        if trip.get("finalFare") is None and trip.get("fare") is not None:
-            updates["finalFare"] = float(trip.get("fare") or 0)
+        if trip.get("finalFare") is None:
+            started_at = trip.get("startedAt")
+            updates["finalFare"] = await calculate_final_fare_for_trip(trip, started_at, now)
         driver_id = trip.get("driverId")
         if driver_id:
             fare = float(trip.get("finalFare") or trip.get("fare") or 0)

@@ -116,12 +116,18 @@ async def find_dispatch_candidates(trip: dict[str, Any]) -> list[dict[str, Any]]
     truck_type = trip.get("truckType")
     near = _pickup_near_point(trip)
     busy_mongo = await _driver_ids_with_active_trips()
+
+    from app.services.platform_settings_service import get_platform_settings
+    settings_doc = await get_platform_settings()
+    max_dist_km = float(settings_doc.get("maxDispatchDistanceKm", 50.0))
+    max_dist_meters = max_dist_km * 1000.0
+
     pipeline: list[dict[str, Any]] = [
         {
             "$geoNear": {
                 "near": near,
                 "distanceField": "distanceMeters",
-                "maxDistance": GEO_MAX_DISTANCE_METERS,
+                "maxDistance": max_dist_meters,
                 "spherical": True,
                 "key": "location",
                 "query": {

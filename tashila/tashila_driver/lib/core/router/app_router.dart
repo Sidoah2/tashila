@@ -126,7 +126,17 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     ],
   );
 
-  ref.listen(driverAppStateProvider, (_, state) => router.refresh());
+  ref.listen<DriverAppState>(
+    driverAppStateProvider,
+    (previous, next) {
+      if (previous?.isAuthenticated != next.isAuthenticated ||
+          previous?.bootstrapped != next.bootstrapped ||
+          previous?.needsProfileSetup != next.needsProfileSetup ||
+          previous?.seenOnboarding != next.seenOnboarding) {
+        router.refresh();
+      }
+    },
+  );
   return router;
 });
 

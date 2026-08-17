@@ -29,6 +29,7 @@ def _default_settings() -> dict[str, Any]:
         "commissionRate": DEFAULT_COMMISSION_RATE,
         "serviceAreaCenter": DEFAULT_CENTER,
         "serviceAreaRadiusKm": DEFAULT_RADIUS_KM,
+        "maxDispatchDistanceKm": 50.0,
         "updatedAt": datetime.now(timezone.utc),
     }
 
@@ -53,6 +54,8 @@ async def update_platform_settings(data: PlatformSettingsUpdate) -> dict[str, An
         updates["serviceAreaCenter"] = center
     if "serviceAreaRadiusKm" in payload and payload["serviceAreaRadiusKm"] is not None:
         updates["serviceAreaRadiusKm"] = float(payload["serviceAreaRadiusKm"])
+    if "maxDispatchDistanceKm" in payload and payload["maxDispatchDistanceKm"] is not None:
+        updates["maxDispatchDistanceKm"] = float(payload["maxDispatchDistanceKm"])
 
     merged = {**current, **updates, "_id": SETTINGS_ID}
     await get_database()[SETTINGS_COLLECTION].update_one(

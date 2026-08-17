@@ -300,6 +300,7 @@
     "geofence_title": "Service area (geofence)",
     "geofence_body": "Drag the center pin and set the radius. Pickup or dropoff outside this circle is blocked in customer apps.",
     "geofence_radius_label": "Coverage radius",
+    "max_dispatch_distance_label": "Max dispatch distance",
     "commission_title": "Platform commission",
     "commission_rate_label": "Commission rate",
     "save_scope": "Save commission & service area",

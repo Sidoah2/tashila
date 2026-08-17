@@ -4,6 +4,7 @@ export type PlatformSettings = {
   commissionRate: number;
   serviceAreaCenter: { lat: number; lng: number };
   serviceAreaRadiusKm: number;
+  maxDispatchDistanceKm: number;
 };
 
 export async function getPlatformSettings(): Promise<PlatformSettings> {

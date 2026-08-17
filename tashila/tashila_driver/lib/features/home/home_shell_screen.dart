@@ -27,7 +27,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _checkGpsPermission();
+    _checkGpsPermission(showLoader: true);
   }
 
   @override
@@ -39,13 +39,15 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
   @override
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
     if (lifecycleState == AppLifecycleState.resumed) {
-      _checkGpsPermission();
+      _checkGpsPermission(showLoader: false);
     }
   }
 
-  Future<void> _checkGpsPermission() async {
+  Future<void> _checkGpsPermission({bool showLoader = false}) async {
     if (!mounted) return;
-    setState(() => _checkingGps = true);
+    if (showLoader) {
+      setState(() => _checkingGps = true);
+    }
     try {
       final hasService = await Geolocator.isLocationServiceEnabled();
       if (!hasService) {
