@@ -36,8 +36,21 @@ def _get_firebase_app():
     global _firebase_app
     if _firebase_app is not None:
         return _firebase_app
-    creds_path = getattr(settings, "firebase_credentials_path", "firebase-adminsdk.json")
+    
     import os
+    import json
+    
+    creds_json = os.environ.get("FIREBASE_CREDENTIALS_JSON")
+    if creds_json:
+        try:
+            cred_dict = json.loads(creds_json)
+            cred = firebase_credentials.Certificate(cred_dict)
+            _firebase_app = firebase_admin.initialize_app(cred)
+            return _firebase_app
+        except Exception as e:
+            print(f"Failed to load Firebase from FIREBASE_CREDENTIALS_JSON: {e}")
+            
+    creds_path = getattr(settings, "firebase_credentials_path", "firebase-adminsdk.json")
     if os.path.exists(creds_path):
         cred = firebase_credentials.Certificate(creds_path)
         _firebase_app = firebase_admin.initialize_app(cred)
