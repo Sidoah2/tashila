@@ -50,6 +50,19 @@ async def verify_otp(body: VerifyOtpRequest) -> dict:
     return await auth_service.verify_otp(body.phone, body.otp, body.role)
 
 
+class FirebaseVerifyRequest(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    firebaseToken: str
+    role: Literal["client", "driver"]
+
+
+@router.post("/firebase/verify", status_code=status.HTTP_200_OK)
+async def firebase_verify(body: FirebaseVerifyRequest) -> dict:
+    """Exchange a Firebase Phone Auth ID token for our own JWT access/refresh tokens."""
+    return await auth_service.verify_firebase_token(body.firebaseToken, body.role)
+
+
 @router.post("/token/refresh", status_code=status.HTTP_200_OK)
 async def refresh_access_token(body: RefreshTokenRequest) -> dict[str, str]:
     return await auth_service.refresh_token(body.refreshToken, settings.jwt_refresh_secret)
