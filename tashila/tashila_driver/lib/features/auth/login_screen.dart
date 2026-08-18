@@ -24,6 +24,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   String completePhone = '';
+  bool _isBusy = false;
   late final TapGestureRecognizer _privacyTap;
   late final TapGestureRecognizer _termsTap;
   late final TextEditingController _phoneController;
@@ -74,7 +75,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final state = ref.watch(driverAppStateProvider);
-    final notifier = ref.read(driverAppStateProvider.notifier);
 
     final baseStyle = theme.textTheme.bodySmall?.copyWith(
       color: AppColors.textSecondary,
@@ -257,7 +257,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       const SizedBox(height: 20),
                       PrimaryButton(
                         label: 'send_otp'.tr(),
-                        isBusy: state.isBusy,
+                        isBusy: state.isBusy || _isBusy,
                         onPressed: () async {
                           final text = _phoneController.text.trim();
                           if (text.startsWith('0')) {
@@ -270,9 +270,29 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             );
                           }
                           if (completePhone.isEmpty) return;
-                          await notifier.requestOtp(completePhone);
-                          if (!context.mounted) return;
-                          context.push('/otp');
+                          setState(() => _isBusy = true);
+                          try {
+                            await ref.read(driverAppStateProvider.notifier).requestOtp(completePhone);
+                            if (!context.mounted) return;
+                            setState(() => _isBusy = false);
+                            context.push(
+                              '/otp',
+                              extra: {
+                                'phone': completePhone,
+                                'verificationId': '',
+                              },
+                            );
+                          } catch (e) {
+                            if (!context.mounted) return;
+                            setState(() => _isBusy = false);
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(
+                                  ref.read(driverAppStateProvider).error ?? 'send_otp_failed'.tr(),
+                                ),
+                              ),
+                            );
+                          }
                         },
                       ),
                       if (state.error != null) ...[

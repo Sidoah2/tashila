@@ -14,6 +14,10 @@ abstract class AuthRepository {
     required String phone,
     required String otp,
   });
+  Future<OtpVerifyResult> verifyFirebaseOtp({
+    required String phone,
+    required String firebaseIdToken,
+  });
 }
 
 abstract class ProfileRepository {

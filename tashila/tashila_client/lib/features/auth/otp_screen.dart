@@ -9,14 +9,18 @@ import 'package:pinput/pinput.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
 import 'package:tashila_client/core/widgets/primary_button.dart';
-import 'package:tashila_client/features/auth/code_sms_retriever.dart';
 
 const _otpResendSeconds = 60;
 
 class OtpScreen extends ConsumerStatefulWidget {
-  const OtpScreen({required this.phone, super.key});
+  const OtpScreen({
+    required this.phone,
+    required this.verificationId,
+    super.key,
+  });
 
   final String phone;
+  final String verificationId;
 
   @override
   ConsumerState<OtpScreen> createState() => _OtpScreenState();
@@ -26,7 +30,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   final pin = TextEditingController();
   Timer? _resendTimer;
   int _secondsUntilResend = _otpResendSeconds;
-  final _smsRetriever = CodeSmsRetriever();
+  bool _isVerifying = false;
 
   @override
   void initState() {
@@ -38,7 +42,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   void dispose() {
     _resendTimer?.cancel();
     pin.dispose();
-    unawaited(_smsRetriever.dispose());
     super.dispose();
   }
 
@@ -72,28 +75,40 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       await ref.read(appStateProvider.notifier).sendOtp(widget.phone);
     } catch (_) {}
     if (!mounted) return;
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('otp_resend_sent'.tr())));
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('otp_resend_sent'.tr())),
+    );
   }
 
   Future<void> _verifyAndContinue() async {
-    if (pin.text.length < 6) return;
-    final ok = await ref
-        .read(appStateProvider.notifier)
-        .verifyOtp(widget.phone, pin.text);
-    if (!mounted) return;
-    if (!ok) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('otp_invalid'.tr())));
-      return;
+    if (pin.text.length < 6 || _isVerifying) return;
+    setState(() => _isVerifying = true);
+    try {
+      final ok = await ref
+          .read(appStateProvider.notifier)
+          .verifyOtp(widget.phone, pin.text);
+
+      if (!mounted) return;
+      if (!ok) {
+        _showError('otp_invalid'.tr());
+        return;
+      }
+      final needSetup = !ref.read(appStateProvider).profileSetupComplete;
+      context.go(needSetup ? '/profile-setup' : '/home');
+    } catch (e) {
+      if (!mounted) return;
+      _showError(e.toString());
+    } finally {
+      if (mounted) setState(() => _isVerifying = false);
     }
-    final needSetup = !ref.read(appStateProvider).profileSetupComplete;
-    context.go(needSetup ? '/profile-setup' : '/home');
   }
 
-  @override
+  void _showError([String? msg]) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(msg ?? 'otp_invalid'.tr())));
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -191,7 +206,6 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                           child: Pinput(
                             length: 6,
                             controller: pin,
-                            smsRetriever: _smsRetriever,
                             autofillHints: const [AutofillHints.oneTimeCode],
                             defaultPinTheme: defaultPinTheme,
                             focusedPinTheme: focusedPinTheme,
@@ -261,8 +275,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                     const Spacer(),
                     const SizedBox(height: 24),
                     PrimaryButton(
-                      label: 'verify'.tr(),
-                      onPressed: () async => _verifyAndContinue(),
+                      label: _isVerifying ? '...' : 'verify'.tr(),
+                      onPressed:
+                          _isVerifying ? null : () async => _verifyAndContinue(),
                     ),
                   ],
                 ),
