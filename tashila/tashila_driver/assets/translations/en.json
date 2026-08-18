@@ -16,7 +16,7 @@
   "invalid_otp": "Invalid OTP code. Please try again.",
   "account_suspended_err": "Account suspended. Please contact support.",
   "otp_sent_to": "Code sent to {phone}",
-  "otp_no_code": "Did not receive a code?",
+  "otp_didnt_receive": "Did not receive a code?",
   "otp_resend": "Resend",
   "verify_continue": "Verify and Continue",
   "signup_verification_title": "Verification",

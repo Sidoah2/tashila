@@ -233,6 +233,27 @@ async def push_document_status(
 # --- SMS ---
 
 async def send_sms(phone: str, message: str) -> None:
+    # If Twilio is configured, send via Twilio SMS API
+    if settings.twilio_account_sid and settings.twilio_auth_token and settings.twilio_phone_number:
+        try:
+            url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.twilio_account_sid}/Messages.json"
+            auth = (settings.twilio_account_sid, settings.twilio_auth_token)
+            data = {
+                "To": phone,
+                "From": settings.twilio_phone_number,
+                "Body": message
+            }
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(url, auth=auth, data=data)
+            if resp.status_code in (200, 201):
+                logger.info("SMS sent to %s via Twilio", phone)
+            else:
+                logger.warning("Twilio SMS HTTP %s for %s: %s", resp.status_code, phone, resp.text[:200])
+        except Exception:
+            logger.exception("Twilio SMS send error for %s", phone)
+        return
+
+    # Fallback to Traccar Gateway
     url = settings.traccar_sms_url or "https://www.traccar.org/sms/"
     token = settings.traccar_sms_token
     

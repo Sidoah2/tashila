@@ -73,7 +73,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SplashScreen(),
       ),
       GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(path: '/otp', builder: (context, state) => const OtpScreen()),
+      GoRoute(
+        path: '/otp',
+        builder: (context, state) {
+          final extra = state.extra as Map<String, dynamic>? ?? {};
+          return OtpScreen(
+            phone: extra['phone'] as String? ?? '',
+            verificationId: extra['verificationId'] as String? ?? '',
+          );
+        },
+      ),
       GoRoute(
         path: '/onboarding',
         builder: (context, state) => const DriverOnboardingScreen(),

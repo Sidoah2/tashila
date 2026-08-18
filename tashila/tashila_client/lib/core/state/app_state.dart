@@ -464,13 +464,39 @@ class AppStateNotifier extends Notifier<AppState> {
     } catch (_) {}
   }
 
-  /// Sends OTP to the given phone number via the API.
-  /// Throws [DioException] on failure.
+  /// Sends OTP to the given phone number via the API (legacy backup).
   Future<void> sendOtp(String phone) async {
-    await _apiClient.post<Map<String, dynamic>>(
-      '/auth/otp/send',
-      data: {'phone': phone, 'role': 'client'},
-    );
+    try {
+      await _apiClient.post<Map<String, dynamic>>(
+        '/auth/otp/send',
+        data: {'phone': phone, 'role': 'client'},
+      );
+    } catch (e) {
+      rethrow;
+    }
+  }
+
+  /// Verify a Firebase Phone Auth ID token and log the user in.
+  /// Returns `true` on success.
+  Future<bool> verifyFirebaseOtp(String phone, String firebaseIdToken) async {
+    try {
+      final res = await _apiClient.post<Map<String, dynamic>>(
+        '/auth/firebase/verify',
+        data: {'firebaseToken': firebaseIdToken, 'role': 'client'},
+      );
+      final data = res.data;
+      if (data == null) return false;
+      final accessToken = data['accessToken'] as String?;
+      final refreshToken = data['refreshToken'] as String?;
+      final user = data['user'] as Map<String, dynamic>?;
+      if (accessToken == null) return false;
+      await _apiClient.saveTokens(accessToken, refreshToken ?? '');
+      final profileComplete = user?['profileComplete'] as bool? ?? false;
+      await loginWithPhone(phone, profileSetupComplete: profileComplete);
+      return true;
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Verifies OTP and logs the user in. Returns `true` on success.

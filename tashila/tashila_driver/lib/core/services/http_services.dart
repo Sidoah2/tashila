@@ -50,6 +50,30 @@ class HttpAuthRepository implements AuthRepository {
       return const OtpVerifyResult(success: false);
     }
   }
+
+  @override
+  Future<OtpVerifyResult> verifyFirebaseOtp({
+    required String phone,
+    required String firebaseIdToken,
+  }) async {
+    try {
+      final res = await _client.post<Map<String, dynamic>>(
+        '/auth/firebase/verify',
+        data: {'firebaseToken': firebaseIdToken, 'role': 'driver'},
+      );
+      final data = res.data;
+      if (data == null) return const OtpVerifyResult(success: false);
+      final accessToken = data['accessToken'] as String?;
+      final refreshToken = data['refreshToken'] as String?;
+      if (accessToken == null) return const OtpVerifyResult(success: false);
+      await _client.saveTokens(accessToken, refreshToken ?? '');
+      final user = data['user'] as Map<String, dynamic>?;
+      final profileComplete = user?['profileComplete'] as bool? ?? false;
+      return OtpVerifyResult(success: true, profileComplete: profileComplete);
+    } catch (_) {
+      return const OtpVerifyResult(success: false);
+    }
+  }
 }
 
 class HttpProfileRepository implements ProfileRepository {

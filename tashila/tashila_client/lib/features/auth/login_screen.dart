@@ -225,25 +225,27 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           : () async {
                               if (completePhone.isEmpty) return;
                               setState(() => _isSending = true);
-                              var ok = false;
                               try {
-                                await ref
-                                    .read(appStateProvider.notifier)
-                                    .sendOtp(completePhone);
-                                ok = true;
+                                await ref.read(appStateProvider.notifier).sendOtp(completePhone);
+                                if (!context.mounted) return;
+                                setState(() => _isSending = false);
+                                context.push(
+                                  '/otp',
+                                  extra: {
+                                    'phone': completePhone,
+                                    'verificationId': '',
+                                  },
+                                );
                               } catch (_) {
-                                if (mounted) {
+                                if (context.mounted) {
+                                  setState(() => _isSending = false);
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                       content: Text('send_otp_failed'.tr()),
                                     ),
                                   );
                                 }
-                              } finally {
-                                if (mounted) setState(() => _isSending = false);
                               }
-                              if (!mounted || !ok) return;
-                              context.push('/otp', extra: completePhone);
                             },
                     ),
                     const Spacer(),

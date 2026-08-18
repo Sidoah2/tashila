@@ -16,7 +16,7 @@
   "invalid_otp": "رمز التحقق غير صحيح. يرجى المحاولة مرة أخرى.",
   "account_suspended_err": "تم إيقاف الحساب. يرجى الاتصال بالدعم الفني.",
   "otp_sent_to": "تم إرسال الرمز إلى {phone}",
-  "otp_no_code": "لم تستلم الرمز؟",
+  "otp_didnt_receive": "لم تستلم الرمز؟",
   "otp_resend": "إعادة الإرسال",
   "verify_continue": "تحقق واستمر",
   "signup_verification_title": "التحقق",

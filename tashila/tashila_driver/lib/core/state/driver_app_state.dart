@@ -528,6 +528,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     } catch (e) {
       // Store the phone regardless so the OTP screen can show it and resend.
       _setState(state.copyWith(error: e.toString(), isBusy: false));
+      rethrow;
     }
   }
 
@@ -578,6 +579,48 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         }
       }
       _setState(state.copyWith(error: errMsg, isBusy: false));
+      return false;
+    }
+  }
+
+  Future<bool> verifyFirebaseOtp(String phone, String firebaseIdToken) async {
+    _setState(state.copyWith(isBusy: true, clearError: true, phone: phone));
+    try {
+      final result = await _authRepository.verifyFirebaseOtp(
+        phone: phone,
+        firebaseIdToken: firebaseIdToken,
+      );
+      if (!result.success) {
+        _setState(state.copyWith(error: 'invalid_otp'.tr(), isBusy: false));
+        return false;
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(kSession, true);
+      await prefs.setString(kPhone, phone);
+      await prefs.setBool(kProfileSetupComplete, result.profileComplete);
+
+      await refreshProfileFromServer();
+
+      _setState(
+        state.copyWith(
+          isAuthenticated: true,
+          profileSetupComplete: result.profileComplete,
+          isBusy: false,
+        ),
+      );
+      await _resumeActiveTripIfAny();
+      await syncTripHistoryFromServer();
+      await syncPlatformEarningsFromServer();
+      if (state.availability == AvailabilityStatus.online) {
+        await _restoreOnlineSession();
+      } else {
+        await refreshDriverLocation(sendToServer: false);
+        _syncLocationTracking();
+      }
+      return true;
+    } catch (e) {
+      _setState(state.copyWith(error: e.toString(), isBusy: false));
       return false;
     }
   }
