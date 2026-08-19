@@ -118,5 +118,32 @@ def main():
     except Exception as e:
         print(f"[FAIL] sendotp connection error: {e}")
 
+    print("\n--- TEST 3: verifyotp endpoint ---")
+    otp_code = input("Enter the OTP code received on your device (or press Enter to skip verify test): ").strip()
+    if otp_code:
+        url_verify = "https://verifyotp-47lvvvrp4a-uc.a.run.app"
+        payload_verify = {
+            "country": country_code.upper(),
+            "phone": local_phone,
+            "projectId": project_id,
+            "otp": otp_code
+        }
+        data_verify = json.dumps(payload_verify).encode("utf-8")
+        req_verify = urllib.request.Request(url_verify, data=data_verify, headers=headers, method="POST")
+
+        try:
+            with urllib.request.urlopen(req_verify, timeout=15) as response:
+                status = response.status
+                body = response.read().decode("utf-8")
+                print(f"[OK] verifyotp returned HTTP Status {status}")
+                print(f"[OK] Response: {body}")
+        except urllib.error.HTTPError as e:
+            body = e.read().decode("utf-8")
+            print(f"[FAIL] verifyotp HTTP Error {e.code}: {e.reason}")
+            print(f"[FAIL] Response Headers: {json.dumps(dict(e.info()), indent=2)}")
+            print(f"[FAIL] Response Body: {body}")
+        except Exception as e:
+            print(f"[FAIL] verifyotp connection error: {e}")
+
 if __name__ == "__main__":
     main()
