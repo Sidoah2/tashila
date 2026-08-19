@@ -14,7 +14,7 @@
   "send_otp": "Envoyer le code",
   "otp_title": "Vérification",
   "otp_sent": "Code envoyé à",
-  "otp_subtitle": "Entrez le code de vérification à 6 chiffres envoyé sur votre téléphone.",
+  "otp_subtitle": "Entrez le code de vérification à 4 chiffres envoyé sur votre téléphone.",
   "otp_didnt_receive": "Vous n'avez pas reçu le code ?",
   "otp_resend": "Renvoyer le code",
   "otp_resend_sent": "Un nouveau code a été envoyé.",

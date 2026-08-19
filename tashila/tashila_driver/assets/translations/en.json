@@ -12,6 +12,7 @@
   "continue": "Continue",
   "send_otp": "Send OTP",
   "otp_title": "OTP Verification",
+  "otp_subtitle": "Enter the 4-digit verification code sent to your phone.",
   "otp_enter_code": "Enter the verification code sent by SMS.",
   "invalid_otp": "Invalid OTP code. Please try again.",
   "account_suspended_err": "Account suspended. Please contact support.",

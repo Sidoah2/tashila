@@ -12,6 +12,7 @@
   "continue": "Continuer",
   "send_otp": "Envoyer OTP",
   "otp_title": "Verification OTP",
+  "otp_subtitle": "Entrez le code de vérification à 4 chiffres envoyé sur votre téléphone.",
   "waiting_for_offer_title": "En Service",
   "otp_enter_code": "Saisissez le code de verification recu par SMS.",
   "invalid_otp": "Code OTP invalide. Veuillez réessayer.",
