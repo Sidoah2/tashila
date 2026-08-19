@@ -202,10 +202,21 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
             
             if resp.status_code not in (200, 201):
                 logger.error("SMSSAK sendotp HTTP %s: %s", resp.status_code, resp.text)
-                raise HTTPException(
-                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                    detail="Failed to send verification SMS via provider",
-                )
+                try:
+                    error_detail = resp.json().get("error", "Failed to send verification SMS via provider")
+                except Exception:
+                    error_detail = "Failed to send verification SMS via provider"
+                
+                if resp.status_code in (400, 401, 403, 429):
+                    raise HTTPException(
+                        status_code=resp.status_code,
+                        detail=error_detail,
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                        detail=error_detail,
+                    )
         except Exception as e:
             if isinstance(e, HTTPException):
                 raise e
