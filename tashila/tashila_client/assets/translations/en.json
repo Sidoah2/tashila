@@ -14,7 +14,7 @@
   "send_otp": "Send OTP",
   "otp_title": "Verification",
   "otp_sent": "Code sent to",
-  "otp_subtitle": "Enter the 6-digit verification code sent to your phone.",
+  "otp_subtitle": "Enter the 4-digit verification code sent to your phone.",
   "otp_didnt_receive": "Didn't receive the code?",
   "otp_resend": "Resend code",
   "otp_resend_sent": "A new code has been sent.",
