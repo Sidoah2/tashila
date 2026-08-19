@@ -233,24 +233,46 @@ async def push_document_status(
 # --- SMS ---
 
 async def send_sms(phone: str, message: str) -> None:
-    # If Twilio is configured, send via Twilio SMS API
-    if settings.twilio_account_sid and settings.twilio_auth_token and settings.twilio_phone_number:
+    # If SMSSAK is configured, send via SMSSAK API
+    if settings.smssak_api_key and settings.smssak_project_id:
         try:
-            url = f"https://api.twilio.com/2010-04-01/Accounts/{settings.twilio_account_sid}/Messages.json"
-            auth = (settings.twilio_account_sid, settings.twilio_auth_token)
+            import re
+            cleaned = re.sub(r"[^\d+]", "", phone or "")
+            if cleaned.startswith("+213"):
+                local_phone = "0" + cleaned[4:]
+                country_code = "dz"
+            elif cleaned.startswith("213"):
+                local_phone = "0" + cleaned[3:]
+                country_code = "dz"
+            elif cleaned.startswith("0") and len(cleaned) == 10:
+                local_phone = cleaned
+                country_code = "dz"
+            elif len(cleaned) == 9 and cleaned[0] in ("5", "6", "7"):
+                local_phone = "0" + cleaned
+                country_code = "dz"
+            else:
+                local_phone = cleaned.lstrip("+")
+                country_code = settings.smssak_country or "dz"
+
+            url = "https://sendmessage-47lvvvrp4a-uc.a.run.app"
+            headers = {
+                "Content-Type": "application/json",
+                "key": settings.smssak_api_key
+            }
             data = {
-                "To": phone,
-                "From": settings.twilio_phone_number,
-                "Body": message
+                "country": country_code.upper(),
+                "phone": local_phone,
+                "projectId": settings.smssak_project_id,
+                "message": message
             }
             async with httpx.AsyncClient(timeout=15.0) as client:
-                resp = await client.post(url, auth=auth, data=data)
+                resp = await client.post(url, headers=headers, json=data)
             if resp.status_code in (200, 201):
-                logger.info("SMS sent to %s via Twilio", phone)
+                logger.info("SMS sent to %s via SMSSAK", phone)
             else:
-                logger.warning("Twilio SMS HTTP %s for %s: %s", resp.status_code, phone, resp.text[:200])
+                logger.warning("SMSSAK SMS HTTP %s for %s: %s", resp.status_code, phone, resp.text[:200])
         except Exception:
-            logger.exception("Twilio SMS send error for %s", phone)
+            logger.exception("SMSSAK SMS send error for %s", phone)
         return
 
     # Fallback to Traccar Gateway

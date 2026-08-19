@@ -1,11 +1,15 @@
+import logging
 import random
 import re
 from datetime import datetime, timezone
 from typing import Any
 
+import httpx
 import firebase_admin
 from firebase_admin import auth as firebase_auth_sdk, credentials as firebase_credentials
 from fastapi import HTTPException, status
+
+logger = logging.getLogger(__name__)
 
 from app.core.config import settings
 from app.core.database import get_database
@@ -162,13 +166,59 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
 
     if settings.test_otp_enabled:
         otp = settings.test_otp_code
+        await store_otp(phone, role, otp, ttl=120)
+    elif settings.smssak_api_key and settings.smssak_project_id:
+        try:
+            cleaned = re.sub(r"[^\d+]", "", phone or "")
+            if cleaned.startswith("+213"):
+                local_phone = "0" + cleaned[4:]
+                country_code = "dz"
+            elif cleaned.startswith("213"):
+                local_phone = "0" + cleaned[3:]
+                country_code = "dz"
+            elif cleaned.startswith("0") and len(cleaned) == 10:
+                local_phone = cleaned
+                country_code = "dz"
+            elif len(cleaned) == 9 and cleaned[0] in ("5", "6", "7"):
+                local_phone = "0" + cleaned
+                country_code = "dz"
+            else:
+                local_phone = cleaned.lstrip("+")
+                country_code = settings.smssak_country or "dz"
+
+            url = "https://sendotp-47lvvvrp4a-uc.a.run.app"
+            headers = {
+                "Content-Type": "application/json",
+                "key": settings.smssak_api_key
+            }
+            data = {
+                "country": country_code.upper(),
+                "phone": local_phone,
+                "projectId": settings.smssak_project_id,
+                "type": "sms"
+            }
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(url, headers=headers, json=data)
+            
+            if resp.status_code not in (200, 201):
+                logger.error("SMSSAK sendotp HTTP %s: %s", resp.status_code, resp.text)
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to send verification SMS via provider",
+                )
+        except Exception as e:
+            if isinstance(e, HTTPException):
+                raise e
+            logger.exception("SMSSAK sendotp error for %s", phone)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send verification SMS",
+            )
     else:
         otp = str(random.randint(100000, 999999))
-    await store_otp(phone, role, otp, ttl=120)
+        await store_otp(phone, role, otp, ttl=120)
 
-    from app.services.notification_service import send_sms
-
-    if not settings.test_otp_enabled:
+        from app.services.notification_service import send_sms
         await send_sms(phone, f"Your Tashila OTP is {otp}")
 
     return {"expiresIn": 120}
@@ -179,9 +229,51 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
     if role not in ("client", "driver"):
         raise ValidationError("Role must be 'client' or 'driver'")
 
-    otp_ok = (settings.test_otp_enabled and otp == settings.test_otp_code) or await redis_verify_otp(
-        phone, role, otp
-    )
+    otp_ok = False
+    if settings.test_otp_enabled and otp == settings.test_otp_code:
+        otp_ok = True
+    elif settings.smssak_api_key and settings.smssak_project_id:
+        try:
+            cleaned = re.sub(r"[^\d+]", "", phone or "")
+            if cleaned.startswith("+213"):
+                local_phone = "0" + cleaned[4:]
+                country_code = "dz"
+            elif cleaned.startswith("213"):
+                local_phone = "0" + cleaned[3:]
+                country_code = "dz"
+            elif cleaned.startswith("0") and len(cleaned) == 10:
+                local_phone = cleaned
+                country_code = "dz"
+            elif len(cleaned) == 9 and cleaned[0] in ("5", "6", "7"):
+                local_phone = "0" + cleaned
+                country_code = "dz"
+            else:
+                local_phone = cleaned.lstrip("+")
+                country_code = settings.smssak_country or "dz"
+
+            url = "https://verifyotp-47lvvvrp4a-uc.a.run.app"
+            headers = {
+                "Content-Type": "application/json",
+                "key": settings.smssak_api_key
+            }
+            data = {
+                "country": country_code.upper(),
+                "phone": local_phone,
+                "projectId": settings.smssak_project_id,
+                "otp": otp
+            }
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.post(url, headers=headers, json=data)
+            
+            if resp.status_code in (200, 201):
+                otp_ok = True
+            else:
+                logger.warning("SMSSAK verifyotp HTTP %s for %s: %s", resp.status_code, phone, resp.text)
+        except Exception:
+            logger.exception("SMSSAK verifyotp error for %s", phone)
+    else:
+        otp_ok = await redis_verify_otp(phone, role, otp)
+
     if not otp_ok:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
