@@ -34,7 +34,7 @@ class Settings(BaseSettings):
     upload_dir: str = "/tmp/tashila_uploads"
     cloudinary_url: str = ""
     test_otp_enabled: bool = True
-    test_otp_code: str = "111111"
+    test_otp_code: str = "1111"
     max_otp_attempts: int = 5
     otp_window_seconds: int = 600
     firebase_credentials_path: str = "firebase-adminsdk.json"
