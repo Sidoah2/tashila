@@ -243,7 +243,8 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
     otp_ok = False
     if settings.test_otp_enabled and otp == settings.test_otp_code:
         otp_ok = True
-    elif settings.smssak_api_key and settings.smssak_project_id:
+
+    if not otp_ok and settings.smssak_api_key and settings.smssak_project_id:
         try:
             cleaned = re.sub(r"[^\d+]", "", phone or "")
             if cleaned.startswith("+213"):
@@ -282,7 +283,7 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
                 logger.warning("SMSSAK verifyotp HTTP %s for %s: %s", resp.status_code, phone, resp.text)
         except Exception:
             logger.exception("SMSSAK verifyotp error for %s", phone)
-    else:
+    elif not otp_ok:
         otp_ok = await redis_verify_otp(phone, role, otp)
 
     if not otp_ok:
