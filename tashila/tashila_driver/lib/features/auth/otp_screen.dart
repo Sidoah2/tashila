@@ -87,7 +87,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
   }
 
   Future<void> _verifyAndContinue() async {
-    if (pin.text.length < 6 || _isVerifying) return;
+    if (pin.text.length < 4 || _isVerifying) return;
     setState(() => _isVerifying = true);
     ApiOverlayManager.show(context);
     try {
@@ -225,7 +225,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                         textDirection: ui.TextDirection.ltr,
                         child: AutofillGroup(
                           child: Pinput(
-                            length: 6,
+                            length: 4,
                             controller: pin,
                             autofillHints: const [AutofillHints.oneTimeCode],
                             defaultPinTheme: defaultPinTheme,
