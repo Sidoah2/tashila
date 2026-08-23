@@ -13,8 +13,8 @@ class PlatformSettingsResponse(BaseModel):
 
     commissionRate: float = Field(default=0.10, ge=0, le=1)
     serviceAreaCenter: ServiceAreaCenter
-    serviceAreaRadiusKm: float = Field(default=50.0, ge=1, le=1000)
-    maxDispatchDistanceKm: float = Field(default=50.0, ge=1, le=1000)
+    serviceAreaRadiusKm: float = Field(default=50.0, ge=1, le=5000)
+    maxDispatchDistanceKm: float = Field(default=50.0, ge=1, le=5000)
 
 
 class PlatformSettingsUpdate(BaseModel):
@@ -22,5 +22,5 @@ class PlatformSettingsUpdate(BaseModel):
 
     commissionRate: float | None = Field(default=None, ge=0, le=1)
     serviceAreaCenter: ServiceAreaCenter | None = None
-    serviceAreaRadiusKm: float | None = Field(default=None, ge=1, le=1000)
-    maxDispatchDistanceKm: float | None = Field(default=None, ge=1, le=1000)
+    serviceAreaRadiusKm: float | None = Field(default=None, ge=1, le=5000)
+    maxDispatchDistanceKm: float | None = Field(default=None, ge=1, le=5000)
