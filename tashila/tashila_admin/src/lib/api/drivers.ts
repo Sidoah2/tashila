@@ -3,6 +3,7 @@ import type {
   DocumentType,
   Driver,
   DriverApprovalStatus,
+  DriverDocument,
   TruckType,
 } from "../types";
 import { apiFetch, getImageUrl } from "./client";

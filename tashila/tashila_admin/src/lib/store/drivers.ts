@@ -68,6 +68,10 @@ export const useDriversStore = create<DriversState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const driver = await driversApi.getDriver(id);
+      if (!driver) {
+        set({ error: "Driver not found", loading: false });
+        return;
+      }
       const current = get().drivers;
       const exists = current.some((d) => d.id === id);
       if (exists) {
