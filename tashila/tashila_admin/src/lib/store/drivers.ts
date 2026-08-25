@@ -16,6 +16,7 @@ type DriversState = {
   loaded: boolean;
   error: string | null;
   load: (force?: boolean) => Promise<void>;
+  loadDriver: (id: string) => Promise<void>;
   create: (input: {
     name: string;
     phone: string;
@@ -59,6 +60,30 @@ export const useDriversStore = create<DriversState>((set, get) => ({
     } catch (e) {
       set({
         error: e instanceof Error ? e.message : "Failed to load drivers",
+        loading: false,
+      });
+    }
+  },
+  loadDriver: async (id) => {
+    set({ loading: true, error: null });
+    try {
+      const driver = await driversApi.getDriver(id);
+      const current = get().drivers;
+      const exists = current.some((d) => d.id === id);
+      if (exists) {
+        set({
+          drivers: current.map((d) => (d.id === id ? driver : d)),
+          loading: false,
+        });
+      } else {
+        set({
+          drivers: [...current, driver],
+          loading: false,
+        });
+      }
+    } catch (e) {
+      set({
+        error: e instanceof Error ? e.message : "Failed to load driver details",
         loading: false,
       });
     }

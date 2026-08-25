@@ -235,6 +235,27 @@ async def set_trip_offer(
     await pipe.execute()
 
 
+async def set_trip_broadcast_offers(
+    trip_id: str,
+    *,
+    driver_ids: list[str],
+    expires_at: str,
+    generation: int,
+    ttl_seconds: int,
+) -> None:
+    redis = get_redis()
+    payload = {
+        "driverIds": driver_ids,
+        "expiresAt": expires_at,
+        "generation": generation,
+    }
+    pipe = redis.pipeline()
+    pipe.set(_trip_offer_key(trip_id), json.dumps(payload), ex=ttl_seconds)
+    for driver_id in driver_ids:
+        pipe.set(_driver_offer_key(driver_id), trip_id, ex=ttl_seconds)
+    await pipe.execute()
+
+
 async def get_trip_offer(trip_id: str) -> dict[str, Any] | None:
     redis = get_redis()
     raw = await redis.get(_trip_offer_key(trip_id))
@@ -248,13 +269,57 @@ async def get_driver_offer_trip_id(driver_id: str) -> str | None:
     return await redis.get(_driver_offer_key(driver_id))
 
 
+async def remove_driver_from_offer(trip_id: str, driver_id: str) -> bool:
+    """
+    Removes a driver from the active offer's driverIds.
+    Returns True if no drivers remain in the offer.
+    """
+    redis = get_redis()
+    offer = await get_trip_offer(trip_id)
+    if not offer:
+        return True
+
+    # Delete driver-specific offer mapping if it still points to this trip
+    current_trip = await redis.get(_driver_offer_key(driver_id))
+    if current_trip == trip_id:
+        await redis.delete(_driver_offer_key(driver_id))
+
+    driver_ids = offer.get("driverIds", [])
+    if not driver_ids and offer.get("driverId"):
+        driver_ids = [offer["driverId"]]
+
+    if driver_id in driver_ids:
+        driver_ids.remove(driver_id)
+
+    if not driver_ids:
+        await redis.delete(_trip_offer_key(trip_id))
+        return True
+
+    offer["driverIds"] = driver_ids
+    ttl = await redis.ttl(_trip_offer_key(trip_id))
+    if ttl > 0:
+        await redis.set(_trip_offer_key(trip_id), json.dumps(offer), ex=ttl)
+        return False
+    else:
+        await redis.delete(_trip_offer_key(trip_id))
+        return True
+
+
 async def clear_trip_offer(trip_id: str) -> None:
     redis = get_redis()
     offer = await get_trip_offer(trip_id)
+    driver_ids = []
+    if offer:
+        driver_ids = offer.get("driverIds", [])
+        if not driver_ids and offer.get("driverId"):
+            driver_ids = [offer["driverId"]]
+
     pipe = redis.pipeline()
     pipe.delete(_trip_offer_key(trip_id))
-    if offer and offer.get("driverId"):
-        pipe.delete(_driver_offer_key(offer["driverId"]))
+    for driver_id in driver_ids:
+        current_trip_id = await redis.get(_driver_offer_key(driver_id))
+        if current_trip_id == trip_id:
+            pipe.delete(_driver_offer_key(driver_id))
     await pipe.execute()
 
 

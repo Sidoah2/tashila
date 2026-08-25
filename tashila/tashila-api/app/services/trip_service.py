@@ -719,12 +719,13 @@ async def calculate_final_fare_for_trip(trip: dict[str, Any], started_at: dateti
 
     pricing_collection = get_database()["pricing"]
     rule = await pricing_collection.find_one({"truckType": trip.get("truckType")})
+    base_fare = rule.get("baseFareDzd", 1000.0) if rule else 1000.0
     price_per_km = rule.get("pricePerKmDzd", 100.0) if rule else 100.0
     distance_km = float(trip.get("distanceKm") or 0.0)
     distance_fare = price_per_km * distance_km
 
-    subtotal = (1000.0 + distance_fare + time_fare) * 1.0 + 0.0
-    raw_fare = max(1000.0, subtotal)
+    subtotal = (base_fare + distance_fare + time_fare) * 1.0 + 0.0
+    raw_fare = max(base_fare, subtotal)
     import math
     return float(math.ceil(raw_fare / 100.0) * 100)
 

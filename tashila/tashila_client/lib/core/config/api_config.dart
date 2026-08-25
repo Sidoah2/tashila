@@ -1,2 +1,1 @@
-const String kApiBaseUrl = 'https://tashila-production.up.railway.app';
-
+const String kApiBaseUrl = 'https://web-production-da6bc.up.railway.app';

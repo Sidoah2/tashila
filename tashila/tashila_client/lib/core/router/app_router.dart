@@ -38,14 +38,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             (path == '/login' || path == '/otp')) {
           return '/home';
         }
-        if (appState.profileSetupComplete &&
-            appState.hasActiveTrip &&
-            // arrivedSummary is handled by /rate-driver; do not redirect /home
-            // back to /trip when the user has just finished rating and navigated home.
-            appState.tripStage != TripStage.arrivedSummary &&
-            path != '/trip' &&
-            path != '/rate-driver') {
-          return '/trip';
+        if (appState.profileSetupComplete && appState.hasActiveTrip) {
+          if (appState.tripStage == TripStage.arrivedSummary) {
+            if (path != '/rate-driver') {
+              return '/rate-driver';
+            }
+          } else {
+            if (path != '/trip') {
+              return '/trip';
+            }
+          }
         }
         if (appState.profileSetupComplete &&
             !appState.hasActiveTrip &&

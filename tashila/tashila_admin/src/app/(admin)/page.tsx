@@ -369,8 +369,9 @@ export default function DashboardPage() {
             </Box>
             {stats ? (
               <Stack direction="row" flexWrap="wrap" gap={1.25}>
-                {(Object.keys(stats.statusCounts) as TripStatus[]).map(
-                  (status) => (
+                {(Object.keys(stats.statusCounts) as TripStatus[])
+                  .filter((status) => status !== "headingToPickup")
+                  .map((status) => (
                     <Box
                       key={status}
                       sx={{

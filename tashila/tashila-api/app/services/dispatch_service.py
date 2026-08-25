@@ -26,6 +26,7 @@ from app.core.redis import (
     release_dispatch_lock,
     set_driver_busy,
     set_trip_offer,
+    set_trip_broadcast_offers,
 )
 from app.services import trip_service
 from app.services.notification_service import push_trip_request
@@ -275,7 +276,10 @@ async def validate_reject(trip_id: str, driver_id: str) -> None:
     offer = await get_trip_offer(trip_id)
     if offer is None:
         raise ConflictError("No active offer for this trip", code="NOT_YOUR_OFFER")
-    if offer.get("driverId") != driver_id:
+    driver_ids = offer.get("driverIds", [])
+    if not driver_ids and offer.get("driverId"):
+        driver_ids = [offer["driverId"]]
+    if driver_id not in driver_ids:
         raise ConflictError("This trip was offered to another driver", code="NOT_YOUR_OFFER")
 
 
@@ -295,7 +299,10 @@ async def validate_accept(trip_id: str, driver_id: str) -> None:
     if offer is None:
         raise ConflictError("No active offer for this trip", code="NOT_YOUR_OFFER")
 
-    if offer.get("driverId") != driver_id:
+    driver_ids = offer.get("driverIds", [])
+    if not driver_ids and offer.get("driverId"):
+        driver_ids = [offer["driverId"]]
+    if driver_id not in driver_ids:
         raise ConflictError("This trip was offered to another driver", code="NOT_YOUR_OFFER")
 
     expires_raw = offer.get("expiresAt")
@@ -387,73 +394,81 @@ async def _dispatch_worker(trip: dict[str, Any], lock_token: str) -> None:
     trip_id = _trip_id_from_payload(trip)
     generation = 0
     try:
-        current = await trip_service.get_trip_by_id(trip_id)
-        if current.get("status") != "requested":
-            return
-
-        candidates = await find_dispatch_candidates(trip)
-        if not candidates:
-            deadline = (
-                asyncio.get_running_loop().time()
-                + settings.dispatch_no_candidate_grace_seconds
-            )
-            while asyncio.get_running_loop().time() < deadline:
-                await asyncio.sleep(settings.dispatch_retry_interval_seconds)
-                current = await trip_service.get_trip_by_id(trip_id)
-                if current.get("status") != "requested":
-                    return
-                trip = await trip_service.trip_with_client(trip_id)
-                candidates = await find_dispatch_candidates(trip)
-                if candidates:
-                    break
-            if not candidates:
-                await fail_trip_no_drivers(trip_id)
+        while True:
+            current = await trip_service.get_trip_by_id(trip_id)
+            if current.get("status") != "requested":
                 return
 
-        trip = await trip_service.trip_with_client(trip_id)
-        candidate_index = 0
+            candidates = await find_dispatch_candidates(trip)
+            # Filter out drivers who have already rejected this trip
+            candidates = [c for c in candidates if not await is_trip_rejected_by_driver(c["id"], trip_id)]
 
-        for driver in candidates:
-            try:
-                driver_id = driver["id"]
-                if await is_trip_rejected_by_driver(driver_id, trip_id):
-                    continue
-
-                current = await trip_service.get_trip_by_id(trip_id)
-                if current.get("status") != "requested":
+            if not candidates:
+                deadline = (
+                    asyncio.get_running_loop().time()
+                    + settings.dispatch_no_candidate_grace_seconds
+                )
+                while asyncio.get_running_loop().time() < deadline:
+                    await asyncio.sleep(settings.dispatch_retry_interval_seconds)
+                    current = await trip_service.get_trip_by_id(trip_id)
+                    if current.get("status") != "requested":
+                        return
+                    trip = await trip_service.trip_with_client(trip_id)
+                    candidates = await find_dispatch_candidates(trip)
+                    candidates = [c for c in candidates if not await is_trip_rejected_by_driver(c["id"], trip_id)]
+                    if candidates:
+                        break
+                if not candidates:
+                    await fail_trip_no_drivers(trip_id)
                     return
 
-                generation += 1
-                expires_at = await offer_to_driver(
-                    trip,
-                    driver,
-                    candidate_index=candidate_index,
-                    generation=generation,
-                )
-                candidate_index += 1
+            trip = await trip_service.trip_with_client(trip_id)
+            
+            generation += 1
+            ttl = settings.offer_ttl_seconds
+            offered_at = datetime.now(timezone.utc).replace(microsecond=0)
+            expires_at = offered_at + timedelta(seconds=ttl)
+            
+            driver_ids = [c["id"] for c in candidates]
+            await set_trip_broadcast_offers(
+                trip_id,
+                driver_ids=driver_ids,
+                expires_at=expires_at.isoformat(),
+                generation=generation,
+                ttl_seconds=ttl + 120,
+            )
+            
+            for driver in candidates:
+                try:
+                    driver_id = driver["id"]
+                    payload = _offer_socket_payload(trip, driver, expires_at=expires_at, generation=generation)
+                    if await get_driver_socket(driver_id):
+                        await emit_to_driver(driver_id, "driver:trip_request", payload)
+                    else:
+                        logger.info(
+                            "_dispatch_worker: driver %s has no socket; HTTP current-offer fallback",
+                            driver_id,
+                        )
+                    pickup = trip.get("pickup") or {}
+                    pickup_address = pickup.get("address") or "Pickup location"
+                    await push_trip_request(driver_id, pickup_address, float(trip.get("fare") or 0))
+                except Exception:
+                    logger.exception("Failed offering trip %s to driver %s", trip_id, driver.get("id"))
 
-                reason = await _wait_offer_window(trip_id, expires_at)
-                current = await trip_service.get_trip_by_id(trip_id)
-                if current.get("status") != "requested":
-                    await clear_trip_offer(trip_id)
-                    return
-
-                offer = await get_trip_offer(trip_id)
-                if offer and offer.get("driverId") == driver_id:
-                    await advance_offer(
-                        trip_id,
-                        reason if reason != "accepted" else "timeout",
-                    )
-            except Exception:
-                logger.exception(
-                    "dispatch candidate failed trip=%s driver=%s",
-                    trip_id,
-                    driver.get("id"),
-                )
+            reason = await _wait_offer_window(trip_id, expires_at)
+            current = await trip_service.get_trip_by_id(trip_id)
+            if current.get("status") != "requested":
                 await clear_trip_offer(trip_id)
-                continue
+                return
 
-        await fail_trip_no_drivers(trip_id)
+            offer = await get_trip_offer(trip_id)
+            if offer:
+                current_driver_ids = offer.get("driverIds", [])
+                if not current_driver_ids and offer.get("driverId"):
+                    current_driver_ids = [offer["driverId"]]
+                for driver_id in current_driver_ids:
+                    await emit_offer_expired(trip_id, driver_id, reason=reason if reason != "accepted" else "timeout")
+            await clear_trip_offer(trip_id)
     finally:
         await clear_trip_offer(trip_id)
         await release_dispatch_lock(trip_id, lock_token)
@@ -488,11 +503,9 @@ async def start_dispatch(trip: dict[str, Any]) -> None:
 
 async def advance_after_reject(trip_id: str, driver_id: str) -> None:
     """Advance dispatch after reject; idempotent if offer already cleared."""
-    offer = await get_trip_offer(trip_id)
-    if offer and offer.get("driverId") == driver_id:
-        await advance_offer(trip_id, "reject")
-        return
-    if offer is None:
+    from app.core.redis import remove_driver_from_offer
+    all_rejected = await remove_driver_from_offer(trip_id, driver_id)
+    if all_rejected:
         await signal_dispatch_wake(trip_id)
 
 
@@ -507,7 +520,13 @@ async def build_current_offer_for_driver(driver_id: str) -> dict[str, Any] | Non
         return None
 
     offer = await get_trip_offer(trip_id)
-    if not offer or offer.get("driverId") != driver_id:
+    if not offer:
+        return None
+
+    driver_ids = offer.get("driverIds", [])
+    if not driver_ids and offer.get("driverId"):
+        driver_ids = [offer["driverId"]]
+    if driver_id not in driver_ids:
         return None
 
     expires_raw = offer.get("expiresAt")

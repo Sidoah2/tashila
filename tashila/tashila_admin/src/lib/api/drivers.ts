@@ -83,21 +83,45 @@ function mapDocStatus(status: string | undefined): DocumentStatus {
 function mapDocuments(
   documents: ApiDriver["documents"],
 ): Driver["documents"] {
-  if (!documents) return [];
-  if (Array.isArray(documents)) {
-    return documents.map((doc) => ({
-      type: doc.type as DocumentType,
-      fileName: doc.fileName ? getImageUrl(doc.fileName) : null,
-      status: mapDocStatus(doc.status),
-      rejectionReason: doc.rejectionReason,
-    }));
+  const docTypes: DocumentType[] = [
+    "drivingLicense",
+    "vehicleRegistration",
+    "vehiclePhoto",
+  ];
+  const mapped: Record<DocumentType, DriverDocument> = {
+    drivingLicense: { type: "drivingLicense", fileName: null, status: "pending" },
+    vehicleRegistration: { type: "vehicleRegistration", fileName: null, status: "pending" },
+    vehiclePhoto: { type: "vehiclePhoto", fileName: null, status: "pending" },
+  };
+  
+  if (documents) {
+    if (Array.isArray(documents)) {
+      documents.forEach((doc) => {
+        const type = doc.type as DocumentType;
+        if (docTypes.includes(type)) {
+          mapped[type] = {
+            type,
+            fileName: doc.fileName ? getImageUrl(doc.fileName) : null,
+            status: mapDocStatus(doc.status),
+            rejectionReason: doc.rejectionReason,
+          };
+        }
+      });
+    } else {
+      Object.entries(documents).forEach(([type, doc]) => {
+        const t = type as DocumentType;
+        if (docTypes.includes(t)) {
+          mapped[t] = {
+            type: t,
+            fileName: doc.url ? getImageUrl(doc.url) : null,
+            status: mapDocStatus(doc.status),
+            rejectionReason: doc.rejectionReason ?? undefined,
+          };
+        }
+      });
+    }
   }
-  return Object.entries(documents).map(([type, doc]) => ({
-    type: type as DocumentType,
-    fileName: doc.url ? getImageUrl(doc.url) : null,
-    status: mapDocStatus(doc.status),
-    rejectionReason: doc.rejectionReason ?? undefined,
-  }));
+  return docTypes.map((t) => mapped[t]);
 }
 
 function mapLocation(d: ApiDriver): { lat: number; lng: number } {
@@ -150,21 +174,21 @@ function mapDriver(d: ApiDriver): Driver {
       clientName: t.clientName ?? "Client",
       driverId: t.driverId ?? null,
       driverName: t.driverName ?? null,
-      pickup: typeof t.pickup === "string" ? t.pickup : (t.pickup?.address ?? ""),
-      dropOff: typeof t.dropOff === "string" ? t.dropOff : (t.dropOff?.address ?? ""),
-      pickupLat: t.pickupLat ?? 0,
-      pickupLng: t.pickupLng ?? 0,
-      dropOffLat: t.dropOffLat ?? 0,
-      dropOffLng: t.dropOffLng ?? 0,
-      fare: t.fare ?? t.fareDzd ?? 0,
+      pickup: t.pickup?.address || `${t.pickup?.lat ?? 0},${t.pickup?.lng ?? 0}`,
+      dropOff: t.dropoff?.address || `${t.dropoff?.lat ?? 0},${t.dropoff?.lng ?? 0}`,
+      pickupLat: t.pickup?.lat ?? 0,
+      pickupLng: t.pickup?.lng ?? 0,
+      dropOffLat: t.dropoff?.lat ?? 0,
+      dropOffLng: t.dropoff?.lng ?? 0,
+      fare: t.finalFare ?? t.fare ?? 0,
       finalFare: t.finalFare ?? null,
       distanceKm: t.distanceKm ?? 0,
       truckType: t.truckType ?? "single_cabin",
       status: t.status ?? "requested",
       createdAt: t.createdAt ?? "",
       completedAt: t.completedAt ?? null,
-      rating: t.rating ?? null,
-      cashConfirmed: t.cashConfirmed ?? false,
+      rating: t.driverRating ?? null,
+      cashConfirmed: t.status === "completed" || t.cashConfirmed === true,
       paymentMethod: t.paymentMethod ?? "cash",
       dispatchedByAdmin: t.dispatchedByAdmin ?? false,
       clientPhone: t.clientPhone ?? null,

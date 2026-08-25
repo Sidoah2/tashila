@@ -17,6 +17,7 @@ import '../../features/profile/profile_setup_screen.dart';
 import '../../features/settings/language_screen.dart';
 import '../../features/support/driver_support_screen.dart';
 import '../state/driver_app_state.dart';
+import '../models/models.dart';
 import '../theme/app_colors.dart';
 
 final rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -41,11 +42,19 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           return '/profile';
         }
         if (!appState.needsProfileSetup &&
+            appState.tripStatus == TripStatus.awaitingClientRating) {
+          if (route != '/rate-client') {
+            return '/rate-client';
+          }
+          return null;
+        }
+        if (!appState.needsProfileSetup &&
             (route == '/login' ||
                 route == '/otp' ||
                 route == '/profile' ||
                 route == '/splash' ||
-                route == '/onboarding')) {
+                route == '/onboarding' ||
+                (route == '/rate-client' && appState.tripStatus != TripStatus.awaitingClientRating))) {
           return '/home';
         }
         return null;

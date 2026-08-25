@@ -178,6 +178,8 @@ async def admin_list_users(
     query: dict[str, Any] = {}
     if status:
         query["status"] = status
+    else:
+        query["status"] = {"$ne": "deleted"}
     search_filter = _build_search_filter(search, ["firstName", "lastName", "phone"])
     if search_filter:
         query = {"$and": [query, search_filter]} if query else search_filter
@@ -381,7 +383,7 @@ async def admin_list_drivers(
     page: int = 1,
     limit: int = 20,
 ) -> dict[str, Any]:
-    query: dict[str, Any] = {}
+    query: dict[str, Any] = {"status": {"$ne": "deleted"}}
     if approval:
         query["approvalStatus"] = approval
     if availability:
@@ -510,6 +512,24 @@ async def admin_update_driver_approval(
     driver = await _find_driver(driver_id)
     if driver is None:
         raise NotFoundError("Driver not found")
+
+    if body.status == "approved":
+        documents = driver.get("documents") or {}
+        required_docs = {"drivingLicense", "vehicleRegistration", "vehiclePhoto"}
+        missing_docs = required_docs - set(documents.keys())
+        if missing_docs:
+            raise ValidationError(
+                f"Cannot approve driver. Missing documents: {', '.join(sorted(missing_docs))}"
+            )
+        unapproved_docs = []
+        for doc_type in required_docs:
+            doc_entry = documents.get(doc_type)
+            if not isinstance(doc_entry, dict) or doc_entry.get("status") != "approved":
+                unapproved_docs.append(doc_type)
+        if unapproved_docs:
+            raise ValidationError(
+                f"Cannot approve driver. The following documents are not approved yet: {', '.join(sorted(unapproved_docs))}"
+            )
 
     now = datetime.now(timezone.utc)
     updates: dict[str, Any] = {

@@ -62,6 +62,7 @@ export default function DriverDetailPage({
   const drivers = useDriversStore((s) => s.drivers);
   const loaded = useDriversStore((s) => s.loaded);
   const load = useDriversStore((s) => s.load);
+  const loadDriver = useDriversStore((s) => s.loadDriver);
   const setDocStatus = useDriversStore((s) => s.setDocStatus);
   const setApproval = useDriversStore((s) => s.setApproval);
   const applyPlatformPayment = useDriversStore((s) => s.applyPlatformPayment);
@@ -80,7 +81,8 @@ export default function DriverDetailPage({
 
   useEffect(() => {
     load();
-  }, [load]);
+    loadDriver(id);
+  }, [load, loadDriver, id]);
 
   const driver = useMemo(
     () => drivers.find((d) => d.id === id) ?? null,
@@ -726,7 +728,7 @@ export default function DriverDetailPage({
               size="large"
               color="success"
               startIcon={<CheckCircleRoundedIcon />}
-              disabled={driver.approvalStatus === "approved"}
+              disabled={driver.approvalStatus === "approved" || !allApproved}
               onClick={handleMasterApprove}
             >
               {driver.approvalStatus === "approved"
