@@ -360,7 +360,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           client['phone'] as String? ?? trip['clientPhone'] as String? ?? '',
       pickup: pickup['address'] as String? ?? '',
       dropOff: dropoff['address'] as String? ?? '',
-      fare: ((trip['fare'] as num?) ?? 0).toDouble(),
+      fare: ((trip['finalFare'] as num?) ?? (trip['fare'] as num?) ?? 0).toDouble(),
       distanceKm: ((trip['distanceKm'] as num?) ?? 0).toDouble(),
       pickupLatLng: LatLng(
         ((pickup['lat'] as num?) ?? 0).toDouble(),
@@ -1270,6 +1270,36 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       _setState(
         state.copyWith(error: _acceptErrorMessage(errorCode), isBusy: false),
       );
+      if (errorCode == 'TRIP_NOT_AVAILABLE') {
+        final ctx = rootNavigatorKey.currentContext;
+        if (ctx != null) {
+          final locale = Localizations.localeOf(ctx);
+          final isAr = locale.languageCode == 'ar';
+          final isFr = locale.languageCode == 'fr';
+          
+          final String title = isAr ? 'عذراً' : (isFr ? 'Désolé' : 'Sorry');
+          final String msg = isAr 
+              ? 'هذه الرحلة تم قبولها بالفعل من قبل سائق آخر.' 
+              : (isFr 
+                  ? 'Ce trajet a déjà été pris par un autre chauffeur.' 
+                  : 'This trip has already been taken by another driver.');
+          
+          showDialog<void>(
+            context: ctx,
+            barrierDismissible: false,
+            builder: (context) => AlertDialog(
+              title: Text(title),
+              content: Text(msg),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
       return false;
     }
     _clearActiveOffer();

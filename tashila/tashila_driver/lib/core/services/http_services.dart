@@ -240,7 +240,7 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
         m['clientPhone'] as String? ?? client['phone'] as String? ?? '',
     pickup: pickup['address'] as String? ?? '$pickupLat,$pickupLng',
     dropOff: dropoff['address'] as String? ?? '$dropoffLat,$dropoffLng',
-    fare: ((m['fare'] as num?) ?? 0).toDouble(),
+    fare: ((m['finalFare'] as num?) ?? (m['fare'] as num?) ?? 0).toDouble(),
     distanceKm: distanceKm,
     estimatedDurationMinutes: estimatedDurationMinutes,
     pickupLatLng: LatLng(pickupLat, pickupLng),

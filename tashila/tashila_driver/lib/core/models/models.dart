@@ -427,7 +427,7 @@ class IncomingOffer {
         clientPhone: client['phone'] as String? ?? '',
         pickup: pickup['address'] as String? ?? '$pickupLat,$pickupLng',
         dropOff: dropoff['address'] as String? ?? '$dropoffLat,$dropoffLng',
-        fare: ((data['fare'] as num?) ?? 0).toDouble(),
+        fare: ((data['finalFare'] as num?) ?? (data['fare'] as num?) ?? 0).toDouble(),
         distanceKm: distanceKm,
         estimatedDurationMinutes: minutes,
         pickupLatLng: LatLng(pickupLat, pickupLng),

@@ -56,7 +56,20 @@ export const useDriversStore = create<DriversState>((set, get) => ({
     set({ loading: true, error: null });
     try {
       const drivers = await driversApi.listDrivers();
-      set({ drivers, loading: false, loaded: true });
+      const current = get().drivers;
+      const merged = drivers.map((d) => {
+        const existing = current.find((curr) => curr.id === d.id);
+        if (existing && existing.trips !== undefined) {
+          return {
+            ...d,
+            trips: existing.trips,
+            platformPayments: existing.platformPayments,
+            customerReviews: existing.customerReviews,
+          };
+        }
+        return d;
+      });
+      set({ drivers: merged, loading: false, loaded: true });
     } catch (e) {
       set({
         error: e instanceof Error ? e.message : "Failed to load drivers",
