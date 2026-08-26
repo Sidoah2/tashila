@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/features/auth/login_screen.dart';
 import 'package:tashila_client/features/auth/otp_screen.dart';
+import 'package:tashila_client/features/auth/suspended_screen.dart';
 import 'package:tashila_client/features/home/home_shell_screen.dart';
 import 'package:tashila_client/features/onboarding/onboarding_screen.dart';
 import 'package:tashila_client/features/profile/profile_onboarding_screen.dart';
@@ -57,6 +58,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       } else if (path != '/login' &&
           path != '/otp' &&
           path != '/onboarding' &&
+          path != '/suspended' &&
           path != '/') {
         return '/login';
       }
@@ -85,6 +87,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/rate-driver',
         builder: (_, _) => const RateDriverScreen(),
+      ),
+      GoRoute(
+        path: '/suspended',
+        builder: (_, _) => const SuspendedScreen(),
       ),
     ],
   );

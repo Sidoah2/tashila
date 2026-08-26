@@ -474,7 +474,7 @@ export default function DispatchTripPage() {
               <Autocomplete
                 value={client}
                 onChange={(_, v) => setClient(v)}
-                options={users}
+                options={users.filter((u) => u.status !== "suspended")}
                 disabled={externalOrder}
                 getOptionLabel={(o) => `${o.firstName} ${o.lastName} · ${o.phone}`}
                 renderInput={(params) => (

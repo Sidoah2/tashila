@@ -12,6 +12,7 @@ import 'package:tashila_client/core/services/api_client.dart';
 import 'package:tashila_client/core/services/places_service.dart';
 import 'package:tashila_client/core/services/trip_socket_service.dart';
 import 'package:tashila_client/core/router/app_router.dart';
+import 'package:go_router/go_router.dart';
 
 enum TruckType { singleCabine, doubleCabine }
 
@@ -698,31 +699,7 @@ class AppStateNotifier extends Notifier<AppState> {
     await logout();
     final ctx = rootNavigatorKey.currentContext;
     if (ctx != null) {
-      final locale = Localizations.localeOf(ctx);
-      final isAr = locale.languageCode == 'ar';
-      final isFr = locale.languageCode == 'fr';
-      
-      final title = isAr ? 'الحساب موقوف' : (isFr ? 'Compte Suspendu' : 'Account Suspended');
-      final message = isAr 
-          ? 'تم إيقاف حسابك من قبل المسؤول. يرجى الاتصال بالدعم الفني.' 
-          : (isFr 
-              ? 'Votre compte a été suspendu par l\'administrateur. Veuillez contacter le support client.' 
-              : 'Your account has been suspended by the administrator. Please contact customer support.');
-              
-      showDialog<void>(
-        context: ctx,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: Text(title),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
+      ctx.go('/suspended');
     }
   }
 

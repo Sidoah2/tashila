@@ -936,9 +936,22 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
     if (isRejected) {
       return Scaffold(
         backgroundColor: AppColors.bg,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back, color: AppColors.textPrimary),
+            onPressed: () async {
+              await notifier.logout();
+              if (context.mounted) {
+                context.go('/login');
+              }
+            },
+          ),
+        ),
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(28.0),
+            padding: const EdgeInsets.symmetric(horizontal: 28.0),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
@@ -974,6 +987,26 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     height: 1.5,
                   ),
                 ),
+                if (profile.rejectionReason != null && profile.rejectionReason!.trim().isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppColors.cardBg,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.red.shade200),
+                    ),
+                    child: Text(
+                      profile.rejectionReason!,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFFE53935),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
                 const SizedBox(height: 32),
                 SizedBox(
                   width: double.infinity,

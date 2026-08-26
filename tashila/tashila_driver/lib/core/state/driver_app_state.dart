@@ -809,12 +809,14 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final status = await _profileRepository.fetchApprovalStatus();
     if (status == null) return;
     final approval = status['approvalStatus'] as String? ?? 'pending';
+    final rejectionReason = status['rejectionReason'] as String?;
     final approved = approval == 'approved';
     final profile = state.profile;
     if (profile == null) return;
     final updated = profile.copyWith(
       documentsApproved: approved,
       approvalStatus: approval,
+      rejectionReason: rejectionReason,
     );
     await _saveProfile(updated);
     _setState(state.copyWith(profile: updated));
@@ -827,6 +829,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final profile = state.profile ?? DriverProfile.empty();
     final profileComplete = me['profileComplete'] as bool? ?? false;
     final rawApproval = me['approvalStatus'] as String? ?? 'pending';
+    final rejectionReason = me['rejectionReason'] as String?;
     final updated = profile.copyWith(
       name: me['name'] as String? ?? profile.name,
       phone: me['phone'] as String? ?? profile.phone,
@@ -835,6 +838,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       ),
       documentsApproved: rawApproval == 'approved',
       approvalStatus: rawApproval,
+      rejectionReason: rejectionReason,
       avatarUrl: me['avatarUrl'] as String? ?? profile.avatarUrl,
       vehiclePlate: me['vehiclePlate'] as String? ?? profile.vehiclePlate,
       vehicleColor: me['vehicleColor'] as String? ?? profile.vehicleColor,

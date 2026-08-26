@@ -234,6 +234,7 @@ async def get_approval_status(driver_id: str) -> dict[str, Any]:
             }
     return {
         "approvalStatus": driver.get("approvalStatus", "pending"),
+        "rejectionReason": driver.get("rejectionReason"),
         "documents": doc_summary,
     }
 

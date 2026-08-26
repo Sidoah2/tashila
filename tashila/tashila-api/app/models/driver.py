@@ -42,6 +42,7 @@ class DriverDoc(BaseModel):
     location: DriverLocation | None = None
     availability: str = "offline"
     approvalStatus: str = "pending"
+    rejectionReason: str | None = None
     documents: dict[str, DocumentEntry] = Field(default_factory=dict)
     earnings: EarningsInfo = Field(default_factory=EarningsInfo)
     profileComplete: bool = False
@@ -65,6 +66,7 @@ class DriverResponse(BaseModel):
     location: DriverLocation | None = None
     availability: str
     approvalStatus: str
+    rejectionReason: str | None = None
     profileComplete: bool
     status: str
     createdAt: datetime

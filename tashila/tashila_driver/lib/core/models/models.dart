@@ -208,6 +208,7 @@ class DriverProfile {
     required this.documents,
     this.documentsApproved = false,
     this.approvalStatus = 'pending',
+    this.rejectionReason,
     this.profilePhotoPath,
     this.avatarUrl,
     this.email = '',
@@ -224,6 +225,7 @@ class DriverProfile {
   final bool documentsApproved;
   /// 'pending' | 'approved' | 'rejected'
   final String approvalStatus;
+  final String? rejectionReason;
   final String? profilePhotoPath;
   final String? avatarUrl;
   final String vehiclePlate;
@@ -260,6 +262,7 @@ class DriverProfile {
     List<DriverDocument>? documents,
     bool? documentsApproved,
     String? approvalStatus,
+    String? rejectionReason,
     String? profilePhotoPath,
     String? avatarUrl,
     String? email,
@@ -283,6 +286,7 @@ class DriverProfile {
       documents: documents ?? this.documents,
       documentsApproved: documentsApproved ?? this.documentsApproved,
       approvalStatus: approvalStatus ?? this.approvalStatus,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
       profilePhotoPath: nextPhoto,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       email: email ?? this.email,
@@ -299,6 +303,7 @@ class DriverProfile {
     'documents': documents.map((d) => d.toJson()).toList(),
     'documentsApproved': documentsApproved,
     'approvalStatus': approvalStatus,
+    'rejectionReason': rejectionReason,
     'profilePhotoPath': profilePhotoPath,
     'avatarUrl': avatarUrl,
     'email': email,
@@ -315,6 +320,7 @@ class DriverProfile {
       documents: _documentsFromJson(json['documents'] as List<dynamic>?),
       documentsApproved: json['documentsApproved'] as bool? ?? false,
       approvalStatus: json['approvalStatus'] as String? ?? 'pending',
+      rejectionReason: json['rejectionReason'] as String?,
       profilePhotoPath: json['profilePhotoPath'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
       email: json['email'] as String? ?? '',
