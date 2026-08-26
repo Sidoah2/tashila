@@ -554,14 +554,24 @@ async def cancel_trip(trip_id: str, client_id: str, reason: str | None = None) -
 
     await dispatch_service.on_client_cancelled_trip(trip_id, reason=normalized_reason)
 
-    notify_driver_id = assigned_driver_id or offered_driver_id
-    if notify_driver_id:
+    notify_driver_ids: set[str] = set()
+    if assigned_driver_id:
+        notify_driver_ids.add(str(assigned_driver_id))
+    if offer:
+        offered_driver_id = offer.get("driverId")
+        if offered_driver_id:
+            notify_driver_ids.add(str(offered_driver_id))
+        offered_driver_ids = offer.get("driverIds", [])
+        for d_id in offered_driver_ids:
+            notify_driver_ids.add(str(d_id))
+
+    for d_id in notify_driver_ids:
         await publish(
             "trip:cancelled_by_client",
             _json_safe(
                 {
                     "tripId": trip_id,
-                    "driverId": notify_driver_id,
+                    "driverId": d_id,
                     "reason": normalized_reason,
                 },
             ),

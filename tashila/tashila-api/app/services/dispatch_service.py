@@ -363,13 +363,16 @@ async def on_client_cancelled_trip(trip_id: str, *, reason: str | None = None) -
     trip = await trip_service.get_trip_by_id(trip_id)
     assigned_driver_id = trip.get("driverId")
     offer = await get_trip_offer(trip_id)
-    offered_driver_id = (offer or {}).get("driverId") if offer else None
-
     notify_ids: set[str] = set()
     if assigned_driver_id:
         notify_ids.add(str(assigned_driver_id))
-    if offered_driver_id:
-        notify_ids.add(str(offered_driver_id))
+    if offer:
+        offered_driver_id = offer.get("driverId")
+        if offered_driver_id:
+            notify_ids.add(str(offered_driver_id))
+        offered_driver_ids = offer.get("driverIds", [])
+        for d_id in offered_driver_ids:
+            notify_ids.add(str(d_id))
 
     payload = {
         "tripId": trip_id,
