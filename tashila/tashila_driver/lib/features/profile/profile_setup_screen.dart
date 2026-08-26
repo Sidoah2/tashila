@@ -993,7 +993,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: AppColors.cardBg,
+                      color: Colors.red.shade50,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.red.shade200),
                     ),
