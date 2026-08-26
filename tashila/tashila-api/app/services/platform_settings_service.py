@@ -30,6 +30,8 @@ def _default_settings() -> dict[str, Any]:
         "serviceAreaCenter": DEFAULT_CENTER,
         "serviceAreaRadiusKm": DEFAULT_RADIUS_KM,
         "maxDispatchDistanceKm": 50.0,
+        "waitGraceMinutes": 5.0,
+        "waitMinutePriceDzd": 25.0,
         "updatedAt": datetime.now(timezone.utc),
     }
 
@@ -56,6 +58,10 @@ async def update_platform_settings(data: PlatformSettingsUpdate) -> dict[str, An
         updates["serviceAreaRadiusKm"] = float(payload["serviceAreaRadiusKm"])
     if "maxDispatchDistanceKm" in payload and payload["maxDispatchDistanceKm"] is not None:
         updates["maxDispatchDistanceKm"] = float(payload["maxDispatchDistanceKm"])
+    if "waitGraceMinutes" in payload and payload["waitGraceMinutes"] is not None:
+        updates["waitGraceMinutes"] = float(payload["waitGraceMinutes"])
+    if "waitMinutePriceDzd" in payload and payload["waitMinutePriceDzd"] is not None:
+        updates["waitMinutePriceDzd"] = float(payload["waitMinutePriceDzd"])
 
     merged = {**current, **updates, "_id": SETTINGS_ID}
     await get_database()[SETTINGS_COLLECTION].update_one(

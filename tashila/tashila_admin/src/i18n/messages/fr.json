@@ -289,6 +289,12 @@
   "pricing": {
     "formula_title": "Calcul des tarifs",
     "formula_tashila": "Calcul du tarif (DZD) : Tarif = Tarif de base + (Prix par Km × Distance) arrondi aux 100 DZD supérieurs (Exemple : base 1000, par km 100 pour 8 km, tarif = 1000 + 100×8 = 1800 DZD)",
+    "commission_title": "Commission de la plateforme",
+    "commission_rate_label": "Taux de commission",
+    "wait_settings_title": "Frais de temps d'attente",
+    "wait_grace_label": "Période de grâce (Minutes)",
+    "wait_price_label": "Prix d'attente par minute (DZD)",
+    "save_scope": "Enregistrer les paramètres",
     "geofence_title": "Zone de service (geofence)",
     "geofence_body": "Definissez un polygone comme tableau JSON de {lat,lng}. Hors zone : les apps client affichent « service indisponible ».",
     "max_dispatch_distance_label": "Distance maximale d'envoi",

@@ -17,6 +17,8 @@ async def get_settings(_admin: dict = _admin_auth) -> dict:
         "serviceAreaCenter": doc.get("serviceAreaCenter", {"lat": 22.785, "lng": 5.523}),
         "serviceAreaRadiusKm": doc.get("serviceAreaRadiusKm", 50.0),
         "maxDispatchDistanceKm": doc.get("maxDispatchDistanceKm", 50.0),
+        "waitGraceMinutes": doc.get("waitGraceMinutes", 5.0),
+        "waitMinutePriceDzd": doc.get("waitMinutePriceDzd", 25.0),
     }
 
 
@@ -31,4 +33,6 @@ async def update_settings(
         "serviceAreaCenter": doc.get("serviceAreaCenter", {"lat": 22.785, "lng": 5.523}),
         "serviceAreaRadiusKm": doc.get("serviceAreaRadiusKm", 50.0),
         "maxDispatchDistanceKm": doc.get("maxDispatchDistanceKm", 50.0),
+        "waitGraceMinutes": doc.get("waitGraceMinutes", 5.0),
+        "waitMinutePriceDzd": doc.get("waitMinutePriceDzd", 25.0),
     }

@@ -15,6 +15,8 @@ class PlatformSettingsResponse(BaseModel):
     serviceAreaCenter: ServiceAreaCenter
     serviceAreaRadiusKm: float = Field(default=50.0, ge=1, le=5000)
     maxDispatchDistanceKm: float = Field(default=50.0, ge=1, le=5000)
+    waitGraceMinutes: float = Field(default=5.0, ge=0, le=120)
+    waitMinutePriceDzd: float = Field(default=25.0, ge=0, le=500)
 
 
 class PlatformSettingsUpdate(BaseModel):
@@ -24,3 +26,5 @@ class PlatformSettingsUpdate(BaseModel):
     serviceAreaCenter: ServiceAreaCenter | None = None
     serviceAreaRadiusKm: float | None = Field(default=None, ge=1, le=5000)
     maxDispatchDistanceKm: float | None = Field(default=None, ge=1, le=5000)
+    waitGraceMinutes: float | None = Field(default=None, ge=0, le=120)
+    waitMinutePriceDzd: float | None = Field(default=None, ge=0, le=500)

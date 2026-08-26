@@ -114,6 +114,8 @@ export default function PricingPage() {
     (settings.commissionRate !== settingsDraft.commissionRate ||
       settings.serviceAreaRadiusKm !== settingsDraft.serviceAreaRadiusKm ||
       settings.maxDispatchDistanceKm !== settingsDraft.maxDispatchDistanceKm ||
+      settings.waitGraceMinutes !== settingsDraft.waitGraceMinutes ||
+      settings.waitMinutePriceDzd !== settingsDraft.waitMinutePriceDzd ||
       settings.serviceAreaCenter.lat !== settingsDraft.serviceAreaCenter.lat ||
       settings.serviceAreaCenter.lng !== settingsDraft.serviceAreaCenter.lng);
 
@@ -162,6 +164,38 @@ export default function PricingPage() {
               }}
               sx={{ maxWidth: 200, mb: 3 }}
             />
+
+            <Typography variant="h6" sx={{ mb: 2 }}>
+              {t("pricing.wait_settings_title")}
+            </Typography>
+            <Stack direction="row" spacing={2} sx={{ mb: 3 }}>
+              <TextField
+                label={t("pricing.wait_grace_label")}
+                type="number"
+                value={settingsDraft.waitGraceMinutes ?? 5}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSettingsDraft({
+                    ...settingsDraft,
+                    waitGraceMinutes: Number.isFinite(val) ? val : 5,
+                  });
+                }}
+                sx={{ maxWidth: 200 }}
+              />
+              <TextField
+                label={t("pricing.wait_price_label")}
+                type="number"
+                value={settingsDraft.waitMinutePriceDzd ?? 25}
+                onChange={(e) => {
+                  const val = Number(e.target.value);
+                  setSettingsDraft({
+                    ...settingsDraft,
+                    waitMinutePriceDzd: Number.isFinite(val) ? val : 25,
+                  });
+                }}
+                sx={{ maxWidth: 200 }}
+              />
+            </Stack>
 
             <Typography variant="h6" sx={{ mb: 1 }}>
               {t("pricing.geofence_title")}

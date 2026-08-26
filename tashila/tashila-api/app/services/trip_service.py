@@ -718,14 +718,19 @@ async def _verify_driver_assigned(trip: dict[str, Any], driver_id: str) -> None:
 
 
 async def calculate_final_fare_for_trip(trip: dict[str, Any], started_at: datetime | None, completed_at: datetime) -> float:
+    from app.services.platform_settings_service import get_platform_settings
+    settings_doc = await get_platform_settings()
+    wait_grace_minutes = float(settings_doc.get("waitGraceMinutes", 5.0))
+    wait_minute_price = float(settings_doc.get("waitMinutePriceDzd", 25.0))
+
     estimated_eta = float(trip.get("estimatedMinutes") or 0)
     if started_at:
         actual_time = (completed_at.timestamp() - started_at.timestamp()) / 60.0
     else:
         actual_time = estimated_eta
-    allowed_time = estimated_eta + 5.0
+    allowed_time = estimated_eta + wait_grace_minutes
     extra_time = max(0.0, actual_time - allowed_time)
-    time_fare = extra_time * 25.0
+    time_fare = extra_time * wait_minute_price
 
     pricing_collection = get_database()["pricing"]
     rule = await pricing_collection.find_one({"truckType": trip.get("truckType")})
