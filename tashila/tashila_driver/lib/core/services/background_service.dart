@@ -37,7 +37,7 @@ Future<void> initializeBackgroundService() async {
   await service.configure(
     androidConfiguration: AndroidConfiguration(
       onStart: onStart,
-      autoStart: true,
+      autoStart: false,
       isForegroundMode: true,
       notificationChannelId: 'driver_service_channel',
       initialNotificationTitle: 'Tashila Driver Active',
@@ -45,7 +45,7 @@ Future<void> initializeBackgroundService() async {
       foregroundServiceNotificationId: 888,
     ),
     iosConfiguration: IosConfiguration(
-      autoStart: true,
+      autoStart: false,
       onForeground: onStart,
       onBackground: onIosBackground,
     ),
@@ -153,6 +153,7 @@ void onStart(ServiceInstance service) async {
       } catch (_) {}
     } else {
       cleanup();
+      service.stopSelf();
     }
   });
 

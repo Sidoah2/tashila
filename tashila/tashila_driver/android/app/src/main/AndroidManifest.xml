@@ -37,6 +37,10 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyCHmAnPG06Vm2V5XPDsQYmfzHy13ICCDtM" />
+        <service
+            android:name="id.flutter.flutter_background_service.BackgroundService"
+            android:stopWithTask="true"
+            android:exported="false" />
     </application>
     <!-- Required to query activities that can process text, see:
          https://developer.android.com/training/package-visibility and

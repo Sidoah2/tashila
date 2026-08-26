@@ -10,6 +10,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
+import 'package:flutter_background_service/flutter_background_service.dart';
 
 import '../config/map_config.dart';
 import '../models/models.dart';
@@ -488,6 +489,16 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     if (!ref.mounted) return;
     _syncLocationTracking();
     await refreshNearbyRequests();
+
+    try {
+      final service = FlutterBackgroundService();
+      final isRunning = await service.isRunning();
+      if (!isRunning) {
+        await service.startService();
+      }
+    } catch (e) {
+      debugPrint('Failed to start background service: $e');
+    }
     if (!ref.mounted) return;
     _startRequestPolling();
   }
@@ -630,6 +641,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _offerCountdownTimer?.cancel();
     _locationTimer?.cancel();
     await _driverSocket?.disconnect();
+
+    try {
+      FlutterBackgroundService().invoke('stopService');
+    } catch (_) {}
+
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await prefs.setBool(kSeenOnboarding, true);
@@ -690,6 +706,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _apiClient.delete('/drivers/me');
     } catch (_) {}
     await _driverSocket?.disconnect();
+
+    try {
+      FlutterBackgroundService().invoke('stopService');
+    } catch (_) {}
+
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool(kSeenOnboarding) ?? false;
     await prefs.clear();
@@ -948,12 +969,28 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       _startRequestPolling();
       await _ensureDriverSocket(online: true);
       _syncLocationTracking();
+
+      try {
+        final service = FlutterBackgroundService();
+        final isRunning = await service.isRunning();
+        if (!isRunning) {
+          await service.startService();
+        }
+      } catch (e) {
+        debugPrint('Failed to start background service: $e');
+      }
     } else {
       _requestPollTimer?.cancel();
       _offerCountdownTimer?.cancel();
       await _driverSocket?.disconnect();
       _setState(state.copyWith(clearIncomingOffers: true));
       _syncLocationTracking();
+
+      try {
+        FlutterBackgroundService().invoke('stopService');
+      } catch (e) {
+        debugPrint('Failed to stop background service: $e');
+      }
     }
   }
 
