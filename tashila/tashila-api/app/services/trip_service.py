@@ -288,7 +288,8 @@ async def estimate_trip(
         base_fare = 1000.0
         price_per_km = 100.0
 
-    raw_fare = base_fare + price_per_km * dist
+    extra_dist = max(0.0, dist - 5.0)
+    raw_fare = base_fare + price_per_km * extra_dist
     import math
     fare = int(math.ceil(raw_fare / 100.0) * 100)
 
@@ -741,7 +742,8 @@ async def calculate_final_fare_for_trip(trip: dict[str, Any], started_at: dateti
     base_fare = rule.get("baseFareDzd", 1000.0) if rule else 1000.0
     price_per_km = rule.get("pricePerKmDzd", 100.0) if rule else 100.0
     distance_km = float(trip.get("distanceKm") or 0.0)
-    distance_fare = price_per_km * distance_km
+    extra_distance = max(0.0, distance_km - 5.0)
+    distance_fare = price_per_km * extra_distance
 
     subtotal = (base_fare + distance_fare + time_fare) * 1.0 + 0.0
     raw_fare = max(base_fare, subtotal)
