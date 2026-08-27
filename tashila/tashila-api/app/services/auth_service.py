@@ -388,6 +388,12 @@ async def admin_login(email: str, password: str) -> dict[str, Any]:
             detail="Invalid email or password",
         )
 
+    if admin.get("status", "active") == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account suspended",
+        )
+
     admin_id = str(admin["_id"])
     return {
         "accessToken": create_admin_access_token(admin_id),

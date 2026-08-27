@@ -29,6 +29,8 @@ import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import PaymentsRoundedIcon from "@mui/icons-material/PaymentsRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import MenuRoundedIcon from "@mui/icons-material/MenuRounded";
+import AdminPanelSettingsRoundedIcon from "@mui/icons-material/AdminPanelSettingsRounded";
+import ManageAccountsRoundedIcon from "@mui/icons-material/ManageAccountsRounded";
 import { useAuthStore } from "@/lib/store/auth";
 import { useDriversStore } from "@/lib/store/drivers";
 import { useAdminRealtime } from "@/lib/realtime/useAdminRealtime";
@@ -154,6 +156,25 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
             </ListItem>
           );
         })}
+        {/* Super admin only nav items */}
+        {session?.role === "super_admin" && (
+          <ListItem disablePadding>
+            <ListItemButton
+              component={Link}
+              href="/admin-accounts"
+              onClick={handleNavClick}
+              selected={isActive("/admin-accounts")}
+            >
+              <ListItemIcon sx={{ minWidth: 36 }}>
+                <AdminPanelSettingsRoundedIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary="Admin Accounts"
+                primaryTypographyProps={{ fontWeight: 600 }}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
       </List>
     </Box>
   );
@@ -227,13 +248,23 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           >
             <Box sx={{ px: 2, py: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                {session.email}
+                {session.name || session.email}
               </Typography>
               <Typography variant="caption" color="text.secondary">
-                {t("common.administrator")}
+                {session.role?.replace("_", " ")}
               </Typography>
             </Box>
             <Divider />
+            <MenuItem
+              component={Link}
+              href="/settings"
+              onClick={() => setMenuAnchor(null)}
+            >
+              <ListItemIcon>
+                <ManageAccountsRoundedIcon fontSize="small" />
+              </ListItemIcon>
+              Account Settings
+            </MenuItem>
             <MenuItem
               onClick={() => {
                 setMenuAnchor(null);
@@ -303,6 +334,8 @@ function pageTitle(pathname: string, t: T): string {
   if (pathname.startsWith("/trips/dispatch")) return t("page.dispatch_title");
   if (pathname.startsWith("/trips")) return t("page.trips_title");
   if (pathname.startsWith("/pricing")) return t("page.pricing_title");
+  if (pathname.startsWith("/admin-accounts")) return "Admin Accounts";
+  if (pathname.startsWith("/settings")) return "Account Settings";
   return t("app.name");
 }
 
@@ -315,5 +348,7 @@ function pageSubtitle(pathname: string, t: T): string {
   if (pathname.startsWith("/trips/dispatch")) return t("page.dispatch_subtitle");
   if (pathname.startsWith("/trips")) return t("page.trips_subtitle");
   if (pathname.startsWith("/pricing")) return t("page.pricing_subtitle");
+  if (pathname.startsWith("/admin-accounts")) return "Manage dashboard admin users";
+  if (pathname.startsWith("/settings")) return "Update your profile and credentials";
   return "";
 }

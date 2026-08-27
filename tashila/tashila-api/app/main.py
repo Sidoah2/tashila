@@ -20,6 +20,7 @@ from app.core.exceptions import register_exception_handlers
 from app.core.logging import setup_logging
 from app.core.redis import close_redis, connect_redis, redis_health_check
 from app.routers import (
+    admin_accounts,
     admin_settings,
     admin_stats,
     admin_trips,
@@ -123,6 +124,7 @@ def create_app() -> FastAPI:
     application.include_router(admin_trips.router)
     application.include_router(admin_stats.router)
     application.include_router(admin_settings.router)
+    application.include_router(admin_accounts.router)
     application.include_router(uploads.router)
 
     # Serve local uploads only when Cloudinary is not configured.

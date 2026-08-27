@@ -9,11 +9,13 @@ from app.core.database import get_database
 from app.core.exceptions import ConflictError, NotFoundError, ValidationError
 from app.core.redis import add_suspended_user, publish, remove_suspended_user
 from app.models.admin import (
+    AdminAccountStatusUpdate,
     AdminDocumentStatusUpdate,
     AdminDriverApprovalUpdate,
     AdminDriverAvailabilityUpdate,
     AdminDriverCreate,
     AdminDriverPaymentCreate,
+    AdminProfileUpdate,
     AdminUserStatusUpdate,
 )
 from app.services.auth_service import PHONE_PATTERN
@@ -716,3 +718,116 @@ async def admin_record_driver_payment(
         "payment": _serialize_doc(payment_doc),
         "driver": updated,
     }
+
+
+ADMIN_USERS_COLLECTION = "admin_users"
+
+
+def _serialize_admin(doc: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "id": str(doc["_id"]),
+        "email": doc.get("email", ""),
+        "name": doc.get("name", ""),
+        "role": doc.get("role", "admin"),
+        "status": doc.get("status", "active"),
+        "createdAt": doc.get("createdAt"),
+    }
+
+
+async def admin_list_admins() -> list[dict[str, Any]]:
+    cursor = get_database()[ADMIN_USERS_COLLECTION].find({}, {"passwordHash": 0})
+    return [_serialize_admin(doc) async for doc in cursor]
+
+
+async def admin_create_admin(body: dict[str, Any]) -> dict[str, Any]:
+    from app.core.security import hash_password
+
+    email = body.get("email", "").strip().lower()
+    password = body.get("password", "")
+    name = body.get("name", "").strip()
+    role = body.get("role", "admin")
+
+    if not email or not password or not name:
+        raise ValidationError("email, password and name are required")
+    if role not in ("admin", "super_admin"):
+        raise ValidationError("role must be 'admin' or 'super_admin'")
+
+    existing = await get_database()[ADMIN_USERS_COLLECTION].find_one({"email": email})
+    if existing:
+        raise ConflictError("An admin with this email already exists")
+
+    now = datetime.now(timezone.utc)
+    doc = {
+        "email": email,
+        "passwordHash": hash_password(password),
+        "name": name,
+        "role": role,
+        "status": "active",
+        "createdAt": now,
+        "updatedAt": now,
+    }
+    result = await get_database()[ADMIN_USERS_COLLECTION].insert_one(doc)
+    doc["_id"] = result.inserted_id
+    return _serialize_admin(doc)
+
+
+async def admin_update_admin_status(admin_id: str, body: AdminAccountStatusUpdate) -> dict[str, Any]:
+    if body.status not in ("active", "suspended"):
+        raise ValidationError("status must be 'active' or 'suspended'")
+    try:
+        oid = ObjectId(admin_id)
+    except InvalidId:
+        raise NotFoundError("Admin not found")
+
+    result = await get_database()[ADMIN_USERS_COLLECTION].find_one_and_update(
+        {"_id": oid},
+        {"$set": {"status": body.status, "updatedAt": datetime.now(timezone.utc)}},
+        return_document=True,
+    )
+    if result is None:
+        raise NotFoundError("Admin not found")
+    return _serialize_admin(result)
+
+
+async def admin_update_my_profile(
+    admin: dict[str, Any],
+    body: AdminProfileUpdate,
+) -> dict[str, Any]:
+    from app.core.security import hash_password
+
+    updates: dict[str, Any] = {"updatedAt": datetime.now(timezone.utc)}
+
+    if body.name is not None:
+        name = body.name.strip()
+        if not name:
+            raise ValidationError("name cannot be empty")
+        updates["name"] = name
+
+    if body.email is not None:
+        email = body.email.strip().lower()
+        if not email:
+            raise ValidationError("email cannot be empty")
+        existing = await get_database()[ADMIN_USERS_COLLECTION].find_one({"email": email})
+        admin_id_str = str(admin.get("_id") or admin.get("id", ""))
+        if existing and str(existing["_id"]) != admin_id_str:
+            raise ConflictError("Email is already in use")
+        updates["email"] = email
+
+    if body.password is not None:
+        if len(body.password) < 6:
+            raise ValidationError("password must be at least 6 characters")
+        updates["passwordHash"] = hash_password(body.password)
+
+    try:
+        oid = ObjectId(str(admin.get("_id") or admin.get("id", "")))
+    except InvalidId:
+        raise NotFoundError("Admin not found")
+
+    result = await get_database()[ADMIN_USERS_COLLECTION].find_one_and_update(
+        {"_id": oid},
+        {"$set": updates},
+        return_document=True,
+    )
+    if result is None:
+        raise NotFoundError("Admin not found")
+    return _serialize_admin(result)

@@ -11,6 +11,7 @@ class AdminDoc(BaseModel):
     passwordHash: str
     name: str
     role: str = "admin"
+    status: str = "active"  # "active" | "suspended"
     createdAt: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
@@ -95,3 +96,17 @@ class AdminDriverPaymentCreate(BaseModel):
 
     amountDzd: float
     note: str | None = None
+
+
+class AdminProfileUpdate(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    email: str | None = None
+    password: str | None = None
+    name: str | None = None
+
+
+class AdminAccountStatusUpdate(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+
+    status: str

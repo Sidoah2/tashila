@@ -158,3 +158,12 @@ export type AdminSession = {
   refreshToken: string;
   loggedInAt: string;
 };
+
+export type AdminAccount = {
+  id: string;
+  email: string;
+  name: string;
+  role: "admin" | "super_admin";
+  status: "active" | "suspended";
+  createdAt: string;
+};
