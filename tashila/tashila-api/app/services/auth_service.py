@@ -157,6 +157,16 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
     if role not in ("client", "driver"):
         raise ValidationError("Role must be 'client' or 'driver'")
 
+    # Check if user/driver is suspended before sending OTP
+    collection_name = USERS_COLLECTION if role == "client" else DRIVERS_COLLECTION
+    collection = get_database()[collection_name]
+    existing = await collection.find_one({"phone": phone})
+    if existing and existing.get("status") == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Account suspended",
+        )
+
     if not await otp_rate_limit(phone):
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,

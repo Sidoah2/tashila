@@ -219,6 +219,7 @@ async def admin_get_user(user_id: str) -> dict[str, Any]:
     name = user.get("name")
     if not name:
         name = f"{user.get('firstName') or ''} {user.get('lastName') or ''}".strip()
+    total_trips = await get_database()[TRIPS_COLLECTION].count_documents({"clientId": user_id})
     return {
         **user,
         "name": name,
@@ -227,13 +228,15 @@ async def admin_get_user(user_id: str) -> dict[str, Any]:
         "averageRating": avg_rating,
         "completedTripsCount": status_counts["completed"],
         "cancelledTripsCount": status_counts["cancelled"],
+        "tripCount": total_trips,
+        "totalTrips": total_trips,
     }
 
 
 async def _client_reviews_for_user(user_id: str, limit: int = 20) -> list[dict[str, Any]]:
     cursor = (
         get_database()[TRIPS_COLLECTION]
-        .find({"clientId": user_id, "clientRating": {"$ne": None}})
+        .find({"clientId": user_id, "driverRating": {"$ne": None}})
         .sort("completedAt", -1)
         .limit(limit)
     )
@@ -242,8 +245,8 @@ async def _client_reviews_for_user(user_id: str, limit: int = 20) -> list[dict[s
         driver = await _find_driver(trip.get("driverId", ""))
         reviews.append({
             "tripId": str(trip["_id"]),
-            "rating": trip.get("clientRating"),
-            "comment": trip.get("clientRatingComment"),
+            "rating": trip.get("driverRating"),
+            "comment": trip.get("driverRatingComment"),
             "driverName": (driver or {}).get("name"),
             "createdAt": trip.get("completedAt") or trip.get("updatedAt"),
         })
@@ -252,8 +255,8 @@ async def _client_reviews_for_user(user_id: str, limit: int = 20) -> list[dict[s
 
 async def _client_average_rating(user_id: str) -> float | None:
     pipeline = [
-        {"$match": {"clientId": user_id, "clientRating": {"$ne": None}}},
-        {"$group": {"_id": None, "avgRating": {"$avg": "$clientRating"}}},
+        {"$match": {"clientId": user_id, "driverRating": {"$ne": None}}},
+        {"$group": {"_id": None, "avgRating": {"$avg": "$driverRating"}}},
     ]
     rows = await get_database()[TRIPS_COLLECTION].aggregate(pipeline).to_list(1)
     if not rows:
@@ -408,7 +411,8 @@ async def admin_list_drivers(
     for item in items:
         driver_id = item["id"]
         reviews = await _driver_customer_reviews(driver_id, limit=1)
-        enriched.append({**item, "customerReviews": reviews})
+        completed_trips = await _driver_completed_trips_count(driver_id)
+        enriched.append({**item, "customerReviews": reviews, "completedTrips": completed_trips})
     return paginated_response(enriched, total, params["page"], params["limit"])
 
 

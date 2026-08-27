@@ -205,6 +205,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Timer? _offerCountdownTimer;
   Timer? _locationTimer;
   DriverSocketService? _driverSocket;
+  final Set<String> _locallyExpiredTripIds = {};
   final StreamController<int> _changeController =
       StreamController<int>.broadcast();
 
@@ -537,8 +538,21 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _authRepository.requestOtp(phone);
       _setState(state.copyWith(isBusy: false));
     } catch (e) {
+      String errMsg = e.toString();
+      if (e is DioException) {
+        if (e.response?.statusCode == 429) {
+          errMsg = 'otp_rate_limit_err'.tr();
+        } else {
+          final data = e.response?.data;
+          if (data is Map && data['detail'] == 'Account suspended') {
+            errMsg = 'account_suspended_err'.tr();
+          } else if (data is String && data.contains('Account suspended')) {
+            errMsg = 'account_suspended_err'.tr();
+          }
+        }
+      }
       // Store the phone regardless so the OTP screen can show it and resend.
-      _setState(state.copyWith(error: e.toString(), isBusy: false));
+      _setState(state.copyWith(error: errMsg, isBusy: false));
       rethrow;
     }
   }
@@ -641,6 +655,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _offerCountdownTimer?.cancel();
     _locationTimer?.cancel();
     await _driverSocket?.disconnect();
+    _locallyExpiredTripIds.clear();
 
     try {
       FlutterBackgroundService().invoke('stopService');
@@ -996,6 +1011,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void _applyIncomingOffer(IncomingOffer offer) {
     if (state.currentRequest != null) return;
+    if (_locallyExpiredTripIds.contains(offer.request.id)) return;
     final list = List<IncomingOffer>.from(state.incomingOffers);
     final idx = list.indexWhere((o) => o.request.id == offer.request.id);
     if (idx >= 0 &&
@@ -1041,6 +1057,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           .where((o) => o.expiresAt.isAfter(now))
           .toList(growable: false);
       if (next.length != state.incomingOffers.length) {
+        for (final o in state.incomingOffers) {
+          if (!o.expiresAt.isAfter(now)) {
+            _locallyExpiredTripIds.add(o.request.id);
+          }
+        }
         _setState(
           state.copyWith(
             incomingOffers: next,
@@ -1092,10 +1113,14 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void _clearActiveOffer({String? tripId}) {
     if (tripId == null) {
+      for (final o in state.incomingOffers) {
+        _locallyExpiredTripIds.add(o.request.id);
+      }
       _offerCountdownTimer?.cancel();
       _setState(state.copyWith(clearIncomingOffers: true));
       return;
     }
+    _locallyExpiredTripIds.add(tripId);
     final next = state.incomingOffers
         .where((o) => o.request.id != tripId)
         .toList(growable: false);

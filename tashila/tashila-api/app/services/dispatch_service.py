@@ -315,6 +315,16 @@ async def validate_accept(trip_id: str, driver_id: str) -> None:
 
 
 async def on_trip_accepted(trip_id: str, driver_id: str) -> None:
+    # Notify other offered drivers that the offer is taken/expired
+    offer = await get_trip_offer(trip_id)
+    if offer:
+        driver_ids = offer.get("driverIds", [])
+        if not driver_ids and offer.get("driverId"):
+            driver_ids = [offer["driverId"]]
+        for other_driver_id in driver_ids:
+            if str(other_driver_id) != str(driver_id):
+                await emit_offer_expired(trip_id, str(other_driver_id), reason="taken")
+
     await clear_trip_offer(trip_id)
     await set_driver_busy(driver_id, trip_id)
     await signal_dispatch_wake(trip_id)

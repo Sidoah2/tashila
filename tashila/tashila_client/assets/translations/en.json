@@ -25,6 +25,7 @@
   "auth_otp_sms_notice": "We will send a verification code (OTP) to this number via SMS.",
   "verify": "Verify",
   "otp_invalid": "Invalid OTP. Please try again.",
+  "otp_rate_limit_err": "Too many OTP requests. Please try again later.",
   "create_trip_failed": "Could not create trip. Please try again.",
   "book": "Book",
   "history": "History",

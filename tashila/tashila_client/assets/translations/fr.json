@@ -25,6 +25,7 @@
   "auth_otp_sms_notice": "Nous enverrons un code de vérification (OTP) à ce numéro par SMS.",
   "verify": "Vérifier",
   "otp_invalid": "Code incorrect. Veuillez réessayer.",
+  "otp_rate_limit_err": "Trop de requêtes OTP. Veuillez réessayer plus tard.",
   "create_trip_failed": "Impossible de créer la course. Veuillez réessayer.",
   "book": "Réserver",
   "history": "Historique",

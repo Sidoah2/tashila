@@ -221,7 +221,7 @@ export default function TripsPage() {
             sx={{ minWidth: 150 }}
           >
             <MenuItem value="all">{t("common.all")}</MenuItem>
-            {TRIP_STATUSES.map((s) => (
+            {TRIP_STATUSES.filter((s) => s !== "headingToPickup").map((s) => (
               <MenuItem key={s} value={s}>
                 {getTripStatusLabel(t, s)}
               </MenuItem>
@@ -463,7 +463,7 @@ function DetailRow({ label, value }: { label: string; value: string }) {
     >
       <Typography color="text.secondary">{label}</Typography>
       <Typography sx={{ fontWeight: 600, textAlign: "end" }}>
-        {value}
+        <bdi>{value}</bdi>
       </Typography>
     </Stack>
   );

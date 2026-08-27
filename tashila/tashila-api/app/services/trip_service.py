@@ -319,7 +319,11 @@ async def create_trip(
 
     collection = get_database()[TRIPS_COLLECTION]
     active = await collection.find_one(
-        {"clientId": client_id, "status": {"$in": list(ACTIVE_CLIENT_STATUSES)}},
+        {
+            "clientId": client_id,
+            "status": {"$in": list(ACTIVE_CLIENT_STATUSES)},
+            "driverRating": None,
+        },
     )
     if active is not None:
         raise ConflictError("You already have an active trip")
@@ -478,7 +482,7 @@ async def get_active_trip_for_client(client_id: str) -> dict[str, Any] | None:
 
     status = doc.get("status")
     has_rating = doc.get("driverRating") is not None
-    is_active = status in ACTIVE_CLIENT_STATUSES
+    is_active = status in ACTIVE_CLIENT_STATUSES and not has_rating
     is_pending_rating = status == "completed" and not has_rating
 
     if is_active or is_pending_rating:

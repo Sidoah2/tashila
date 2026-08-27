@@ -276,7 +276,7 @@ export default function DriverDetailPage({
                   size="small"
                   variant="outlined"
                   label={t("driver_detail.joined_on", {
-                    date: formatDate(driver.createdAt),
+                    date: `\u2068${formatDate(driver.createdAt)}\u2069`,
                   })}
                 />
               </Stack>
@@ -499,10 +499,10 @@ export default function DriverDetailPage({
                 >
                   <Box>
                     <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                      ID: {tItem.id.slice(-6).toUpperCase()} · {formatDzd(tItem.fare)}
+                      ID: <bdi>{tItem.id.slice(-6).toUpperCase()}</bdi> · <bdi>{formatDzd(tItem.fare)}</bdi>
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
-                      {formatDateTime(tItem.createdAt)} · {tItem.clientName}
+                      <bdi>{formatDateTime(tItem.createdAt)}</bdi> · <bdi>{tItem.clientName}</bdi>
                     </Typography>
                     <Typography variant="caption" color="text.secondary" display="block">
                       {tItem.pickup} ➔ {tItem.dropOff}
@@ -556,7 +556,7 @@ export default function DriverDetailPage({
                     {r.comment}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {r.tripId} · {formatDate(r.date)}
+                    <bdi>{r.tripId}</bdi> · <bdi>{formatDate(r.date)}</bdi>
                   </Typography>
                 </Paper>
               ))}

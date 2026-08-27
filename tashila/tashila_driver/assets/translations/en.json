@@ -16,6 +16,7 @@
   "otp_enter_code": "Enter the verification code sent by SMS.",
   "invalid_otp": "Invalid OTP code. Please try again.",
   "account_suspended_err": "Account suspended. Please contact support.",
+  "otp_rate_limit_err": "Too many OTP requests. Please try again later.",
   "otp_sent_to": "Code sent to {phone}",
   "otp_didnt_receive": "Did not receive a code?",
   "otp_resend": "Resend",

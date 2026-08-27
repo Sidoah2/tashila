@@ -96,10 +96,9 @@ void onStart(ServiceInstance service) async {
     socket!.on('driver:trip_request', (data) async {
       try {
         FlutterRingtonePlayer().play(
-          android: AndroidSounds.ringtone,
-          ios: IosSounds.glass,
+          fromAsset: "assets/sounds/notification_sound.mp3",
           looping: false,
-          volume: 1.0,
+          volume: 4.0,
         );
       } catch (_) {}
 

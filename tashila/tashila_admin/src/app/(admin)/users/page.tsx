@@ -346,7 +346,7 @@ export default function UsersPage() {
                       {r.comment}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {r.tripId} · {formatDate(r.date)}
+                      <bdi>{r.tripId}</bdi> · <bdi>{formatDate(r.date)}</bdi>
                     </Typography>
                   </Paper>
                 ))}
@@ -399,7 +399,9 @@ function DetailRow({
     >
       <Typography color="text.secondary">{label}</Typography>
       {children ?? (
-        <Typography sx={{ fontWeight: 600 }}>{value}</Typography>
+        <Typography sx={{ fontWeight: 600 }}>
+          <bdi>{value}</bdi>
+        </Typography>
       )}
     </Stack>
   );

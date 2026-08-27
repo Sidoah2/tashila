@@ -1,5 +1,6 @@
 import 'dart:ui' as ui;
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
@@ -236,12 +237,16 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                     'verificationId': '',
                                   },
                                 );
-                              } catch (_) {
+                              } catch (e) {
                                 if (context.mounted) {
                                   setState(() => _isSending = false);
+                                  String errMsg = 'send_otp_failed'.tr();
+                                  if (e is DioException && e.response?.statusCode == 429) {
+                                    errMsg = 'otp_rate_limit_err'.tr();
+                                  }
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
-                                      content: Text('send_otp_failed'.tr()),
+                                      content: Text(errMsg),
                                     ),
                                   );
                                 }
