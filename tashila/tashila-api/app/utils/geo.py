@@ -23,13 +23,41 @@ def estimate_minutes(distance_km: float, avg_speed_kmh: float = 35) -> int:
 
 async def get_route_distance_and_duration(lat1: float, lng1: float, lat2: float, lng2: float) -> tuple[float, float]:
     """
-    Get actual driving distance (in km) and duration (in minutes) between two points using OSRM.
-    Falls back to haversine calculation with a 1.3 multiplier if OSRM fails.
+    Get actual driving distance (in km) and duration (in minutes) between two points.
+    First tries Google Maps Directions API if google_maps_api_key is set.
+    Falls back to OSRM, and then to haversine calculation with a 1.3 multiplier.
     """
     import httpx
     import logging
+    from app.core.config import settings
     logger = logging.getLogger(__name__)
 
+    # Try Google Maps Directions API if key is set
+    if settings.google_maps_api_key:
+        # Note: Google Directions API expects lat,lng (latitude first)
+        url = f"https://maps.googleapis.com/maps/api/directions/json?origin={lat1},{lng1}&destination={lat2},{lng2}&key={settings.google_maps_api_key}"
+        try:
+            async with httpx.AsyncClient(timeout=3.0) as client:
+                response = await client.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    if data.get("status") == "OK" and data.get("routes"):
+                        route = data["routes"][0]
+                        if route.get("legs"):
+                            leg = route["legs"][0]
+                            distance_meters = leg.get("distance", {}).get("value", 0.0)
+                            duration_seconds = leg.get("duration", {}).get("value", 0.0)
+                            
+                            distance_km = distance_meters / 1000.0
+                            duration_minutes = max(1.0, math.ceil(duration_seconds / 60.0))
+                            logger.info("Distance calculated via Google Maps: %s km, %s mins", distance_km, duration_minutes)
+                            return distance_km, duration_minutes
+                    else:
+                        logger.warning("Google Maps Directions API status: %s", data.get("status"))
+        except Exception as e:
+            logger.warning("Google Maps routing failed: %s. Trying OSRM fallback.", e)
+
+    # Try OSRM fallback
     url = f"https://router.project-osrm.org/route/v1/driving/{lng1},{lat1};{lng2},{lat2}?overview=false"
     try:
         async with httpx.AsyncClient(timeout=3.0) as client:

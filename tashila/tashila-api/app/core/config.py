@@ -36,8 +36,8 @@ class Settings(BaseSettings):
     test_otp_enabled: bool = True
     test_otp_code: str = "1111"
     max_otp_attempts: int = 5
-    otp_window_seconds: int = 600
     firebase_credentials_path: str = "firebase-adminsdk.json"
+    google_maps_api_key: str = ""
 
     offer_ttl_seconds: int = 180
     max_dispatch_candidates: int = 5
