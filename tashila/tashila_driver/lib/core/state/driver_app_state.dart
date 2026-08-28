@@ -1079,16 +1079,14 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void _handleTripCancelledByClient(Map<String, dynamic> data) {
     final tripId = data['tripId'] as String?;
-    if (tripId != null && tripId.isNotEmpty) {
-      _clearActiveOffer(tripId: tripId);
-    } else {
-      _clearActiveOffer();
-    }
-    final activeId = state.currentRequest?.id;
-    if (activeId == null ||
-        tripId == null ||
-        tripId.isEmpty ||
-        activeId == tripId) {
+    if (tripId == null || tripId.isEmpty) return;
+
+    final isIncomingOffer = state.incomingOffers.any((o) => o.request.id == tripId);
+    final isCurrentRequest = state.currentRequest?.id == tripId;
+
+    _clearActiveOffer(tripId: tripId);
+
+    if (isCurrentRequest) {
       _stopActiveTripPolling();
       _setState(
         state.copyWith(
@@ -1096,6 +1094,21 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           clearCurrentRequest: true,
           clearTripStartedAt: true,
           clearError: true,
+          infoMessage: 'trip_cancelled_by_client'.tr(),
+        ),
+      );
+      try {
+        FlutterRingtonePlayer().play(
+          fromAsset: "assets/sounds/notification_sound.mp3",
+          looping: false,
+          volume: 4.0,
+        );
+      } catch (e) {
+        debugPrint('Failed to play ringtone: $e');
+      }
+    } else if (isIncomingOffer) {
+      _setState(
+        state.copyWith(
           infoMessage: 'trip_cancelled_by_client'.tr(),
         ),
       );

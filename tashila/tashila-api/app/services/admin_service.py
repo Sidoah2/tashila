@@ -786,6 +786,14 @@ async def admin_update_admin_status(admin_id: str, body: AdminAccountStatusUpdat
     )
     if result is None:
         raise NotFoundError("Admin not found")
+
+    if body.status == "suspended":
+        from app.core.redis import add_suspended_user
+        await add_suspended_user(admin_id)
+    else:
+        from app.core.redis import remove_suspended_user
+        await remove_suspended_user(admin_id)
+
     return _serialize_admin(result)
 
 

@@ -358,6 +358,27 @@ async def refresh_token(refresh_token_value: str, secret: str) -> dict[str, str]
             detail="Token has been revoked",
         )
 
+    role = payload.get("role")
+    sub = payload.get("sub")
+    if sub:
+        from app.core.deps import _ensure_not_suspended
+        await _ensure_not_suspended(sub)
+        
+        from app.core.database import get_database
+        from bson import ObjectId
+        if role == "admin":
+            admin = await get_database()["admin_users"].find_one({"_id": ObjectId(sub)})
+            if admin and admin.get("status") == "suspended":
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account suspended")
+        elif role == "driver":
+            driver = await get_database()["drivers"].find_one({"_id": ObjectId(sub)})
+            if driver and driver.get("status") == "suspended":
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account suspended")
+        elif role == "client":
+            user = await get_database()["users"].find_one({"_id": ObjectId(sub)})
+            if user and user.get("status") == "suspended":
+                raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account suspended")
+
     ttl = get_remaining_ttl(refresh_token_value, secret)
     if jti and ttl > 0:
         await blacklist_token(jti, ttl)

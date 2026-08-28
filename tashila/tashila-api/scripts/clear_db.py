@@ -11,9 +11,13 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 async def main() -> None:
     from app.core.database import close_db, connect_db, get_database
 
+    from app.core.config import settings
+
     force = os.environ.get("FORCE_CLEAR") == "true"
     
-    print("WARNING: This will delete transactional and user data (users, drivers, trips) from your database!")
+    print(f"Target Database URI: {settings.mongo_uri}")
+    print(f"Target Database Name: {settings.mongo_db_name}")
+    print("\nWARNING: This will delete transactional and user data (users, drivers, trips) from your database!")
     if not force:
         confirm = input("Are you sure you want to proceed? (yes/no): ").strip().lower()
         if confirm != "yes":

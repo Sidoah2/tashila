@@ -21,6 +21,41 @@ def estimate_minutes(distance_km: float, avg_speed_kmh: float = 35) -> int:
     return max(1, math.ceil(distance_km / avg_speed_kmh * 60))
 
 
+async def get_route_distance_and_duration(lat1: float, lng1: float, lat2: float, lng2: float) -> tuple[float, float]:
+    """
+    Get actual driving distance (in km) and duration (in minutes) between two points using OSRM.
+    Falls back to haversine calculation with a 1.3 multiplier if OSRM fails.
+    """
+    import httpx
+    import logging
+    logger = logging.getLogger(__name__)
+
+    url = f"https://router.project-osrm.org/route/v1/driving/{lng1},{lat1};{lng2},{lat2}?overview=false"
+    try:
+        async with httpx.AsyncClient(timeout=3.0) as client:
+            headers = {"User-Agent": "TashilaApp/1.0 (contact: admin@tashila.com)"}
+            response = await client.get(url, headers=headers)
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("code") == "Ok" and data.get("routes"):
+                    route = data["routes"][0]
+                    distance_meters = route.get("distance", 0.0)
+                    duration_seconds = route.get("duration", 0.0)
+                    
+                    distance_km = distance_meters / 1000.0
+                    duration_minutes = max(1.0, math.ceil(duration_seconds / 60.0))
+                    return distance_km, duration_minutes
+    except Exception as e:
+        logger.warning("OSRM routing failed: %s. Falling back to haversine estimation.", e)
+        
+    # Fallback to straight-line distance * routing correction factor (1.3)
+    raw_dist = haversine_km(lat1, lng1, lat2, lng2)
+    distance_km = raw_dist * 1.3
+    duration_minutes = float(estimate_minutes(distance_km))
+    return distance_km, duration_minutes
+
+
+
 def bounding_box(
     lat: float,
     lng: float,

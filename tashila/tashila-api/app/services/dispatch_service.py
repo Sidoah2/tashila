@@ -27,6 +27,8 @@ from app.core.redis import (
     set_driver_busy,
     set_trip_offer,
     set_trip_broadcast_offers,
+    add_rejected_trip,
+    remove_driver_from_offer,
 )
 from app.services import trip_service
 from app.services.notification_service import push_trip_request
@@ -481,6 +483,8 @@ async def _dispatch_worker(trip: dict[str, Any], lock_token: str) -> None:
                     current_driver_ids = [offer["driverId"]]
                 for driver_id in current_driver_ids:
                     await emit_offer_expired(trip_id, driver_id, reason=reason if reason != "accepted" else "timeout")
+                    if reason != "accepted":
+                        await add_rejected_trip(driver_id, trip_id, ttl_seconds=settings.reject_ttl_seconds)
             await clear_trip_offer(trip_id)
     finally:
         await clear_trip_offer(trip_id)
@@ -516,7 +520,6 @@ async def start_dispatch(trip: dict[str, Any]) -> None:
 
 async def advance_after_reject(trip_id: str, driver_id: str) -> None:
     """Advance dispatch after reject; idempotent if offer already cleared."""
-    from app.core.redis import remove_driver_from_offer
     all_rejected = await remove_driver_from_offer(trip_id, driver_id)
     if all_rejected:
         await signal_dispatch_wake(trip_id)

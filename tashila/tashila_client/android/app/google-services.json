@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "716939499512",
+    "project_id": "tashila-app-180f3",
+    "storage_bucket": "tashila-app-180f3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716939499512:android:fc520716908d0ebd5a280d",
+        "android_client_info": {
+          "package_name": "com.tashila.tashilaclient"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWpIM9b2xASw1KzajgJfVfHbWyDqv93d8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:716939499512:android:3824a7fd12860c8c5a280d",
+        "android_client_info": {
+          "package_name": "com.tashila.tashiladriver"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAWpIM9b2xASw1KzajgJfVfHbWyDqv93d8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

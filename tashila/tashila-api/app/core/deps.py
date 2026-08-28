@@ -125,11 +125,19 @@ async def get_current_admin(token: str = Depends(get_token_from_header)) -> dict
             detail="Invalid token role for admin access",
         )
 
-    admin = await _find_by_id(ADMIN_USERS_COLLECTION, payload["sub"])
+    admin_id = payload["sub"]
+    await _ensure_not_suspended(admin_id)
+
+    admin = await _find_by_id(ADMIN_USERS_COLLECTION, admin_id)
     if admin is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin not found",
+        )
+    if admin.get("status") == "suspended":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Account suspended",
         )
     return admin
 
@@ -158,6 +166,9 @@ async def get_authenticated_principal(
         admin = await _find_by_id(ADMIN_USERS_COLLECTION, subject)
         if admin is None:
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Admin not found")
+        await _ensure_not_suspended(subject)
+        if admin.get("status") == "suspended":
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Account suspended")
         return payload
     if role == "driver":
         driver = await _find_by_id(DRIVERS_COLLECTION, subject)

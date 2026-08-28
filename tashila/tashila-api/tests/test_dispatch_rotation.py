@@ -31,44 +31,36 @@ async def test_signal_dispatch_wake_does_not_raise() -> None:
 async def test_advance_after_reject_calls_advance_offer_for_active_offer() -> None:
     with (
         patch(
-            "app.services.dispatch_service.get_trip_offer",
+            "app.services.dispatch_service.remove_driver_from_offer",
             new_callable=AsyncMock,
-            return_value={"driverId": "d1"},
-        ),
-        patch(
-            "app.services.dispatch_service.advance_offer",
-            new_callable=AsyncMock,
-        ) as advance_mock,
+            return_value=True,
+        ) as remove_mock,
         patch(
             "app.services.dispatch_service.signal_dispatch_wake",
             new_callable=AsyncMock,
         ) as wake_mock,
     ):
         await dispatch_service.advance_after_reject("trip-1", "d1")
-        advance_mock.assert_awaited_once_with("trip-1", "reject")
-        wake_mock.assert_not_awaited()
+        remove_mock.assert_awaited_once_with("trip-1", "d1")
+        wake_mock.assert_awaited_once_with("trip-1")
 
 
 @pytest.mark.asyncio
 async def test_advance_after_reject_idempotent_when_offer_cleared() -> None:
     with (
         patch(
-            "app.services.dispatch_service.get_trip_offer",
+            "app.services.dispatch_service.remove_driver_from_offer",
             new_callable=AsyncMock,
-            return_value=None,
-        ),
-        patch(
-            "app.services.dispatch_service.advance_offer",
-            new_callable=AsyncMock,
-        ) as advance_mock,
+            return_value=False,
+        ) as remove_mock,
         patch(
             "app.services.dispatch_service.signal_dispatch_wake",
             new_callable=AsyncMock,
         ) as wake_mock,
     ):
         await dispatch_service.advance_after_reject("trip-1", "d1")
-        advance_mock.assert_not_awaited()
-        wake_mock.assert_awaited_once_with("trip-1")
+        remove_mock.assert_awaited_once_with("trip-1", "d1")
+        wake_mock.assert_not_awaited()
 
 
 @pytest.mark.asyncio
@@ -103,9 +95,8 @@ async def test_dispatch_worker_offers_second_driver_after_reject() -> None:
     offer_calls: list[str] = []
     trip_state = {"status": "requested"}
 
-    async def fake_offer(trip, driver, *, candidate_index, generation):
-        offer_calls.append(driver["id"])
-        return datetime.now(timezone.utc) + timedelta(seconds=30)
+    async def fake_emit_to_driver(driver_id, event, payload):
+        offer_calls.append(driver_id)
 
     async def fake_wait(t_id, expires_at):
         if offer_calls[-1] == "d1":
@@ -136,8 +127,17 @@ async def test_dispatch_worker_offers_second_driver_after_reject() -> None:
             return_value=False,
         ),
         patch(
-            "app.services.dispatch_service.offer_to_driver",
-            side_effect=fake_offer,
+            "app.services.dispatch_service.get_driver_socket",
+            new_callable=AsyncMock,
+            return_value="socket-id",
+        ),
+        patch(
+            "app.services.dispatch_service.emit_to_driver",
+            side_effect=fake_emit_to_driver,
+        ),
+        patch(
+            "app.services.dispatch_service.push_trip_request",
+            new_callable=AsyncMock,
         ),
         patch(
             "app.services.dispatch_service._wait_offer_window",
@@ -164,6 +164,14 @@ async def test_dispatch_worker_offers_second_driver_after_reject() -> None:
             "app.services.dispatch_service.fail_trip_no_drivers",
             new_callable=AsyncMock,
         ) as fail_mock,
+        patch(
+            "app.services.dispatch_service.add_rejected_trip",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "app.services.dispatch_service.set_trip_broadcast_offers",
+            new_callable=AsyncMock,
+        ),
     ):
         await dispatch_service._dispatch_worker(
             {"id": trip_id, "status": "requested"},
@@ -180,6 +188,14 @@ async def test_dispatch_worker_fail_when_all_candidates_exhausted() -> None:
     drivers = [{"id": "d1"}]
     trip_doc = {"id": trip_id, "status": "requested"}
 
+    calls = 0
+    async def fake_candidates(trip):
+        nonlocal calls
+        if calls == 0:
+            calls += 1
+            return drivers
+        return []
+
     with (
         patch(
             "app.services.dispatch_service.trip_service.get_trip_by_id",
@@ -193,8 +209,7 @@ async def test_dispatch_worker_fail_when_all_candidates_exhausted() -> None:
         ),
         patch(
             "app.services.dispatch_service.find_dispatch_candidates",
-            new_callable=AsyncMock,
-            return_value=drivers,
+            side_effect=fake_candidates,
         ),
         patch(
             "app.services.dispatch_service.is_trip_rejected_by_driver",
@@ -232,6 +247,14 @@ async def test_dispatch_worker_fail_when_all_candidates_exhausted() -> None:
             "app.services.dispatch_service.fail_trip_no_drivers",
             new_callable=AsyncMock,
         ) as fail_mock,
+        patch(
+            "app.services.dispatch_service.add_rejected_trip",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "app.services.dispatch_service.set_trip_broadcast_offers",
+            new_callable=AsyncMock,
+        ),
     ):
         await dispatch_service._dispatch_worker(trip_doc, "lock-token")
 
@@ -248,11 +271,10 @@ async def test_dispatch_worker_continues_after_candidate_exception() -> None:
     async def get_trip(_t_id):
         return {"id": trip_id, "status": trip_state["status"]}
 
-    async def flaky_offer(trip, driver, *, candidate_index, generation):
-        if driver["id"] == "d1":
+    async def flaky_emit_to_driver(driver_id, event, payload):
+        if driver_id == "d1":
             raise RuntimeError("simulated offer failure")
-        offer_calls.append(driver["id"])
-        return datetime.now(timezone.utc) + timedelta(seconds=30)
+        offer_calls.append(driver_id)
 
     async def fake_wait(_t_id, _expires_at):
         trip_state["status"] = "accepted"
@@ -278,8 +300,17 @@ async def test_dispatch_worker_continues_after_candidate_exception() -> None:
             return_value=False,
         ),
         patch(
-            "app.services.dispatch_service.offer_to_driver",
-            side_effect=flaky_offer,
+            "app.services.dispatch_service.get_driver_socket",
+            new_callable=AsyncMock,
+            return_value="socket-id",
+        ),
+        patch(
+            "app.services.dispatch_service.emit_to_driver",
+            side_effect=flaky_emit_to_driver,
+        ),
+        patch(
+            "app.services.dispatch_service.push_trip_request",
+            new_callable=AsyncMock,
         ),
         patch(
             "app.services.dispatch_service._wait_offer_window",
@@ -306,6 +337,14 @@ async def test_dispatch_worker_continues_after_candidate_exception() -> None:
             "app.services.dispatch_service.fail_trip_no_drivers",
             new_callable=AsyncMock,
         ) as fail_mock,
+        patch(
+            "app.services.dispatch_service.add_rejected_trip",
+            new_callable=AsyncMock,
+        ),
+        patch(
+            "app.services.dispatch_service.set_trip_broadcast_offers",
+            new_callable=AsyncMock,
+        ),
     ):
         await dispatch_service._dispatch_worker(
             {"id": trip_id, "status": "requested"},

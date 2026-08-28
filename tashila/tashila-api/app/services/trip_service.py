@@ -275,8 +275,10 @@ async def estimate_trip(
         await validate_coords_in_service_area(
             pickup.lat, pickup.lng, dropoff.lat, dropoff.lng,
         )
-    dist = haversine_km(pickup.lat, pickup.lng, dropoff.lat, dropoff.lng)
-    minutes = estimate_minutes(dist)
+    from app.utils.geo import get_route_distance_and_duration
+    dist, minutes = await get_route_distance_and_duration(
+        pickup.lat, pickup.lng, dropoff.lat, dropoff.lng
+    )
 
     # Fetch pricing rules from DB
     pricing_collection = get_database()["pricing"]
