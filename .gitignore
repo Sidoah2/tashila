@@ -40,3 +40,13 @@ yarn-error.log*
 # Compiled binaries
 releases/
 *.apk
+
+# Dependency and build folders
+node_modules/
+.next/
+build/
+.dart_tool/
+.flutter-plugins-dependencies
+
+# Old app folders
+_old/
