@@ -50,3 +50,11 @@ build/
 
 # Old app folders
 _old/
+
+# Agent / dev tools
+.agent/
+
+# Personal / irrelevant files
+heetch_ui_screenshots/
+notification_sound.mp3
+resume.txt
