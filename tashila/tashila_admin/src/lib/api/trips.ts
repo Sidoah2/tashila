@@ -182,4 +182,4 @@ export async function confirmTripCash(id: string): Promise<Trip> {
   return mapTrip(t);
 }
 
-export { estimateFareFromApi, findRule } from "./pricing";
+export { estimateFareFromApi, estimateTripFromApi, findRule } from "./pricing";

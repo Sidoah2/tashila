@@ -318,9 +318,15 @@ export default function DriverDetailPage({
           <Typography variant="h6" sx={{ mb: 1 }}>
             {t("driver_detail.platform_dues_title")}
           </Typography>
-          <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
-            {formatDzd(driver.platformDueDzd)}
-          </Typography>
+          {(driver.creditDzd ?? 0) > 0 ? (
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 2, color: "success.main" }}>
+              +{formatDzd(driver.creditDzd ?? 0)} ({locale === "ar" ? "رصيد دائن" : "Credit"})
+            </Typography>
+          ) : (
+            <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+              {formatDzd(driver.platformDueDzd)}
+            </Typography>
+          )}
           <Typography variant="subtitle2" color="text.secondary" sx={{ mb: 1 }}>
             {t("driver_detail.platform_payments_title")}
           </Typography>
@@ -360,24 +366,24 @@ export default function DriverDetailPage({
               disabled={
                 platformBusy ||
                 !platformAmount.trim() ||
-                Number(platformAmount) <= 0 ||
-                driver.platformDueDzd <= 0
+                Number(platformAmount) <= 0
               }
               onClick={async () => {
                 const n = Number(platformAmount);
                 if (!Number.isFinite(n) || n <= 0) return;
                 setPlatformBusy(true);
                 try {
-                  const applied = Math.min(n, driver.platformDueDzd);
                   await applyPlatformPayment(driver.id, n, platformNote);
                   showToast(
                     t("toast.platform_payment_recorded", {
-                      amount: formatDzd(applied),
+                      amount: formatDzd(n),
                     }),
                     "success"
                   );
                   setPlatformAmount("");
                   setPlatformNote("");
+                } catch (err) {
+                  showToast(err instanceof Error ? err.message : t("toast.action_failed"), "error");
                 } finally {
                   setPlatformBusy(false);
                 }

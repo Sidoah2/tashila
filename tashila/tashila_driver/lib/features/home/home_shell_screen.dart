@@ -174,9 +174,13 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
       ProfileSetupScreen(),
     ];
 
+    final effectiveIndex = hasActiveTrip ? 0 : currentIndex;
+
     return Scaffold(
-      body: tabs[currentIndex],
-      bottomNavigationBar: SafeArea(
+      body: tabs[effectiveIndex],
+      bottomNavigationBar: hasActiveTrip
+          ? null
+          : SafeArea(
         top: false,
         child: Container(
           // margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),

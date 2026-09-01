@@ -253,11 +253,21 @@ export default function DriversPage() {
       headerName: t("drivers.column_platform_dues"),
       width: 130,
       type: "number",
-      renderCell: (params: GridRenderCellParams<Driver>) => (
-        <Typography variant="body2" sx={{ fontWeight: 600 }}>
-          {formatNumber(params.row.platformDueDzd)} DZD
-        </Typography>
-      ),
+      renderCell: (params: GridRenderCellParams<Driver>) => {
+        const credit = params.row.creditDzd ?? 0;
+        if (credit > 0) {
+          return (
+            <Typography variant="body2" sx={{ fontWeight: 700, color: "success.main" }}>
+              +{formatNumber(credit)} DZD
+            </Typography>
+          );
+        }
+        return (
+          <Typography variant="body2" sx={{ fontWeight: 600 }}>
+            {formatNumber(params.row.platformDueDzd)} DZD
+          </Typography>
+        );
+      },
     },
     {
       field: "completedTrips",

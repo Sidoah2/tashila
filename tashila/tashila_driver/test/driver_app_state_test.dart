@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -54,8 +55,14 @@ class _InProgressActiveTripRepository extends FakeTripRepository {
 }
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
   setUp(() {
     SharedPreferences.setMockInitialValues({});
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+        .setMockMethodCallHandler(
+      const MethodChannel('flutter_ringtone_player'),
+      (MethodCall methodCall) async => null,
+    );
   });
 
   test('auto-login starts at home when profile is complete', () async {
@@ -324,5 +331,40 @@ void main() {
     final summary = notifier.earningsSummary;
     expect(summary.todayTrips, 1);
     expect(summary.todayTotal, request.fare);
+  });
+
+  test('DriverPlatformEarnings calculates net earnings and credit properly', () {
+    // Exact Solaimane bug scenario:
+    // Total gross = 29,700, platform fee paid = 2,747, current due = 0
+    final earnings1 = DriverPlatformEarnings(
+      totalEarnedDzd: 29700,
+      platformDueDzd: 0,
+      paidDzd: 2747,
+      creditDzd: 0,
+    );
+    expect(earnings1.netDzd, 26953); // Gross - Commission!
+
+    // Overpayment scenario:
+    // Due was 400, paid 1000 => credit 600, due 0
+    final earnings2 = DriverPlatformEarnings(
+      totalEarnedDzd: 4000,
+      platformDueDzd: 0,
+      paidDzd: 1000,
+      creditDzd: 600,
+    );
+    // Commission incurred was 1000 - 600 = 400. Net should be 4000 - 400 = 3600.
+    expect(earnings2.netDzd, 3600);
+    expect(earnings2.creditDzd, 600);
+
+    // Serialization / Deserialization
+    final json = {
+      'totalEarnedDzd': 29700.0,
+      'platformDueDzd': 0.0,
+      'paidDzd': 2747.0,
+      'creditDzd': 0.0,
+    };
+    final parsed = DriverPlatformEarnings.fromJson(json);
+    expect(parsed.totalEarnedDzd, 29700.0);
+    expect(parsed.netDzd, 26953.0);
   });
 }

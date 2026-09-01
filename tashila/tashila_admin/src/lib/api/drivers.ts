@@ -55,7 +55,8 @@ interface ApiDriver {
   rating?: number;
   completedTrips?: number;
   platformDueDzd?: number;
-  earnings?: { platformDueDzd?: number };
+  creditDzd?: number;
+  earnings?: { platformDueDzd?: number; creditDzd?: number };
   customerReviews?: ApiReview[];
   platformPayments?: ApiPayment[];
   avatarUrl?: string | null;
@@ -167,6 +168,7 @@ function mapDriver(d: ApiDriver): Driver {
     completedTrips: d.completedTrips ?? 0,
     customerReviews: reviews,
     platformDueDzd: d.earnings?.platformDueDzd ?? d.platformDueDzd ?? 0,
+    creditDzd: d.earnings?.creditDzd ?? d.creditDzd ?? 0,
     platformPayments: payments,
     avatarUrl: d.avatarUrl ? getImageUrl(d.avatarUrl) : null,
     trips: (d.trips ?? []).map((t: any) => ({

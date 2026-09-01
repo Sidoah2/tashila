@@ -25,6 +25,7 @@ class EarningsInfo(BaseModel):
     totalEarnedDzd: float = 0.0
     platformDueDzd: float = 0.0
     paidDzd: float = 0.0
+    creditDzd: float = 0.0
 
 
 class DriverDoc(BaseModel):

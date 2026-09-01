@@ -2709,6 +2709,18 @@ class _ProfileOverviewCard extends StatelessWidget {
             emphasize: true,
           ),
           const SizedBox(height: 12),
+          if (platform.creditDzd > 0) ...[
+            _statRow(
+              context,
+              label: 'earnings_platform_credit'.tr(),
+              value: '+${money.format(platform.creditDzd)}',
+              icon: Icons.account_balance_wallet_outlined,
+              iconBg: Colors.green.shade50,
+              iconColor: Colors.green.shade700,
+              emphasize: true,
+            ),
+            const SizedBox(height: 12),
+          ],
           _statRow(
             context,
             label: 'earnings_platform_due'.tr(),

@@ -128,6 +128,7 @@ class AppState {
     this.dropoffInServiceArea = false,
     this.selectedTruck = TruckType.singleCabine,
     this.estimatedPrice = 0,
+    this.distanceKm = 0.0,
     this.tripStage = TripStage.idle,
     this.tripStartTime,
     this.tripEndTime,
@@ -176,6 +177,7 @@ class AppState {
   final bool dropoffInServiceArea;
   final TruckType selectedTruck;
   final double estimatedPrice;
+  final double distanceKm;
   final TripStage tripStage;
   final List<LatLng> routePoints;
   final LatLng serviceAreaCenter;
@@ -236,6 +238,7 @@ class AppState {
     bool? dropoffInServiceArea,
     TruckType? selectedTruck,
     double? estimatedPrice,
+    double? distanceKm,
     TripStage? tripStage,
     DateTime? tripStartTime,
     DateTime? tripEndTime,
@@ -282,6 +285,7 @@ class AppState {
       dropoffInServiceArea: dropoffInServiceArea ?? this.dropoffInServiceArea,
       selectedTruck: selectedTruck ?? this.selectedTruck,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
+      distanceKm: distanceKm ?? this.distanceKm,
       tripStage: tripStage ?? this.tripStage,
       tripStartTime: tripStartTimeNull
           ? null
@@ -793,8 +797,10 @@ class AppStateNotifier extends Notifier<AppState> {
         destLat: state.dropoffLat,
         destLng: state.dropoffLng,
       );
+      if (!ref.mounted) return;
       state = state.copyWith(routePoints: points);
     } catch (_) {
+      if (!ref.mounted) return;
       // Fallback to straight line with midpoint
       final p = LatLng(state.pickupLat, state.pickupLng);
       final d = LatLng(state.dropoffLat, state.dropoffLng);
@@ -848,6 +854,7 @@ class AppStateNotifier extends Notifier<AppState> {
       pickupInServiceArea: false,
       dropoffInServiceArea: false,
       estimatedPrice: 0,
+      distanceKm: 0.0,
       routePoints: const [],
       // Reset truck type to default so the next booking starts fresh.
       selectedTruck: TruckType.singleCabine,
@@ -884,8 +891,12 @@ class AppStateNotifier extends Notifier<AppState> {
         },
       );
       final fare = (res.data?['fare'] as num?)?.toDouble();
+      final dist = (res.data?['distanceKm'] as num?)?.toDouble();
       if (fare != null) {
-        state = state.copyWith(estimatedPrice: fare);
+        state = state.copyWith(
+          estimatedPrice: fare,
+          distanceKm: dist ?? state.distanceKm,
+        );
         return;
       }
     } catch (_) {}
@@ -895,7 +906,10 @@ class AppStateNotifier extends Notifier<AppState> {
       state.dropoffLat,
       state.dropoffLng,
     );
-    state = state.copyWith(estimatedPrice: estimateFareDzd(km));
+    state = state.copyWith(
+      estimatedPrice: estimateFareDzd(km),
+      distanceKm: km,
+    );
   }
 
   void _handleNoDriversFound() {
@@ -1299,7 +1313,8 @@ class AppStateNotifier extends Notifier<AppState> {
         driver?['vehicleModel'] as String? ??
         data['vehicleModel'] as String? ??
         state.driverVehicleModel;
-    final driverTruck = driver?['truckType'] as String?;
+    final driverTruck =
+        driver?['truckType'] as String? ?? data['truckType'] as String?;
     TruckType? truckFromDriver;
     if (driverTruck == 'double_cabin') {
       truckFromDriver = TruckType.doubleCabine;
@@ -1317,6 +1332,8 @@ class AppStateNotifier extends Notifier<AppState> {
         ? DateTime.tryParse(completedAtRaw)?.toLocal()
         : null;
 
+    final dist = (data['distanceKm'] as num?)?.toDouble();
+
     state = state.copyWith(
       currentTripStatus: status,
       driverName: driver?['name'] as String? ?? state.driverName,
@@ -1327,6 +1344,7 @@ class AppStateNotifier extends Notifier<AppState> {
       driverAvatarUrl: driver?['avatarUrl'] as String? ?? state.driverAvatarUrl,
       selectedTruck: truckFromDriver ?? state.selectedTruck,
       estimatedPrice: fare ?? state.estimatedPrice,
+      distanceKm: dist ?? state.distanceKm,
     );
 
     switch (status) {

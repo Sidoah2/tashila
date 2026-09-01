@@ -61,6 +61,7 @@ export type Driver = {
   completedTrips: number;
   customerReviews: DriverCustomerReview[];
   platformDueDzd: number;
+  creditDzd?: number;
   platformPayments: PlatformPayment[];
   avatarUrl?: string | null;
   trips?: Trip[];

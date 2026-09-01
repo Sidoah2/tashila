@@ -47,6 +47,33 @@ export async function updatePricing(rule: PricingRule): Promise<PricingRule> {
   return mapRule(r);
 }
 
+export interface TripEstimateResult {
+  fare: number;
+  distanceKm: number;
+  estimatedMinutes: number;
+  currency?: string;
+}
+
+/** Estimate trip route distance, duration and fare via API. */
+export async function estimateTripFromApi(
+  pickup: { lat: number; lng: number; address?: string },
+  dropoff: { lat: number; lng: number; address?: string },
+  truckType: TruckType,
+  bypassServiceArea = false,
+): Promise<TripEstimateResult> {
+  const url = bypassServiceArea ? "/trips/estimate?bypass_service_area=true" : "/trips/estimate";
+  const data = await apiFetch<{
+    fare: number;
+    distanceKm: number;
+    estimatedMinutes: number;
+    currency?: string;
+  }>(url, {
+    method: "POST",
+    body: JSON.stringify({ pickup, dropoff, truckType }),
+  });
+  return data;
+}
+
 /** Estimate fare via API when possible. */
 export async function estimateFareFromApi(
   pickup: { lat: number; lng: number; address?: string },
@@ -54,11 +81,7 @@ export async function estimateFareFromApi(
   truckType: TruckType,
   bypassServiceArea = false,
 ): Promise<number> {
-  const url = bypassServiceArea ? "/trips/estimate?bypass_service_area=true" : "/trips/estimate";
-  const data = await apiFetch<{ fare: number }>(url, {
-    method: "POST",
-    body: JSON.stringify({ pickup, dropoff, truckType }),
-  });
+  const data = await estimateTripFromApi(pickup, dropoff, truckType, bypassServiceArea);
   return data.fare;
 }
 

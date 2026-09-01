@@ -693,13 +693,19 @@ class DriverPlatformEarnings {
     this.totalEarnedDzd = 0,
     this.platformDueDzd = 0,
     this.paidDzd = 0,
+    this.creditDzd = 0,
   });
 
   final double totalEarnedDzd;
   final double platformDueDzd;
   final double paidDzd;
+  final double creditDzd;
 
-  double get netDzd => totalEarnedDzd - platformDueDzd;
+  double get netDzd {
+    final totalCommission = paidDzd + platformDueDzd - creditDzd;
+    final net = totalEarnedDzd - (totalCommission > 0 ? totalCommission : 0);
+    return net < 0 ? 0 : net;
+  }
 
   static DriverPlatformEarnings fromJson(Map<String, dynamic>? json) {
     if (json == null) return const DriverPlatformEarnings();
@@ -709,6 +715,7 @@ class DriverPlatformEarnings {
       totalEarnedDzd: read('totalEarnedDzd'),
       platformDueDzd: read('platformDueDzd'),
       paidDzd: read('paidDzd'),
+      creditDzd: read('creditDzd'),
     );
   }
 }

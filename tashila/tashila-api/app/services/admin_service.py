@@ -459,6 +459,7 @@ async def admin_get_driver(driver_id: str) -> dict[str, Any]:
             "totalEarnedDzd": 0.0,
             "platformDueDzd": 0.0,
             "paidDzd": 0.0,
+            "creditDzd": 0.0,
         },
         "trips": trips,
         "averageRating": avg_rating,
@@ -495,6 +496,7 @@ async def admin_create_driver(body: AdminDriverCreate) -> dict[str, Any]:
             "totalEarnedDzd": 0.0,
             "platformDueDzd": 0.0,
             "paidDzd": 0.0,
+            "creditDzd": 0.0,
         },
         "profileComplete": True,
         "status": "active",
@@ -686,9 +688,18 @@ async def admin_record_driver_payment(
     earnings = driver.get("earnings") or {}
     platform_due = float(earnings.get("platformDueDzd", 0))
     paid = float(earnings.get("paidDzd", 0))
-    deduction = min(body.amountDzd, platform_due)
-    new_due = max(0.0, platform_due - deduction)
-    new_paid = paid + body.amountDzd
+    credit = float(earnings.get("creditDzd", 0))
+
+    # Net balance: existing credit minus platform dues plus newly received payment
+    net_balance = (credit - platform_due) + body.amountDzd
+    if net_balance >= 0:
+        new_due = 0.0
+        new_credit = round(net_balance, 2)
+    else:
+        new_due = round(abs(net_balance), 2)
+        new_credit = 0.0
+
+    new_paid = round(paid + body.amountDzd, 2)
 
     now = datetime.now(timezone.utc)
     await get_database()[DRIVERS_COLLECTION].update_one(
@@ -696,6 +707,7 @@ async def admin_record_driver_payment(
         {
             "$set": {
                 "earnings.platformDueDzd": new_due,
+                "earnings.creditDzd": new_credit,
                 "earnings.paidDzd": new_paid,
                 "updatedAt": now,
             },

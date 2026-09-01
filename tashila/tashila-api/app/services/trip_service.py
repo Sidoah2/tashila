@@ -229,16 +229,32 @@ async def _notify_client_status_push(trip: dict[str, Any], new_status: str) -> N
 
 async def _apply_trip_completion_earnings(driver_id: str, fare: float) -> None:
     commission_rate = await get_commission_rate()
-    platform_due = fare * commission_rate
+    commission = fare * commission_rate
     now = datetime.now(timezone.utc)
+
+    driver = await _find_driver(driver_id)
+    earnings = (driver or {}).get("earnings") or {}
+    current_due = float(earnings.get("platformDueDzd", 0.0))
+    current_credit = float(earnings.get("creditDzd", 0.0))
+
+    # Net balance: existing credit minus existing due, minus newly incurred commission
+    net_balance = (current_credit - current_due) - commission
+    if net_balance >= 0:
+        new_due = 0.0
+        new_credit = round(net_balance, 2)
+    else:
+        new_due = round(abs(net_balance), 2)
+        new_credit = 0.0
+
     await get_database()[DRIVERS_COLLECTION].update_one(
         {"_id": ObjectId(driver_id)},
         {
-            "$inc": {
-                "earnings.totalEarnedDzd": fare,
-                "earnings.platformDueDzd": platform_due,
+            "$inc": {"earnings.totalEarnedDzd": fare},
+            "$set": {
+                "earnings.platformDueDzd": new_due,
+                "earnings.creditDzd": new_credit,
+                "updatedAt": now,
             },
-            "$set": {"updatedAt": now},
         },
     )
 
@@ -1020,11 +1036,16 @@ async def admin_dispatch_trip(data: AdminTripDispatchRequest) -> dict[str, Any]:
         raise ConflictError("Driver is busy with another trip")
     active = await get_active_trip_for_driver(data.driverId)
     if active is not None:
-        raise ConflictError("Driver already has an active trip")
+        raise ConflictError("Driver already has an active or uncompleted trip")
+
+    client_id = data.clientId or ""
+    if client_id:
+        active_client = await get_active_trip_for_client(client_id)
+        if active_client is not None:
+            raise ConflictError("Client already has an active or uncompleted trip")
 
     estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType, bypass_service_area=True)
     now = datetime.now(timezone.utc)
-    client_id = data.clientId or ""
     notes = data.notes
     if data.externalLabel:
         external_note = f"External order: {data.externalLabel}"

@@ -460,12 +460,14 @@ class _TripScreenState extends ConsumerState<TripScreen> {
   }
 
   Widget _buildDriverAcceptedPanel(BuildContext context, AppState state) {
-    final distance = tripRouteDistanceKm(
-      state.pickupLat,
-      state.pickupLng,
-      state.dropoffLat,
-      state.dropoffLng,
-    );
+    final distance = state.distanceKm > 0
+        ? state.distanceKm
+        : tripRouteDistanceKm(
+            state.pickupLat,
+            state.pickupLng,
+            state.dropoffLat,
+            state.dropoffLng,
+          );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -819,12 +821,14 @@ class _TripScreenState extends ConsumerState<TripScreen> {
   }
 
   Widget _buildArrivedSummaryScreen(BuildContext context, AppState state) {
-    final distance = tripRouteDistanceKm(
-      state.pickupLat,
-      state.pickupLng,
-      state.dropoffLat,
-      state.dropoffLng,
-    );
+    final distance = state.distanceKm > 0
+        ? state.distanceKm
+        : tripRouteDistanceKm(
+            state.pickupLat,
+            state.pickupLng,
+            state.dropoffLat,
+            state.dropoffLng,
+          );
     final durationText = _formatDuration(
       state.tripStartTime,
       state.tripEndTime,

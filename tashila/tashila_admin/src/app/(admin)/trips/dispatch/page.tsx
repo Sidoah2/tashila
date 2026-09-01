@@ -26,7 +26,7 @@ import { useDriversStore } from "@/lib/store/drivers";
 import { useUsersStore } from "@/lib/store/users";
 import { useTripsStore } from "@/lib/store/trips";
 import { useToast } from "@/components/ToastProvider";
-import { estimateFareFromApi, findRule } from "@/lib/api/pricing";
+import { estimateTripFromApi, findRule } from "@/lib/api/pricing";
 import { ADMIN_NEIGHBORHOODS, neighborhoodLabel } from "@/lib/neighborhoods";
 import { TRUCK_TYPES, type TruckType } from "@/lib/types";
 import { getTruckTypeLabel } from "@/lib/labels";
@@ -208,7 +208,12 @@ export default function DispatchTripPage() {
     return (v: number) => fmt.format(v);
   }, [locale]);
 
-  const distanceKm = useMemo(() => {
+  const [apiDistanceKm, setApiDistanceKm] = useState<number | null>(null);
+  const [apiMinutes, setApiMinutes] = useState<number | null>(null);
+  const [apiFare, setApiFare] = useState<number | null>(null);
+  const [fareLoading, setFareLoading] = useState(false);
+
+  const fallbackDistanceKm = useMemo(() => {
     if (!effectivePickup || !effectiveDropOff) return 0;
     return Number(
       haversineKm(
@@ -220,32 +225,38 @@ export default function DispatchTripPage() {
     );
   }, [effectivePickup, effectiveDropOff]);
 
+  const distanceKm = apiDistanceKm ?? fallbackDistanceKm;
   const rule = useMemo(() => findRule(rules, truckType), [rules, truckType]);
-  const estimatedMinutes = useMemo(
-    () => Math.max(5, distanceKm * 2.4),
-    [distanceKm]
-  );
-  const [apiFare, setApiFare] = useState<number | null>(null);
-  const [fareLoading, setFareLoading] = useState(false);
+  const estimatedMinutes = apiMinutes ?? Math.max(5, Math.round(distanceKm * 2.4));
 
   useEffect(() => {
-    if (!effectivePickup || !effectiveDropOff || distanceKm <= 0) {
+    if (!effectivePickup || !effectiveDropOff || fallbackDistanceKm <= 0) {
       setApiFare(null);
+      setApiDistanceKm(null);
+      setApiMinutes(null);
       return;
     }
     let cancelled = false;
     setFareLoading(true);
-    estimateFareFromApi(
+    estimateTripFromApi(
       { lat: effectivePickup.lat, lng: effectivePickup.lng, address: effectivePickup.label },
       { lat: effectiveDropOff.lat, lng: effectiveDropOff.lng, address: effectiveDropOff.label },
       truckType,
       customLocation
     )
-      .then((fare) => {
-        if (!cancelled) setApiFare(fare);
+      .then((res) => {
+        if (!cancelled) {
+          setApiFare(res.fare);
+          setApiDistanceKm(res.distanceKm);
+          setApiMinutes(res.estimatedMinutes);
+        }
       })
       .catch(() => {
-        if (!cancelled) setApiFare(null);
+        if (!cancelled) {
+          setApiFare(null);
+          setApiDistanceKm(null);
+          setApiMinutes(null);
+        }
       })
       .finally(() => {
         if (!cancelled) setFareLoading(false);
@@ -253,7 +264,7 @@ export default function DispatchTripPage() {
     return () => {
       cancelled = true;
     };
-  }, [effectivePickup, effectiveDropOff, truckType, distanceKm, customLocation]);
+  }, [effectivePickup, effectiveDropOff, truckType, fallbackDistanceKm, customLocation]);
 
   const mapCenter = effectivePickup
     ? { lat: effectivePickup.lat, lng: effectivePickup.lng }
@@ -349,8 +360,9 @@ export default function DispatchTripPage() {
         t("toast.trip_dispatched", { id: trip.id, name: driver.name })
       );
       router.push("/trips");
-    } catch {
-      showToast(t("toast.action_failed"), "error");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : t("toast.action_failed");
+      showToast(msg, "error");
     } finally {
       setSubmitting(false);
     }
