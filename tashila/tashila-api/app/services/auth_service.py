@@ -171,7 +171,7 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
             detail="Too many OTP requests. Please try again later.",
-            headers={"Retry-After": str(settings.otp_window_seconds)},
+            headers={"Retry-After": str(getattr(settings, "otp_window_seconds", 60))},
         )
 
     if settings.test_otp_enabled:

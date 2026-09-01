@@ -101,9 +101,11 @@ async def otp_rate_limit(phone: str) -> bool:
     redis = get_redis()
     key = _otp_rate_key(phone)
     count = await redis.incr(key)
+    window = getattr(app_settings, "otp_window_seconds", 60)
+    max_attempts = getattr(app_settings, "max_otp_attempts", 5)
     if count == 1:
-        await redis.expire(key, app_settings.otp_window_seconds)
-    if count > app_settings.max_otp_attempts:
+        await redis.expire(key, window)
+    if count > max_attempts:
         return False
     return True
 
