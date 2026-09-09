@@ -24,7 +24,7 @@ class UserResponse(BaseModel):
     phone: str
     name: str | None = None
     avatarUrl: str | None = None
-    locale: str
+    locale: str = "ar"
     profileComplete: bool
     status: str
     createdAt: datetime

@@ -416,6 +416,7 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
                     "phone": phone,
                     "name": "Test Client",
                     "email": "testclient@tashila.dz",
+                    "locale": "ar",
                     "createdAt": now,
                     "updatedAt": now,
                     "profileComplete": True,
@@ -432,6 +433,8 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
                 }
                 if not existing.get("name"):
                     update_fields["name"] = "Test Client"
+                if not existing.get("locale"):
+                    update_fields["locale"] = "ar"
                 await collection.update_one({"_id": existing["_id"]}, {"$set": update_fields})
             profile_complete = True
         else:  # role == "driver"
@@ -510,6 +513,7 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
         if existing is None:
             new_doc = {
                 "phone": phone,
+                "locale": "ar",
                 "createdAt": now,
                 "updatedAt": now,
                 "profileComplete": False,
