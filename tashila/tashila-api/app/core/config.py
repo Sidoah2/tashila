@@ -35,6 +35,8 @@ class Settings(BaseSettings):
     cloudinary_url: str = ""
     test_otp_enabled: bool = True
     test_otp_code: str = "1111"
+    test_phone_numbers: str = "+213611223344,+213711223344,0611223344,0711223344,611223344,711223344"
+    test_otp_codes: str = "1111,1234,0000"
     max_otp_attempts: int = 5
     otp_window_seconds: int = 60
     firebase_credentials_path: str = "firebase-adminsdk.json"

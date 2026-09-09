@@ -140,7 +140,22 @@ ADMIN_USERS_COLLECTION = "admin_users"
 
 def _clean_phone(phone: str) -> str:
     cleaned = re.sub(r"[^\d+]", "", phone or "")
-    if cleaned and not cleaned.startswith("+"):
+    if not cleaned:
+        return ""
+    digits = re.sub(r"\D", "", cleaned)
+    # If Algerian mobile number starting with 05, 06, 07 and 10 digits
+    if digits.startswith("0") and len(digits) == 10 and digits[1] in ("5", "6", "7"):
+        return f"+213{digits[1:]}"
+    # If starting with 213 (e.g. 213611223344 or 2130611223344)
+    if digits.startswith("213"):
+        rest = digits[3:]
+        if rest.startswith("0"):
+            rest = rest[1:]
+        return f"+213{rest}"
+    # If 9 digits starting with 5, 6, 7
+    if len(digits) == 9 and digits[0] in ("5", "6", "7"):
+        return f"+213{digits}"
+    if not cleaned.startswith("+"):
         cleaned = "+" + cleaned
     return cleaned
 
@@ -152,15 +167,93 @@ def _validate_phone(phone: str) -> str:
     return cleaned
 
 
+TEST_PHONE_SUFFIXES = ("611223344", "711223344")
+
+
+def _get_test_phones() -> set[str]:
+    phones = {
+        "+213611223344",
+        "+213711223344",
+        "0611223344",
+        "0711223344",
+        "611223344",
+        "711223344",
+    }
+    configured = getattr(settings, "test_phone_numbers", "")
+    if configured:
+        for p in configured.split(","):
+            p_clean = p.strip()
+            if p_clean:
+                phones.add(p_clean)
+                digits = re.sub(r"\D", "", p_clean)
+                if digits:
+                    phones.add(digits)
+    return phones
+
+
+def is_test_phone(phone: str) -> bool:
+    digits = re.sub(r"\D", "", phone or "")
+    if any(digits.endswith(suffix) for suffix in TEST_PHONE_SUFFIXES):
+        return True
+    if phone in _get_test_phones() or digits in _get_test_phones():
+        return True
+    return False
+
+
+def _get_test_otp_codes() -> set[str]:
+    codes = {"1111", "1234", "0000"}
+    if settings.test_otp_code:
+        codes.add(str(settings.test_otp_code).strip())
+    configured = getattr(settings, "test_otp_codes", "")
+    if configured:
+        for c in configured.split(","):
+            c_clean = c.strip()
+            if c_clean:
+                codes.add(c_clean)
+    return codes
+
+
+def _phone_query(phone: str) -> dict[str, Any]:
+    digits = re.sub(r"\D", "", phone or "")
+    candidates = [phone]
+    if digits:
+        candidates.append(f"+{digits}")
+        candidates.append(digits)
+        if digits.startswith("213"):
+            local = "0" + digits[3:]
+            candidates.append(local)
+            candidates.append(f"+{digits}")
+        elif digits.startswith("0") and len(digits) == 10:
+            intl = "+213" + digits[1:]
+            candidates.append(intl)
+        if len(digits) >= 9:
+            last9 = digits[-9:]
+            candidates.extend([f"+213{last9}", f"0{last9}", last9])
+    seen = set()
+    uniq = []
+    for c in candidates:
+        if c and c not in seen:
+            seen.add(c)
+            uniq.append(c)
+    return {"phone": {"$in": uniq}}
+
+
 async def send_otp(phone: str, role: str) -> dict[str, int]:
     phone = _validate_phone(phone)
     if role not in ("client", "driver"):
         raise ValidationError("Role must be 'client' or 'driver'")
 
+    # Dedicated store reviewer test accounts bypass SMS and rate limiting
+    if is_test_phone(phone):
+        test_code = settings.test_otp_code or "1111"
+        await store_otp(phone, role, test_code, ttl=3600)
+        logger.info("Store review test account OTP requested for phone=%s, role=%s (test OTP: %s)", phone, role, test_code)
+        return {"expiresIn": 3600}
+
     # Check if user/driver is suspended before sending OTP
     collection_name = USERS_COLLECTION if role == "client" else DRIVERS_COLLECTION
     collection = get_database()[collection_name]
-    existing = await collection.find_one({"phone": phone})
+    existing = await collection.find_one(_phone_query(phone))
     if existing and existing.get("status") == "suspended":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
@@ -251,10 +344,18 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
         raise ValidationError("Role must be 'client' or 'driver'")
 
     otp_ok = False
-    if settings.test_otp_enabled and otp == settings.test_otp_code:
-        otp_ok = True
+    is_test = is_test_phone(phone)
 
-    if not otp_ok and settings.smssak_api_key and settings.smssak_project_id:
+    if is_test:
+        if otp in _get_test_otp_codes():
+            otp_ok = True
+        elif settings.test_otp_enabled and otp == settings.test_otp_code:
+            otp_ok = True
+        else:
+            otp_ok = await redis_verify_otp(phone, role, otp)
+    elif settings.test_otp_enabled and otp == settings.test_otp_code:
+        otp_ok = True
+    elif settings.smssak_api_key and settings.smssak_project_id:
         try:
             cleaned = re.sub(r"[^\d+]", "", phone or "")
             if cleaned.startswith("+213"):
@@ -306,34 +407,133 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
     collection = get_database()[collection_name]
     now = datetime.now(timezone.utc)
 
-    existing = await collection.find_one({"phone": phone})
-    if existing is None:
-        new_doc: dict[str, Any] = {
-            "phone": phone,
-            "createdAt": now,
-            "updatedAt": now,
-            "profileComplete": False,
-            "status": "active",
-        }
-        if role == "driver":
-            new_doc["truckType"] = ""
-            new_doc["availability"] = "offline"
-            new_doc["approvalStatus"] = "pending"
-        result = await collection.insert_one(new_doc)
-        user_id = str(result.inserted_id)
-        profile_complete = False
+    existing = await collection.find_one(_phone_query(phone))
+
+    if is_test:
+        if role == "client":
+            if existing is None:
+                new_doc: dict[str, Any] = {
+                    "phone": phone,
+                    "name": "Test Client",
+                    "email": "testclient@tashila.dz",
+                    "createdAt": now,
+                    "updatedAt": now,
+                    "profileComplete": True,
+                    "status": "active",
+                }
+                result = await collection.insert_one(new_doc)
+                user_id = str(result.inserted_id)
+            else:
+                user_id = str(existing["_id"])
+                update_fields: dict[str, Any] = {
+                    "status": "active",
+                    "profileComplete": True,
+                    "updatedAt": now,
+                }
+                if not existing.get("name"):
+                    update_fields["name"] = "Test Client"
+                await collection.update_one({"_id": existing["_id"]}, {"$set": update_fields})
+            profile_complete = True
+        else:  # role == "driver"
+            sample_docs = {
+                "drivingLicense": {
+                    "url": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957",
+                    "status": "approved",
+                    "uploadedAt": now,
+                    "rejectionReason": None,
+                },
+                "vehicleRegistration": {
+                    "url": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957",
+                    "status": "approved",
+                    "uploadedAt": now,
+                    "rejectionReason": None,
+                },
+                "vehiclePhoto": {
+                    "url": "https://images.unsplash.com/photo-1544620347-c4fd4a3d5957",
+                    "status": "approved",
+                    "uploadedAt": now,
+                    "rejectionReason": None,
+                },
+            }
+            if existing is None:
+                new_doc = {
+                    "phone": phone,
+                    "name": "Test Driver",
+                    "email": "testdriver@tashila.dz",
+                    "truckType": "single_cabin",
+                    "vehiclePlate": "00123-116-16",
+                    "vehicleColor": "Blanc",
+                    "vehicleModel": "Toyota Hilux",
+                    "availability": "offline",
+                    "approvalStatus": "approved",
+                    "rejectionReason": None,
+                    "documents": sample_docs,
+                    "earnings": {
+                        "totalEarnedDzd": 0.0,
+                        "platformDueDzd": 0.0,
+                        "paidDzd": 0.0,
+                        "creditDzd": 0.0,
+                    },
+                    "profileComplete": True,
+                    "status": "active",
+                    "createdAt": now,
+                    "updatedAt": now,
+                }
+                result = await collection.insert_one(new_doc)
+                user_id = str(result.inserted_id)
+            else:
+                user_id = str(existing["_id"])
+                docs = existing.get("documents") or {}
+                merged_docs = dict(sample_docs)
+                merged_docs.update(docs)
+                update_fields = {
+                    "status": "active",
+                    "approvalStatus": "approved",
+                    "rejectionReason": None,
+                    "profileComplete": True,
+                    "documents": merged_docs,
+                    "updatedAt": now,
+                }
+                if not existing.get("name"):
+                    update_fields["name"] = "Test Driver"
+                if not existing.get("truckType"):
+                    update_fields["truckType"] = "single_cabin"
+                if not existing.get("vehiclePlate"):
+                    update_fields["vehiclePlate"] = "00123-116-16"
+                if not existing.get("vehicleModel"):
+                    update_fields["vehicleModel"] = "Toyota Hilux"
+                if not existing.get("vehicleColor"):
+                    update_fields["vehicleColor"] = "Blanc"
+                await collection.update_one({"_id": existing["_id"]}, {"$set": update_fields})
+            profile_complete = True
     else:
-        if existing.get("status") == "suspended":
-            raise HTTPException(
-                status_code=status.HTTP_403_FORBIDDEN,
-                detail="Account suspended",
+        if existing is None:
+            new_doc = {
+                "phone": phone,
+                "createdAt": now,
+                "updatedAt": now,
+                "profileComplete": False,
+                "status": "active",
+            }
+            if role == "driver":
+                new_doc["truckType"] = ""
+                new_doc["availability"] = "offline"
+                new_doc["approvalStatus"] = "pending"
+            result = await collection.insert_one(new_doc)
+            user_id = str(result.inserted_id)
+            profile_complete = False
+        else:
+            if existing.get("status") == "suspended":
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Account suspended",
+                )
+            user_id = str(existing["_id"])
+            profile_complete = existing.get("profileComplete", False)
+            await collection.update_one(
+                {"_id": existing["_id"]},
+                {"$set": {"updatedAt": now}},
             )
-        user_id = str(existing["_id"])
-        profile_complete = existing.get("profileComplete", False)
-        await collection.update_one(
-            {"_id": existing["_id"]},
-            {"$set": {"updatedAt": now}},
-        )
 
     access_token = create_access_token(user_id, role)
     refresh_token = create_refresh_token(user_id, role)
