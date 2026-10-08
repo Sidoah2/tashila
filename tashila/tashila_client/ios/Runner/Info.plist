@@ -54,6 +54,6 @@
 	<key>NSCameraUsageDescription</key>
 	<string>The camera can be used to take a profile picture.</string>
 	<key>GMSApiKey</key>
-	<string>AIzaSyDOxXdhOejrci6fERrxrA5NE2C0P60PlJg</string>
+	<string>$(GOOGLE_MAPS_API_KEY_IOS)</string>
 </dict>
 </plist>

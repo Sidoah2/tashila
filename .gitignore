@@ -61,3 +61,11 @@ apps/
 heetch_ui_screenshots/
 notification_sound.mp3
 resume.txt
+
+# Sensitive credentials, keys and Firebase configuration
+key.properties
+*.keystore
+*.jks
+google-services.json
+GoogleService-Info.plist
+!*.example

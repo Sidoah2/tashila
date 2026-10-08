@@ -50,7 +50,7 @@
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
 	<string>Location is used to show your live driving position.</string>
 	<key>GMSApiKey</key>
-	<string>AIzaSyDOxXdhOejrci6fERrxrA5NE2C0P60PlJg</string>
+	<string>$(GOOGLE_MAPS_API_KEY_IOS)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>The camera is used to photograph your licence and other verification documents.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
