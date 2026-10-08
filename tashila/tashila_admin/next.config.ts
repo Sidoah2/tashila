@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const API_URL =
   process.env.API_URL ??
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tashila-production.up.railway.app";
+  "https://web-production-da6bc.up.railway.app";
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,

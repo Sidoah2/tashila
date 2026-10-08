@@ -9,7 +9,7 @@ import { useTripsStore } from "@/lib/store/trips";
 
 const SOCKET_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tashila-production.up.railway.app";
+  "https://web-production-da6bc.up.railway.app";
 
 function readSession(): AdminSession | null {
   if (typeof window === "undefined") return null;
