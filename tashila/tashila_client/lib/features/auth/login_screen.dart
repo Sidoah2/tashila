@@ -13,7 +13,7 @@ import 'package:tashila_client/core/theme/app_colors.dart';
 import 'package:tashila_client/core/widgets/primary_button.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-const _kPrivacyPolicyUrl = 'https://tashila.app/privacy';
+const _kPrivacyPolicyUrl = 'https://tashila-privacy.vercel.app/';
 const _kTermsOfServiceUrl = 'https://tashila.app/terms';
 
 class LoginScreen extends ConsumerStatefulWidget {

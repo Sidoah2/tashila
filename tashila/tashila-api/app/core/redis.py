@@ -177,8 +177,11 @@ async def get_rejected_trip_ids(driver_id: str) -> set[str]:
 
 
 async def is_trip_rejected_by_driver(driver_id: str, trip_id: str) -> bool:
-    redis = get_redis()
-    return bool(await redis.sismember(_rejected_key(driver_id), trip_id))
+    try:
+        redis = get_redis()
+        return bool(await redis.sismember(_rejected_key(driver_id), trip_id))
+    except Exception:
+        return False
 
 
 async def add_suspended_user(user_id: str) -> None:
@@ -215,6 +218,10 @@ def _driver_offer_key(driver_id: str) -> str:
     return f"driver:offer:{driver_id}"
 
 
+def _driver_offers_set_key(driver_id: str) -> str:
+    return f"driver:offers:{driver_id}"
+
+
 async def set_trip_offer(
     trip_id: str,
     *,
@@ -234,6 +241,8 @@ async def set_trip_offer(
     pipe = redis.pipeline()
     pipe.set(_trip_offer_key(trip_id), json.dumps(payload), ex=ttl_seconds)
     pipe.set(_driver_offer_key(driver_id), trip_id, ex=ttl_seconds)
+    pipe.sadd(_driver_offers_set_key(driver_id), trip_id)
+    pipe.expire(_driver_offers_set_key(driver_id), ttl_seconds)
     await pipe.execute()
 
 
@@ -255,6 +264,8 @@ async def set_trip_broadcast_offers(
     pipe.set(_trip_offer_key(trip_id), json.dumps(payload), ex=ttl_seconds)
     for driver_id in driver_ids:
         pipe.set(_driver_offer_key(driver_id), trip_id, ex=ttl_seconds)
+        pipe.sadd(_driver_offers_set_key(driver_id), trip_id)
+        pipe.expire(_driver_offers_set_key(driver_id), ttl_seconds)
     await pipe.execute()
 
 
@@ -267,8 +278,33 @@ async def get_trip_offer(trip_id: str) -> dict[str, Any] | None:
 
 
 async def get_driver_offer_trip_id(driver_id: str) -> str | None:
-    redis = get_redis()
-    return await redis.get(_driver_offer_key(driver_id))
+    try:
+        redis = get_redis()
+    except Exception:
+        return None
+    trip_id = await redis.get(_driver_offer_key(driver_id))
+    if trip_id:
+        return trip_id
+    members = await redis.smembers(_driver_offers_set_key(driver_id))
+    if members:
+        return sorted(list(members))[0]
+    return None
+
+
+async def get_driver_offer_trip_ids(driver_id: str) -> list[str]:
+    try:
+        redis = get_redis()
+    except Exception:
+        return []
+    try:
+        members = await redis.smembers(_driver_offers_set_key(driver_id))
+        results = set(members)
+        single = await redis.get(_driver_offer_key(driver_id))
+        if single:
+            results.add(single)
+        return list(results)
+    except Exception:
+        return []
 
 
 async def remove_driver_from_offer(trip_id: str, driver_id: str) -> bool:
@@ -277,14 +313,26 @@ async def remove_driver_from_offer(trip_id: str, driver_id: str) -> bool:
     Returns True if no drivers remain in the offer.
     """
     redis = get_redis()
+    await redis.srem(_driver_offers_set_key(driver_id), trip_id)
+
     offer = await get_trip_offer(trip_id)
     if not offer:
+        current_trip = await redis.get(_driver_offer_key(driver_id))
+        if current_trip == trip_id:
+            remaining = await redis.smembers(_driver_offers_set_key(driver_id))
+            if remaining:
+                await redis.set(_driver_offer_key(driver_id), sorted(list(remaining))[0], ex=180)
+            else:
+                await redis.delete(_driver_offer_key(driver_id))
         return True
 
-    # Delete driver-specific offer mapping if it still points to this trip
     current_trip = await redis.get(_driver_offer_key(driver_id))
     if current_trip == trip_id:
-        await redis.delete(_driver_offer_key(driver_id))
+        remaining = await redis.smembers(_driver_offers_set_key(driver_id))
+        if remaining:
+            await redis.set(_driver_offer_key(driver_id), sorted(list(remaining))[0], ex=180)
+        else:
+            await redis.delete(_driver_offer_key(driver_id))
 
     driver_ids = offer.get("driverIds", [])
     if not driver_ids and offer.get("driverId"):
@@ -319,10 +367,17 @@ async def clear_trip_offer(trip_id: str) -> None:
     pipe = redis.pipeline()
     pipe.delete(_trip_offer_key(trip_id))
     for driver_id in driver_ids:
+        pipe.srem(_driver_offers_set_key(driver_id), trip_id)
+    await pipe.execute()
+
+    for driver_id in driver_ids:
         current_trip_id = await redis.get(_driver_offer_key(driver_id))
         if current_trip_id == trip_id:
-            pipe.delete(_driver_offer_key(driver_id))
-    await pipe.execute()
+            remaining = await redis.smembers(_driver_offers_set_key(driver_id))
+            if remaining:
+                await redis.set(_driver_offer_key(driver_id), sorted(list(remaining))[0], ex=180)
+            else:
+                await redis.delete(_driver_offer_key(driver_id))
 
 
 async def acquire_dispatch_lock(trip_id: str, token: str, ttl_seconds: int) -> bool:

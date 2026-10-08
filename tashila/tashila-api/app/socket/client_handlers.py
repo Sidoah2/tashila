@@ -26,12 +26,20 @@ async def _get_session(server: socketio.AsyncServer, sid: str) -> dict[str, Any]
 
 
 def _driver_notify_payload(driver: dict[str, Any]) -> dict[str, Any]:
+    rating = driver.get("rating")
+    if rating is not None:
+        try:
+            rating = round(float(rating), 1)
+        except (ValueError, TypeError):
+            rating = 5.0
+    else:
+        rating = 5.0
     return {
         "id": driver.get("id") or driver.get("_id"),
         "name": driver.get("name"),
         "phone": driver.get("phone"),
         "truckType": driver.get("truckType"),
-        "rating": driver.get("rating"),
+        "rating": rating,
         "vehiclePlate": driver.get("vehiclePlate"),
         "vehicleColor": driver.get("vehicleColor"),
         "vehicleModel": driver.get("vehicleModel"),

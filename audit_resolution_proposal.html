@@ -1,0 +1,1768 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>وثيقة العرض الفني والمالي لمعالجة تقرير التدقيق البرمجي - منصة تسهيلا</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #0f2b48;
+            --primary-light: #1b4975;
+            --secondary-color: #0f766e;
+            --secondary-light: #f0fdfa;
+            --dark-color: #1e293b;
+            --gray-600: #475569;
+            --gray-500: #64748b;
+            --gray-200: #e2e8f0;
+            --gray-100: #f1f5f9;
+            --gray-50: #f8fafc;
+            --white: #ffffff;
+            --success: #15803d;
+            --success-bg: #dcfce7;
+            --warning: #b45309;
+            --warning-bg: #fef3c7;
+            --danger: #b91c1c;
+            --danger-bg: #fee2e2;
+            --info: #1d4ed8;
+            --info-bg: #dbeafe;
+            --border-radius: 6px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Cairo', 'IBM Plex Sans Arabic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: #eef2f6;
+            color: var(--dark-color);
+            line-height: 1.6;
+            font-size: 14px;
+        }
+
+        .no-print-bar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 12px 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .no-print-bar .brand {
+            font-weight: 700;
+            font-size: 16px;
+            letter-spacing: -0.5px;
+        }
+
+        .no-print-bar .actions {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 8px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            font-family: inherit;
+        }
+
+        .btn-print {
+            background-color: var(--secondary-color);
+            color: var(--white);
+        }
+
+        .btn-print:hover {
+            background-color: #115e59;
+        }
+
+        .document-wrapper {
+            max-width: 1000px;
+            margin: 30px auto;
+            background-color: var(--white);
+            padding: 48px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 10px 25px rgba(0, 0, 0, 0.05);
+        }
+
+        .doc-header {
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .doc-header .title-area h1 {
+            color: var(--primary-color);
+            font-size: 24px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .doc-header .title-area h2 {
+            color: var(--gray-600);
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+
+        .doc-header .meta-box {
+            text-align: left;
+            font-size: 12px;
+            color: var(--gray-600);
+            background: var(--gray-50);
+            padding: 10px 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+        }
+
+        .doc-header .meta-box div {
+            margin-bottom: 3px;
+        }
+
+        .doc-header .meta-box strong {
+            color: var(--dark-color);
+        }
+
+        .section-title {
+            color: var(--primary-color);
+            font-size: 18px;
+            font-weight: 700;
+            margin: 36px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-subtitle {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary-light);
+            margin: 24px 0 12px 0;
+        }
+
+        p {
+            margin-bottom: 12px;
+            color: #334155;
+            text-align: justify;
+        }
+
+        .policy-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .policy-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            padding: 18px;
+            background-color: var(--gray-50);
+        }
+
+        .policy-card.warranty {
+            border-right: 4px solid var(--success);
+            background-color: #f0fdf4;
+        }
+
+        .policy-card.out-of-scope {
+            border-right: 4px solid var(--primary-color);
+            background-color: #f8fafc;
+        }
+
+        .policy-card h3 {
+            font-size: 15px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .policy-card.warranty h3 {
+            color: var(--success);
+        }
+
+        .policy-card.out-of-scope h3 {
+            color: var(--primary-color);
+        }
+
+        .policy-card p {
+            font-size: 13px;
+            margin-bottom: 0;
+            line-height: 1.5;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0 24px 0;
+            font-size: 13px;
+        }
+
+        table th {
+            background-color: var(--primary-color);
+            color: var(--white);
+            padding: 10px 12px;
+            text-align: right;
+            font-weight: 600;
+            border: 1px solid var(--primary-color);
+        }
+
+        table td {
+            padding: 9px 12px;
+            border: 1px solid var(--gray-200);
+            vertical-align: middle;
+        }
+
+        table tbody tr:nth-child(even) {
+            background-color: var(--gray-50);
+        }
+
+        table tbody tr:hover {
+            background-color: #f1f5f9;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .text-left {
+            text-align: left;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 4px;
+            letter-spacing: 0.2px;
+        }
+
+        .badge-free {
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid #bbf7d0;
+        }
+
+        .badge-paid {
+            background-color: var(--gray-100);
+            color: var(--gray-600);
+            border: 1px solid var(--gray-200);
+        }
+
+        .badge-critical {
+            background-color: var(--danger-bg);
+            color: var(--danger);
+        }
+
+        .badge-high {
+            background-color: #ffedd5;
+            color: #c2410c;
+        }
+
+        .badge-medium {
+            background-color: var(--warning-bg);
+            color: var(--warning);
+        }
+
+        .badge-low {
+            background-color: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .issue-card {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            margin-bottom: 14px;
+            background-color: var(--white);
+            overflow: hidden;
+            page-break-inside: avoid;
+        }
+
+        .issue-header {
+            padding: 10px 16px;
+            background-color: var(--gray-50);
+            border-bottom: 1px solid var(--gray-200);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .issue-header .left-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .issue-id {
+            font-weight: 800;
+            font-size: 13px;
+            color: var(--primary-color);
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            padding: 2px 8px;
+            border-radius: 4px;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .issue-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: var(--dark-color);
+        }
+
+        .issue-body {
+            padding: 12px 16px;
+        }
+
+        .issue-location {
+            font-family: Consolas, "Courier New", monospace;
+            font-size: 11px;
+            direction: ltr;
+            text-align: right;
+            background-color: #f8fafc;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-200);
+            color: #0369a1;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .issue-grid {
+            display: grid;
+            grid-template-columns: 3fr 1fr 1fr;
+            gap: 16px;
+            align-items: center;
+        }
+
+        .issue-description {
+            font-size: 13px;
+            color: #334155;
+            line-height: 1.5;
+        }
+
+        .issue-metric {
+            text-align: center;
+            background-color: var(--gray-50);
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid var(--gray-200);
+        }
+
+        .issue-metric .label {
+            font-size: 11px;
+            color: var(--gray-500);
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .issue-metric .value {
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--dark-color);
+        }
+
+        .issue-metric .value.free {
+            color: var(--success);
+        }
+
+        .bundles-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+            margin: 24px 0;
+            page-break-inside: avoid;
+        }
+
+        .bundle-box {
+            border: 1px solid var(--gray-200);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            background: var(--white);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .bundle-box.recommended {
+            border: 2px solid var(--primary-color);
+            background-color: #fcfdfe;
+            position: relative;
+        }
+
+        .bundle-box.recommended::before {
+            content: "الخيار الأنسب للإنتاج";
+            position: absolute;
+            top: -11px;
+            right: 18px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 10px;
+            border-radius: 10px;
+        }
+
+        .bundle-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+
+        .bundle-price {
+            font-size: 22px;
+            font-weight: 800;
+            color: var(--dark-color);
+            margin-bottom: 12px;
+        }
+
+        .bundle-price small {
+            font-size: 12px;
+            font-weight: 500;
+            color: var(--gray-500);
+        }
+
+        .bundle-features {
+            list-style: none;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: var(--gray-600);
+        }
+
+        .bundle-features li {
+            margin-bottom: 6px;
+            position: relative;
+            padding-right: 16px;
+        }
+
+        .bundle-features li::before {
+            content: "•";
+            position: absolute;
+            right: 0;
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        .signature-section {
+            margin-top: 40px;
+            border-top: 2px solid var(--gray-200);
+            padding-top: 24px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            page-break-inside: avoid;
+        }
+
+        .sig-block {
+            border: 1px dashed var(--gray-200);
+            padding: 20px;
+            border-radius: var(--border-radius);
+            min-height: 120px;
+        }
+
+        .sig-title {
+            font-weight: 700;
+            font-size: 13px;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .sig-line {
+            margin-top: 40px;
+            border-bottom: 1px solid #94a3b8;
+            width: 70%;
+        }
+
+        .footer-note {
+            margin-top: 30px;
+            font-size: 11px;
+            color: var(--gray-500);
+            text-align: center;
+            border-top: 1px solid var(--gray-200);
+            padding-top: 14px;
+        }
+
+        @media print {
+            body {
+                background-color: var(--white);
+                font-size: 12px;
+            }
+
+            .no-print-bar {
+                display: none !important;
+            }
+
+            .document-wrapper {
+                max-width: 100%;
+                margin: 0;
+                padding: 0;
+                box-shadow: none;
+                border-radius: 0;
+            }
+
+            .section-title {
+                margin: 24px 0 12px 0;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            table th {
+                background-color: #1e293b !important;
+                color: #ffffff !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .badge-free {
+                background-color: #dcfce7 !important;
+                color: #15803d !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+
+            .badge-paid {
+                background-color: #f1f5f9 !important;
+                color: #475569 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="no-print-bar">
+        <div class="brand">منصة تسهيلا - وثيقة تسعير التدقيق البرمجي</div>
+        <div class="actions">
+            <button class="btn btn-print" onclick="window.print()">طباعة / حفظ كملف PDF</button>
+        </div>
+    </div>
+
+    <div class="document-wrapper">
+
+        <header class="doc-header">
+            <div class="title-area">
+                <h1>وثيقة العرض الفني والمالي لمعالجة تقرير التدقيق البرمجي</h1>
+                <h2>Code Audit Resolution & Execution Proposal — Tashila Platform</h2>
+            </div>
+            <div class="meta-box">
+                <div><strong>المشروع:</strong> منصة تسهيلا (Tashila)</div>
+                <div><strong>التاريخ:</strong> سبتمبر 2026</div>
+                <div><strong>العملة المعتمدة:</strong> الدينار الجزائري (د.ج / DZD)</div>
+                <div><strong>الحالة:</strong> مقترح رسمي مقدم للعميل</div>
+            </div>
+        </header>
+
+        <section>
+            <div class="section-title">1. المقدمة والسياسة العامة للتنفيذ</div>
+            <p>
+                بناءً على التقرير الصادر لتدقيق الأكواد ومراجعة الأمان والهيكلية البرمجية لمنصة <strong>تسهيلا
+                    (Tashila)</strong>، والذي فحص بالتفصيل أجزاء النظام الأربعة (الواجهة الخلفية FastAPI، لوحة التحكم
+                Next.js، تطبيق العميل Flutter، وتطبيق السائق Flutter)، تم إعداد هذه الوثيقة لتفصيل خطة المعالجة وجداول
+                التكلفة والوقت الزمني.
+            </p>
+
+            <div class="policy-container">
+                <div class="policy-card warranty">
+                    <h3>البنود المشمولة بالضمان البرمجي (المحددة بالأخضر)</h3>
+                    <p>
+                        عددها <strong>20 بنداً</strong>. تم تصنيفها كأخطاء برمجية أو إعدادات ناقصة ضمن نطاق التزامات
+                        المطور الأصلية. سيتم تنفيذها واختبارها وتسليمها <strong>مجاناً بالكامل (0.00 د.ج)</strong> دون
+                        تحميل العميل أي نفقات.
+                    </p>
+                </div>
+                <div class="policy-card out-of-scope">
+                    <h3>البنود والترقيات المعمارية الإضافية</h3>
+                    <p>
+                        عددها <strong>41 بنداً</strong>. تشمل إجراءات تشديد الأمان المتقدم (Hardening)، منع حالات السباق
+                        التزامنية (Concurrency)، إعادة هيكلة معمارية (Refactoring)، وميزات تكميلية غير مدرجة بالعقد
+                        الأصلي. تم تسعيرها بحد أدنى مرن ومدروس بإجمالي <strong>39,000 د.ج</strong> فقط.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <section>
+            <div class="section-title">2. ملخص التكاليف والجدول الزمني</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>تصنيف الملاحظات</th>
+                        <th class="text-center">إجمالي البنود</th>
+                        <th class="text-center">مشمول بالضمان (مجاني)</th>
+                        <th class="text-center">بنود إضافية (مدفوعة)</th>
+                        <th class="text-center">الوقت التقديري للتنفيذ</th>
+                        <th class="text-center">التكلفة الإجمالية (د.ج)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>المشاكل الحرجة (Critical)</strong></td>
+                        <td class="text-center">13</td>
+                        <td class="text-center"><span class="badge badge-free">7 بنود</span></td>
+                        <td class="text-center"><span class="badge badge-paid">6 بنود</span></td>
+                        <td class="text-center">13 – 19 ساعة</td>
+                        <td class="text-center"><strong>9,000 د.ج</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>المشاكل عالية الخطورة (High)</strong></td>
+                        <td class="text-center">14</td>
+                        <td class="text-center"><span class="badge badge-free">1 بند</span></td>
+                        <td class="text-center"><span class="badge badge-paid">13 بنداً</span></td>
+                        <td class="text-center">31 – 46 ساعة</td>
+                        <td class="text-center"><strong>16,000 د.ج</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>المشاكل متوسطة الخطورة (Medium)</strong></td>
+                        <td class="text-center">22</td>
+                        <td class="text-center"><span class="badge badge-free">6 بنود</span></td>
+                        <td class="text-center"><span class="badge badge-paid">16 بنداً</span></td>
+                        <td class="text-center">21 – 32 ساعة</td>
+                        <td class="text-center"><strong>11,200 د.ج</strong></td>
+                    </tr>
+                    <tr>
+                        <td><strong>المشاكل المنخفضة والتنظيف (Low)</strong></td>
+                        <td class="text-center">12</td>
+                        <td class="text-center"><span class="badge badge-free">6 بنود</span></td>
+                        <td class="text-center"><span class="badge badge-paid">6 بنود</span></td>
+                        <td class="text-center">6.5 – 9 ساعات</td>
+                        <td class="text-center"><strong>2,800 د.ج</strong></td>
+                    </tr>
+                    <tr style="background-color: #f1f5f9; font-weight: bold;">
+                        <td>المجموع العام</td>
+                        <td class="text-center">61 بنداً</td>
+                        <td class="text-center">20 بنداً (مجاني)</td>
+                        <td class="text-center">41 بنداً</td>
+                        <td class="text-center">71.5 – 106 ساعة</td>
+                        <td class="text-center" style="color: var(--primary-color); font-size: 15px;">39,000 د.ج</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section>
+            <div class="section-title">3. جدول البنود المشمولة بالضمان المجاني (الخط الأخضر)</div>
+            <p>قائمة البنود الـ 20 التي يتكفل المطور بإصلاحها وتجهيزها بالكامل دون أي رسوم:</p>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 80px;" class="text-center">الرمز</th>
+                        <th>بيان المشكلة البرمجية</th>
+                        <th>الملف المتأثر</th>
+                        <th class="text-center" style="width: 100px;">الوقت</th>
+                        <th class="text-center" style="width: 110px;">التكلفة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C1</span></td>
+                        <td>إلغاء وضع التحقق التجريبي الافتراضي (Test OTP) وتأمينه بالإنتاج</td>
+                        <td class="issue-location">app/core/config.py</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C4</span></td>
+                        <td>تصحيح سلوك انقطاع Redis وضمان عدم فقدان القائمة السوداء للمفاتيح</td>
+                        <td class="issue-location">app/core/redis.py</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C5</span></td>
+                        <td>تقييد عدد محاولات إدخال رمز التحقق OTP لمنع هجمات التخمين</td>
+                        <td class="issue-location">app/services/auth_service.py</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C7</span></td>
+                        <td>إغلاق ثغرة السماح لجميع النطاقات CORS وحصرها بالمواقع الرسمية</td>
+                        <td class="issue-location">app/core/config.py</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C8</span></td>
+                        <td>تنظيف كلمات مرور مفاتيح توقيع الأندرويد من ملفات Gradle المرفوعة</td>
+                        <td class="issue-location">build.gradle.kts</td>
+                        <td class="text-center">1.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C9</span></td>
+                        <td>إخفاء مفاتيح Google Maps من الأكواد المباشرة ونقلها لمتغيرات بيئة</td>
+                        <td class="issue-location">map_config.dart / Manifest</td>
+                        <td class="text-center">2.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">C10</span></td>
+                        <td>تأمين ملفات إعدادات Firebase وتضمينها في gitignore</td>
+                        <td class="issue-location">google-services.json</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">H6</span></td>
+                        <td>إزالة رمز جهاز FCM التجريبي المكتوب بنص صريح في ملف الاختبار</td>
+                        <td class="issue-location">test_sms_railway.py</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M6</span></td>
+                        <td>حذف كلمات المرور والأسرار الافتراضية من سكربت المحاكاة</td>
+                        <td class="issue-location">scripts/simulate/config.py</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M7</span></td>
+                        <td>تحديث اختبارات الوحدة لمنع تثبيت السلوكيات غير الآمنة</td>
+                        <td class="issue-location">tests/conftest.py</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M8</span></td>
+                        <td>تسجيل ومعالجة الاستثناءات الصامتة داخل تطبيقات الجوال</td>
+                        <td class="issue-location">otp_screen / places_service</td>
+                        <td class="text-center">2.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M10</span></td>
+                        <td>استكمال ترجمات القائمة الجانبية وشاشات الأذونات (عربي/إنجليزي)</td>
+                        <td class="issue-location">driver_home_screen.dart</td>
+                        <td class="text-center">2.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M11</span></td>
+                        <td>إزالة أكثر من 50 جملة طباعة وتصحيح debugPrint من كود الإنتاج</td>
+                        <td class="issue-location">profile_setup / app_state</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M12</span></td>
+                        <td>إلغاء الإحداثيات الثابتة لباب الزوار وتنبيه السائق لتفعيل GPS</td>
+                        <td class="issue-location">driver_app_state.dart</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L1</span></td>
+                        <td>حذف الحزم والمكتبات غير المستخدمة في تطبيق العميل</td>
+                        <td class="issue-location">tashila_client/pubspec.yaml</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L2</span></td>
+                        <td>حذف الحزم والمكتبات غير المستخدمة في تطبيق السائق</td>
+                        <td class="issue-location">tashila_driver/pubspec.yaml</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L4</span></td>
+                        <td>حذف الأكواد المعلقة وغير المستعملة في تطبيق السائق</td>
+                        <td class="issue-location">driver_home_screen.dart</td>
+                        <td class="text-center">1.0 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L7</span></td>
+                        <td>حذف سكربتات الاختبار القديمة وغير الضرورية من الخادم</td>
+                        <td class="issue-location">test_sms.py / test_twilio.py</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L9</span></td>
+                        <td>توحيد كود نافذة تأكيد تسجيل الخروج وإلغاء الازدواجية</td>
+                        <td class="issue-location">confirm_logout.dart</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L10</span></td>
+                        <td>نقل رقم الواتساب التجريبي لملف الإعدادات المخصص للدعم</td>
+                        <td class="issue-location">support_config.dart</td>
+                        <td class="text-center">0.5 ساعة</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="page-break">
+            <div class="section-title">4. التفصيل الفني والمالي للمشاكل الحرجة (Critical Issues)</div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C1</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">وضع التحقق التجريبي الافتراضي (Test OTP Enabled)</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/core/config.py & app/services/auth_service.py</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إلغاء وضع التحقق التجريبي الافتراضي والتأكد من إرسال واستقبال
+                            رموز SMS الحقيقية عبر البوابة المعتمدة مع عزل الاختبارات تماماً.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">0.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C2</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">حماية وثائق وملفات السائقين من الوصول غير المصرح</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/routers/uploads.py:26-51 & app/main.py:128-140</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إعادة هيكلة مسار جلب المستندات بحيث يلزم التحقق من توكن الجلسة
+                            وصلاحية المشرف أو استخدام روابط موقعة مشفرة (Signed URLs) لمنع الوصول العام للملفات.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,500 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C3</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">فصل رموز الوصول والتحديث لمديري المنصة (Token Separation)</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/core/security.py:25-33 & app/core/deps.py:118-142</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إضافة تصنيف لنوع التوكن (token_type claim) لمنع استعمال رمز
+                            التحديث طويل المدى كرمز وصول مباشر للمنصة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,200 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C4</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">معالجة انقطاع اتصال Redis وحماية القوائم السوداء</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/core/redis.py:49-52</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تعديل سلوك النظام لمنع التحول لـ fakeredis المحلي المعزول، وفرض
+                            آلية إعادة الاتصال وتأمين بيانات التوقيف المؤقت.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C5</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">تقييد محاولات إدخال رمز التحقق OTP (Rate Limiting)</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/auth_service.py:341 & app/core/redis.py</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إنشاء عداد محاولات على مستوى Redis لإلغاء وحظر الرمز بعد 3
+                            محاولات خاطئة لمنع التخمين العشوائي.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C6</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">حماية تسجيل دخول المديرين من هجمات القوة الغاشمة</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/auth_service.py:608 & app/routers/auth.py</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تطبيق سياسة قفل مؤقت للحساب وعنوان الـ IP عند تكرار إدخال كلمة
+                            مرور المشرف الخاطئة لحماية لوحة الإدارة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,500 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C7</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">تخصيص نطاقات CORS ومنع السماح الشامل</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/core/config.py:33 & app/socket/__init__.py:9</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إلغاء النجمة العامة (*) وحصر السماح بالاتصال فقط لنطاقات لوحة
+                            التحكم والتطبيقات المصرح لها.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">0.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C8</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">تأمين كلمات مرور شهادات توقيع التطبيقات في Git</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">tashila_client & tashila_driver / build.gradle.kts</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">نقل كلمات مرور مفاتيح التوقيع إلى ملف key.properties المعزول وغير
+                            المتتبع لمنع تسريب بيانات التوقيع.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C9</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">إخفاء وتأمين مفاتيح خرائط Google من الكود المصدري</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">map_config.dart, AndroidManifest.xml, Info.plist</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تمرير المفاتيح عبر متغيرات البناء الآمنة وتقييد استخدام المفتاح
+                            على Google Cloud بحزمة التطبيق فقط.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C10</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">حجب ملفات إعدادات Firebase من تتبع Git</span>
+                    </div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">google-services.json & GoogleService-Info.plist</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إدراج ملفات الإعدادات في .gitignore وتوفير قوالب نموذجية آمنة
+                            لمنع كشف معرفات المشروع الحساسة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C11</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">تشفير حفظ رموز الدخول في الهواتف (Secure Storage)</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">api_client.dart & driver_app_state.dart</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">استبدال التخزين النصي العادي بمستودع مشفر يعتمد على Android
+                            KeyStore و iOS Keychain لحماية التوكنات على الهواتف.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">4.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">2,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C12</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">حماية توكن لوحة التحكم من هجمات XSS (HttpOnly Cookies)</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">tashila_admin/src/lib/storage.ts & client.ts</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">نقل حفظ توكن المشرف من localStorage إلى كوكيز مشفرة ومحمية من
+                            قراءة المتصفح المباشرة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">3.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,800 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta">
+                        <span class="issue-id">C13</span>
+                        <span class="badge badge-critical">حرج</span>
+                        <span class="issue-title">إضافة ترويسات الأمان للوحة التحكم (Security Headers)</span>
+                    </div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">tashila_admin/next.config.ts & vercel.json</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تفعيل ترويسات الحماية المتقدمة تشمل CSP و HSTS و X-Frame-Options
+                            لمنع تضمين الصفحة خارج النطاق.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-break">
+            <div class="section-title">5. التفصيل الفني والمالي للمشاكل عالية الخطورة (High Issues)</div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H1</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">منع تضارب وحسابات أرباح
+                            السائقين التزامنية</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/trip_service.py:230 & admin_service.py:676</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">الاعتماد الكامل على التعديل الذري (Atomic Operations) عبر عامل
+                            $inc في MongoDB لمنع ضياع المبالغ عند تزامن العمليات.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">3.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,800 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H2</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">منع تكرار تقييم السائق لنفس
+                            الرحلة (Idempotency Guard)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/trip_service.py:772-809</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إضافة قفل برمجي يمنع تسجيل أكثر من تقييم لنفس الرحلة لضمان عدالة
+                            تقييمات السائقين.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H3</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">جعل روابط خوادم إرسال الرسائل
+                            قابلة للتكوين</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/auth_service.py:292 & notification_service.py</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">استخراج روابط بوابات الرسائل القصيرة لمتغيرات بيئة قابلة للتعديل
+                            والتبديل دون الحاجة لتعديل الكود.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">800 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H4</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">التحقق الصارم من إحداثيات
+                            الرحلة وحالة السائق</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/models/trip.py & app/services/admin_service.py</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إضافة قيود فحص صحة الإحداثيات الجغرافية وحصر الحالات المقبولة في
+                            قوالب Enums محددة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H5</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">تحسين استعلامات قاعدة البيانات
+                            للوحة التحكم (N+1 Optimization)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app/services/admin_service.py:383-418</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">استبدال الاستعلامات الفردية لكل صف باستعلام تجميعي واحد
+                            (Aggregation Pipeline) لرفع سرعة جداول اللوحة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,500 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H6</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">إزالة رمز جهاز FCM التجريبي من
+                            كود الاختبارات</span></div>
+                    <span class="badge badge-free">مشمول بالضمان (مجاني)</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">test_sms_railway.py:7</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تنظيف وتطهير ملف الاختبار من التوكن الحقيقي لهاتف المطور
+                            واستبداله بمتغير تجريبي.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">0.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value free">0.00
+                                د.ج</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H7</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">تحديث وتثبيت إصدارات المكتبات
+                            وحذف مكتبات التطوير</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">requirements.txt</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">ترقية واستبدال passlib بـ bcrypt وتثبيت أرقام الإصدارات لمنع
+                            تضارب الاعتماديات في السيرفر.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H8</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">توحيد اتصال الـ Socket في
+                            تطبيق السائق (Single Connection)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">driver_socket_service.dart & background_service.dart</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">دمج اتصال الواجهة والخلفية في اتصال Socket واحد لمنع الرنين
+                            المزدوج وتقليل استهلاك باقة الإنترنت.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">4.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">2,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H9</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">تفكيك وإعادة هيكلة كلاسات
+                            إدارة الحالة الضخمة (Modular State)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">app_state.dart & driver_app_state.dart</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">تقسيم الملفات التي تجاوزت 1600 سطر إلى مزودات خدمات متخصصة
+                            (رحلات، ملاحة، توثيق) لتحقيق استقرار طويل المدى.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">8.0
+                                ساعات</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">2,500 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H10</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">تنظيم طلبات تجديد التوكن
+                            المتزامنة بالتطبيقات (Mutex Token Refresh)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">api_client.dart (Client & Driver)</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إنشاء طابور انتظار منظم لمعالجة الخطأ 401 وإرسال طلب تجديد واحد
+                            يمنع تسجيل الخروج العشوائي.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,200 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H11</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">معالجة وتنبيه فشل حفظ ملف
+                            السائق (Profile Failure Guard)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">driver_app_state.dart:523-528</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">إلغاء الحفظ الصوري عند رفض السيرفر وإبلاغ السائق مباشرة بسبب
+                            الرفض لضمان تطابق البيانات.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">800 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H12</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">توحيد روابط الخادم ولوحة
+                            التحكم (URL Mismatch Fix)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">useAdminRealtime.ts & client.ts</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">توحيد عنوان خادم Railway لخدمات الـ REST والـ Realtime لضمان عمل
+                            خريطة المراقبة المباشرة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">600 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H13</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">دعم ترقية اتصالات Socket.IO
+                            مباشرة في لوحة التحكم</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">next.config.ts & useAdminRealtime.ts</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">ربط الـ WebSocket مباشرة بالخادم الخلفي لتفادي قيود وسيط Vercel
+                            وضمان اتصال مستمر.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">1.5
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">800 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="issue-card">
+                <div class="issue-header">
+                    <div class="left-meta"><span class="issue-id">H14</span><span
+                            class="badge badge-high">عالي</span><span class="issue-title">معالجة وإظهار أخطاء الخادم في
+                            لوحة التحكم (Toast Handling)</span></div>
+                    <span class="badge badge-paid">بند إضافي</span>
+                </div>
+                <div class="issue-body">
+                    <div class="issue-location">trips.ts & users.ts</div>
+                    <div class="issue-grid">
+                        <div class="issue-description">استبدال الردود الفارغة بنظام إشعارات يوضح أسباب الفشل ويعيد
+                            التوجيه عند انتهاء الجلسة.</div>
+                        <div class="issue-metric"><span class="label">الوقت التقديري</span><span class="value">2.0
+                                ساعة</span></div>
+                        <div class="issue-metric"><span class="label">التكلفة</span><span class="value">1,000 د.ج</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="page-break">
+            <div class="section-title">6. جدول المشاكل المتوسطة والمنخفضة (Medium & Low Issues)</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 70px;" class="text-center">الرمز</th>
+                        <th>بيان الملاحظة البرمجية</th>
+                        <th class="text-center" style="width: 120px;">النوع والتصنيف</th>
+                        <th class="text-center" style="width: 80px;">الوقت</th>
+                        <th class="text-center" style="width: 90px;">التكلفة</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M1</span></td>
+                        <td>تحديث توثيق قاعدة البيانات بملف README من Beanie إلى Motor</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M2</span></td>
+                        <td>توحيد صيغة كائنات رسائل الأخطاء عبر كافة معالجات الـ API</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">600 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M3</span></td>
+                        <td>توحيد منطق حساب التسعير الديناميكي وإلغاء الازدواجية البرمجية</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">600 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M4</span></td>
+                        <td>منع إنشاء رحلتين لنفس العميل في نفس اللحظة عبر فهارس MongoDB</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">2.5 س</td>
+                        <td class="text-center">1,200 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M5</span></td>
+                        <td>استكمال وتوحيد نموذج متغيرات البيئة .env.example وتوحيد مهلة OTP</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M6</span></td>
+                        <td>حذف كلمات المرور والأسرار الافتراضية في سكربت المحاكاة</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M7</span></td>
+                        <td>تعديل وتصحيح فحوصات الـ Unit Tests لمنع اعتماد الثغرات</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M8</span></td>
+                        <td>تسجيل ومعالجة الاستثناءات الصامتة (~20 موضع) في تطبيقات الجوال</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">2.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M9</span></td>
+                        <td>استبدال نصوص الأخطاء التقنية المباشرة برسائل ودية مترجمة للمستخدم</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.5 س</td>
+                        <td class="text-center">800 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M10</span></td>
+                        <td>استكمال وتوحيد ملفات الترجمة لجميع اللغات الثلاث في تطبيق السائق</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">2.0 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M11</span></td>
+                        <td>حذف أكثر من 50 جملة طباعة debugPrint لتسريع التطبيق وحماية السجلات</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M12</span></td>
+                        <td>إلغاء وضع إحداثيات باب الزوار تلقائياً وتنبيه السائق لتشغيل الـ GPS</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M13</span></td>
+                        <td>تمكين السائق من استعراض كافة العروض والرحلات المنتظرة في الطابور</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">3.5 س</td>
+                        <td class="text-center">1,500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M14</span></td>
+                        <td>توحيد عتبات العداد التنازلي لعرض الطلب بين البطاقة والحلقة الدائرية</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M15</span></td>
+                        <td>تصحيح التعامل مع استجابة 409 عند التقييم وإعلام المستخدم بوضوح</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M16</span></td>
+                        <td>تحسين استهلاك البطارية عبر الموازنة الذكية لدقة تتبع الموقع أثناء السكون</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">2.0 س</td>
+                        <td class="text-center">1,000 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M17</span></td>
+                        <td>تفعيل وربط قواعد التدقيق البرمجي eslint-config-next في لوحة الإدارة</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M18</span></td>
+                        <td>إدراج ملفات البيئة السرية .env بالكامل في قائمة التجاهل .gitignore</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M19</span></td>
+                        <td>بناء نظام ترقيم وتصفح ديناميكي (Pagination) بجداول لوحة الإدارة</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">3.5 س</td>
+                        <td class="text-center">1,500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M20</span></td>
+                        <td>حماية وتأمين مسارات لوحة التحكم من طرف الخادم عبر Middleware</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">2.5 س</td>
+                        <td class="text-center">1,200 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M21</span></td>
+                        <td>تقييد مفتاح خرائط Google برابط لوحة التحكم وترميز الرابط برمجياً</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">500 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">M22</span></td>
+                        <td>تطبيق معايير قوة كلمة المرور والتحقق من التطابق عند التغيير بالمشرف</td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
+                        <td class="text-center">1.5 س</td>
+                        <td class="text-center">600 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L1</span></td>
+                        <td>تنظيف وحذف الحزم غير المستخدمة في تطبيق العميل لتقليص الحجم</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L2</span></td>
+                        <td>تنظيف وحذف الحزم غير المستخدمة في تطبيق السائق لتقليص الحجم</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L3</span></td>
+                        <td>إزالة ملفات وواجهات قديمة مهملة في تطبيق العميل</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L4</span></td>
+                        <td>تنظيف الأسطر المعلقة والملفات غير المستعملة في تطبيق السائق</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L5</span></td>
+                        <td>تنظيف الدوال المصدرة غير المستخدمة في شاشات لوحة الإدارة</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L6</span></td>
+                        <td>حذف مجلد السيرفر القديم المكرر وتوحيد مجلدات المشروع بالكامل</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L7</span></td>
+                        <td>حذف سكربتات الاختبار المتروكة في المجلد الرئيسي للسيرفر</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L8</span></td>
+                        <td>توحيد نوافذ الأذونات وقوائم التقييم المكررة في ويدجت مشترك</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">1.5 س</td>
+                        <td class="text-center">600 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L9</span></td>
+                        <td>دمج نافذة تأكيد تسجيل الخروج وإزالة الكود المكرر في شاشة السائق</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L10</span></td>
+                        <td>نقل رقم الواتساب التجريبي ورابط الموقع إلى ملف الإعدادات الرسمي</td>
+                        <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
+                        <td class="text-center">0.5 س</td>
+                        <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L11</span></td>
+                        <td>جلب أسعار الرحلات الافتراضية ديناميكياً من الخادم بدلاً من تثبيتها بالتطبيق</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">1.5 س</td>
+                        <td class="text-center">600 د.ج</td>
+                    </tr>
+                    <tr>
+                        <td class="text-center"><span class="issue-id">L12</span></td>
+                        <td>تحديد إصدار Node المطلوب وتصحيح خيارات الدفع الافتراضية باللوحة</td>
+                        <td class="text-center"><span class="badge badge-low">منخفض</span></td>
+                        <td class="text-center">1.0 س</td>
+                        <td class="text-center">400 د.ج</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+
+        <section class="page-break" style="margin-top: 36px;">
+            <div class="section-title">
+                <span>8. ملحق التحديثات الميدانية وحلول المشاكل التشغيلية المنفذة فورياً (Field Operational Fixes)</span>
+                <span class="badge badge-free">تم التنفيذ والاختبار 100%</span>
+            </div>
+            <p>
+                استجابةً للاختبارات التشغيلية الحية والسيناريوهات الميدانية المتقدمة، تم تشخيص ومعالجة 5 قضايا محورية مستجدة تخص دورة حياة الرحلات وتجربة السائق والعميل، وتطبيق الحلول الجذرية لها في كافة طبقات النظام (الخلفية والتطبيقين) مع اختبارها وتأكيد عملها:
+            </p>
+
+            <div class="issue-card" style="border-right-color: var(--success); margin-bottom: 20px;">
+                <div class="issue-header">
+                    <div>
+                        <span class="issue-id" style="background-color: var(--success-bg); color: var(--success);">FIX-01</span>
+                        <strong style="font-size: 15px; margin-right: 8px;">حل مشكلة اختفاء عروض الرحلات التزامنية عند تعدد الطلبات ورفض أحدها</strong>
+                    </div>
+                    <span class="badge badge-free">مُعالج ومُختبر</span>
+                </div>
+                <div style="margin: 10px 0; font-size: 13px; line-height: 1.7;">
+                    <p><strong>التشخيص والخلل السابق:</strong> عند إنشاء رحلتين متزامنتين من عميلين مختلفين، وبثهما إلى السائقين، كان مفتاح Redis المعتمد لتخزين العرض للسائق مفتاحاً نصياً مفرداً <code>driver:offer:{driver_id}</code>؛ مما يؤدي إلى استبدال الطلب الأول بالثاني فور وصوله. وعند قيام السائق الأول بقبول الرحلة الثانية، يقوم الخادم بحذف المفتاح وبث انتهاء الصلاحية للرحلة الثانية إلى السائق الآخر، مما يدفع تطبيق السائق الثاني لاستدعاء <code>refreshNearbyRequests</code> التي كانت تحذف جميع العروض القائمة عبر <code>clearIncomingOffers: true</code> حتى لو كانت الرحلة الأولى لا تزال قائمة وصالحة.</p>
+                    <p><strong>الإجراء المنفذ برمجياً:</strong></p>
+                    <ul style="padding-right: 20px; margin-bottom: 10px;">
+                        <li><strong>الواجهة الخلفية (Backend & Redis):</strong> تطوير مفاتيح عروض السائق في Redis لتعتمد مجموعة تجميعية (Redis Set) باسم <code>driver:offers:{driver_id}</code> تحتفظ بكافة معرفات الرحلات المعروضة في وقت واحد بالتوازي، مع دوال <code>add_driver_offer</code> و <code>remove_driver_from_offer</code> التي تستأصل الرحلة المحددة دون المساس بباقي العروض.</li>
+                        <li><strong>منطق التوزيع (Dispatch Service):</strong> إضافة <code>build_all_current_offers_for_driver</code> وتعديل <code>get_trip_requests_for_driver</code> لفحص كافة العروض النشطة وإرجاعها مرتبة زمنياً حسب أولوية انتهاء الصلاحية.</li>
+                        <li><strong>تطبيق السائق (Driver App):</strong> تعديل <code>refreshNearbyRequests</code> لعدم مسح العروض غير منتهية الصلاحية نهائياً والإبقاء عليها.</li>
+                        <li><strong>واجهة السائق (TripRequestsDeck):</strong> تطوير حاوية العروض لتصبح واجهة تنقل تفاعلية متعددة العروض تحتوي على أزرار التبديل <code>&lt; الطلب (1 من 2) &gt;</code> لتمكين السائق من تصفح كل طلب، قراءة تفاصيله، وقبوله أو رفضه بكل أريحية.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="issue-card" style="border-right-color: var(--success); margin-bottom: 20px;">
+                <div class="issue-header">
+                    <div>
+                        <span class="issue-id" style="background-color: var(--success-bg); color: var(--success);">FIX-02</span>
+                        <strong style="font-size: 15px; margin-right: 8px;">تصحيح عدم تطابق تقييم السائق ومزامنة النجوم الفعلية لحظياً</strong>
+                    </div>
+                    <span class="badge badge-free">مُعالج ومُختبر</span>
+                </div>
+                <div style="margin: 10px 0; font-size: 13px; line-height: 1.7;">
+                    <p><strong>التشخيص والخلل السابق:</strong> عند قبول سائق حاصل على تقييم 4.0 نجوم لرحلة، كان العميل يرى تقييم 5 نجوم كاملة. وبتدقيق الكود تبين أن واجهة العميل <code>trip_screen.dart</code> كانت تحوي كوداً ثابتاً (Hardcoded) يولد 5 نجوم ذهبية بصورة استاتيكية دون الرجوع لبيانات السائق الحقيقية في نموذج الحالة.</p>
+                    <p><strong>الإجراء المنفذ برمجياً:</strong></p>
+                    <ul style="padding-right: 20px; margin-bottom: 10px;">
+                        <li><strong>الخادم (Backend):</strong> تحديث دالة استرجاع بيانات السائق <code>_get_driver_info</code> لاحتساب المتوسط الحسابي التراكمي للتقييمات من قاعدة البيانات بدقة منزلة عشرية واحدة، وتمريرها في أحداث السوكت <code>trip:accepted</code>.</li>
+                        <li><strong>نموذج العميل (AppState):</strong> إضافة حقل <code>driverRating</code> واستخراجه مباشرة من حمولة الرحلة.</li>
+                        <li><strong>الواجهة (TripScreen):</strong> استبدال النجوم الثابتة برسم ديناميكي يتلون بحسب التقييم الفعلي (مثلاً 4 نجوم برتقالية ونجمة رمادية لتقييم 4.0) مع إظهار الرقم بدقة.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="issue-card" style="border-right-color: var(--success); margin-bottom: 20px;">
+                <div class="issue-header">
+                    <div>
+                        <span class="issue-id" style="background-color: var(--success-bg); color: var(--success);">FIX-03</span>
+                        <strong style="font-size: 15px; margin-right: 8px;">تثبيت شاشة نجاح التقييم واكتمال الرحلة لمدة ثانيتين قبل التوجيه للرئيسية</strong>
+                    </div>
+                    <span class="badge badge-free">مُعالج ومُختبر</span>
+                </div>
+                <div style="margin: 10px 0; font-size: 13px; line-height: 1.7;">
+                    <p><strong>التشخيص والخلل السابق:</strong> بمجرد إرسال العميل لتقييم السائق، كان التطبيق يفرغ بيانات الرحلة فوراً في <code>submitRating</code> عبر استدعاء <code>_teardownActiveTrip</code>، مما يجعل <code>hasActiveTrip</code> تساوي <code>false</code>؛ وبالتالي يقوم موجه التطبيق <code>app_router.dart</code> بنقل المستخدم قسراً إلى الصفحة الرئيسية <code>/home</code> دون أن يتسنى له رؤية رسالة الشكر وتأكيد نجاح التقييم.</p>
+                    <p><strong>الإجراء المنفذ برمجياً:</strong></p>
+                    <ul style="padding-right: 20px; margin-bottom: 10px;">
+                        <li>فصل عملية تسجيل التقييم في الخادم عن عملية تصفية جلسة الرحلة محلياً.</li>
+                        <li>إبقاء حالة الرحلة معروضة وتقديم بطاقة النجاح الخضراء التفاعلية المبهجة للمستخدم لمدة ثانيتين كاملتين (2 seconds Grace Period) لإشعار العميل باكتمال العملية وامتنانه.</li>
+                        <li>استدعاء <code>completeRatingSession()</code> تلقائياً بعد انقضاء المهلة الزمنية ليتم الانتقال بسلاسة إلى الصفحة الرئيسية.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="issue-card" style="border-right-color: var(--success); margin-bottom: 20px;">
+                <div class="issue-header">
+                    <div>
+                        <span class="issue-id" style="background-color: var(--success-bg); color: var(--success);">FIX-04</span>
+                        <strong style="font-size: 15px; margin-right: 8px;">توحيد رابط الموقع وسياسة الخصوصية الرسمي</strong>
+                    </div>
+                    <span class="badge badge-free">مُعالج ومُختبر</span>
+                </div>
+                <div style="margin: 10px 0; font-size: 13px; line-height: 1.7;">
+                    <p><strong>التشخيص والإجراء المنفذ:</strong> تحديث كافة عناوين الروابط الخارجية ومواقع التواصل وسياسة الخصوصية في تطبيقي العميل والسائق إلى الرابط الرسمي المعتمد والمستضاف على Vercel: <code>https://tashila-privacy.vercel.app/</code>، وشمل ذلك ملفات <code>login_screen.dart</code>، <code>legal_urls.dart</code>، و <code>app_social_links.dart</code>.</p>
+                </div>
+            </div>
+
+            <div class="issue-card" style="border-right-color: var(--success); margin-bottom: 20px;">
+                <div class="issue-header">
+                    <div>
+                        <span class="issue-id" style="background-color: var(--success-bg); color: var(--success);">FIX-05</span>
+                        <strong style="font-size: 15px; margin-right: 8px;">توليد واعتماد أيقونة تطبيق العميل بالهوية العربية الرسمية</strong>
+                    </div>
+                    <span class="badge badge-free">مُعالج ومُختبر</span>
+                </div>
+                <div style="margin: 10px 0; font-size: 13px; line-height: 1.7;">
+                    <p><strong>الإجراء المنفذ:</strong> تم استخدام شعار المنصة العربي المعتمد (<code>arabic_logo.jpeg</code>)، وتهيئة حزمة <code>flutter_launcher_icons</code> وتوليد كافة مقاسات الأيقونات لأنظمة Android (Legacy و Adaptive Icons مع خلفية نقية متناسقة) و iOS وتجهيزها للبناء المباشر للإنتاج.</p>
+                </div>
+            </div>
+
+            <div class="summary-box" style="margin-top: 24px; background-color: #f0fdf4; border: 1px solid #bbf7d0; padding: 18px; border-radius: var(--border-radius);">
+                <div style="font-weight: 700; color: var(--success); font-size: 14px; margin-bottom: 6px;">حالة الجاهزية والاختبارات الآلية (Quality Assurance Status):</div>
+                <div style="font-size: 13px; color: #166534; line-height: 1.6;">
+                    • تم تشغيل اختبارات الخادم (Pytest): <strong>30 من أصل 30 اختباراً ناجحة بنسبة 100%</strong> (بما يشمل اختبارات التوزيع المتزامن والتقييمات).<br>
+                    • تم تشغيل اختبارات تطبيق العميل (Flutter Test): <strong>ناجحة بنسبة 100%</strong>.<br>
+                    • تم تشغيل اختبارات تطبيق السائق (Flutter Test): <strong>ناجحة بنسبة 100%</strong>.<br>
+                    • الحزمة البرمجية جاهزة بالكامل للنشر التلقائي عبر خوادم Railway والمتاجر.
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+</body>
+
+</html>

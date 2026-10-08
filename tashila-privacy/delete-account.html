@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Account &amp; Data Deletion | Tashila</title>
+  <meta name="description" content="Official account and data deletion request portal for Tashila Client and Tashila Driver mobile applications, compliant with Google Play Store policies.">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <!-- Ambient background glow -->
+  <div class="ambient-bg">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-wrapper">
+        <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
+        <div class="brand-title">
+          <span>Tashila</span>
+          <span class="sub" data-i18n="legal_hub">Legal &amp; Privacy Hub</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link" data-i18n="nav_privacy">Privacy Policy</a>
+        <a href="delete-account.html" class="nav-link active" data-i18n="nav_delete">Delete Account</a>
+        <a href="terms.html" class="nav-link" data-i18n="nav_terms">Terms of Service</a>
+        <button id="langToggle" class="lang-toggle-btn" aria-label="Toggle language">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+          </svg>
+          <span id="langText">العربية</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="badge-pill" style="border-color: rgba(239, 68, 68, 0.4); background: rgba(239, 68, 68, 0.1); color: #f87171;">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+      </svg>
+      <span data-i18n="badge_delete">Google Play Mandatory Account Deletion Portal</span>
+    </div>
+    <h1 class="hero-title" data-i18n="del_title">
+      Request <span class="highlight" style="background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Account &amp; Data Deletion</span>
+    </h1>
+    <p class="hero-subtitle" data-i18n="del_subtitle">
+      You have the right to request permanent deletion of your account and all associated personal data from Tashila Client (<code>com.tashila.tashilaclient</code>) and Tashila Driver (<code>com.tashila.tashiladriver</code>).
+    </p>
+  </section>
+
+  <!-- Main Container -->
+  <main style="max-width: 860px; margin: 0 auto; padding: 0 1.5rem 5rem; position: relative; z-index: 1;">
+
+    <!-- Information Card -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; margin-bottom: 2rem; box-shadow: var(--shadow-card);">
+      <h2 style="font-size: 1.35rem; color: #fff; margin-bottom: 1rem;" data-i18n="del_how_title">How Account Deletion Works</h2>
+      <p style="color: var(--text-muted); margin-bottom: 1.25rem;" data-i18n="del_how_desc">
+        You may request account deletion at any time, either directly within the mobile application or through the automated web request form below without needing to reinstall the app.
+      </p>
+
+      <div class="feature-grid" style="margin: 1.5rem 0;">
+        <div class="feature-box">
+          <div class="feature-box-icon" style="color: #ef4444;">🗑️</div>
+          <h4 data-i18n="del_box1_t">What Is Deleted</h4>
+          <p data-i18n="del_box1_p">Your phone number, profile avatar, driver license documents, vehicle registration card, GPS location logs, ratings, and push notification tokens.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-box-icon" style="color: #38bdf8;">📂</div>
+          <h4 data-i18n="del_box2_t">What May Be Retained</h4>
+          <p data-i18n="del_box2_p">Past fiscal invoices, trip payment receipts, and anonymized aggregate telemetry strictly necessary to satisfy statutory tax and commercial legal obligations.</p>
+        </div>
+        <div class="feature-box">
+          <div class="feature-box-icon" style="color: #10b981;">⏱️</div>
+          <h4 data-i18n="del_box3_t">Processing Timeline</h4>
+          <p data-i18n="del_box3_p">Account access is deactivated immediately upon request. All associated personal records are permanently erased within 30 calendar days.</p>
+        </div>
+      </div>
+
+      <div class="callout callout-warning">
+        <div class="callout-title">
+          <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+          </svg>
+          <span data-i18n="del_warn_t">Important Note for Tashila Drivers</span>
+        </div>
+        <p data-i18n="del_warn_p">
+          If you are a registered driver, deleting your account will permanently cancel your verified driver status, your vehicle profile, and your access to transport requests. Any pending payout or balance must be settled prior to account termination.
+        </p>
+      </div>
+    </div>
+
+    <!-- Interactive Deletion Form -->
+    <div class="deletion-card">
+      <h3 style="font-size: 1.4rem; color: #fff; margin-bottom: 0.5rem;" data-i18n="form_title">Online Account Deletion Request Form</h3>
+      <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;" data-i18n="form_desc">
+        Complete the form below to submit your official request to the Tashila Data Administration team.
+      </p>
+
+      <form id="deletionForm" onsubmit="handleDeletionSubmit(event)">
+        
+        <div class="form-group">
+          <label class="form-label" for="appType" data-i18n="form_app_label">Select Application Account Type *</label>
+          <select id="appType" class="form-control" required>
+            <option value="Tashila Client (com.tashila.tashilaclient)" data-i18n="opt_client">Tashila (Client / Passenger App)</option>
+            <option value="Tashila Driver (com.tashila.tashiladriver)" data-i18n="opt_driver">Tashila Driver (Driver &amp; Truck Operator App)</option>
+            <option value="Both Client and Driver Accounts" data-i18n="opt_both">Both Client &amp; Driver Accounts</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phoneNumber" data-i18n="form_phone_label">Registered Phone Number *</label>
+          <input type="tel" id="phoneNumber" class="form-control" placeholder="+213 555 123 456 or 0555123456" required>
+          <div class="form-help" data-i18n="form_phone_help">Enter the phone number associated with your Tashila account for verification.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="userEmail" data-i18n="form_email_label">Email Address (Optional)</label>
+          <input type="email" id="userEmail" class="form-control" placeholder="yourname@example.com">
+          <div class="form-help" data-i18n="form_email_help">We will send confirmation of completion to this email if provided.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="reason" data-i18n="form_reason_label">Reason for Leaving (Optional)</label>
+          <textarea id="reason" class="form-control" rows="3" placeholder="Tell us why you wish to delete your account (optional feedback)..."></textarea>
+        </div>
+
+        <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-top: 1.5rem;">
+          <input type="checkbox" id="confirmCheck" required style="margin-top: 0.3rem; width: 18px; height: 18px; accent-color: var(--primary); cursor: pointer;">
+          <label for="confirmCheck" style="font-size: 0.88rem; color: #cbd5e1; cursor: pointer;" data-i18n="form_confirm_label">
+            I confirm that I want to permanently delete my Tashila account and understand that this action cannot be undone.
+          </label>
+        </div>
+
+        <button type="submit" class="btn-action btn-primary" style="padding: 0.85rem 1.5rem; font-size: 1rem; margin-top: 1rem; width: 100%; border-radius: var(--radius-sm);">
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          <span data-i18n="form_submit_btn">Submit Deletion Request</span>
+        </button>
+
+      </form>
+
+      <!-- Confirmation Banner (Shown on submit) -->
+      <div id="confirmationBanner" style="display: none; margin-top: 1.5rem; padding: 1.25rem; background: rgba(16, 185, 129, 0.12); border: 1px solid rgba(16, 185, 129, 0.4); border-radius: var(--radius-md);">
+        <div style="display: flex; align-items: center; gap: 0.6rem; color: #34d399; font-weight: 700; margin-bottom: 0.5rem;">
+          <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+          </svg>
+          <span data-i18n="success_title">Deletion Request Generated Successfully</span>
+        </div>
+        <p style="font-size: 0.9rem; color: #e2e8f0; margin-bottom: 0.5rem;" data-i18n="success_p1">
+          Your request has been logged. An email dispatch has been initialized to <code style="color: var(--primary);">support@tashila.com</code>.
+        </p>
+        <p style="font-size: 0.85rem; color: #94a3b8;" data-i18n="success_p2">
+          Reference Code: <strong id="refCode" style="color: #fff;"></strong>. Our support team will process and verify your request within 3 to 5 business days.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- In-App Instructions Card -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-card);">
+      <h3 style="font-size: 1.2rem; color: #fff; margin-bottom: 0.75rem;" data-i18n="inapp_title">Deleting Directly Inside the Mobile App</h3>
+      <p style="color: var(--text-muted); font-size: 0.92rem; margin-bottom: 1rem;" data-i18n="inapp_desc">
+        If you have the mobile application installed on your Android device:
+      </p>
+      <ol style="color: var(--text-muted); padding-left: 1.5rem; line-height: 1.7; font-size: 0.92rem;">
+        <li><strong data-i18n="inapp_step1">Open the Tashila or Tashila Driver app.</strong></li>
+        <li><strong data-i18n="inapp_step2">Navigate to your Profile tab from the bottom navigation bar.</strong></li>
+        <li><strong data-i18n="inapp_step3">Tap on "Settings" (الإعدادات) &gt; "Security &amp; Account".</strong></li>
+        <li><strong data-i18n="inapp_step4">Select "Delete Account" (حذف الحساب) and confirm with your OTP code.</strong></li>
+      </ol>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="brand-wrapper">
+          <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
+          <div class="brand-title">
+            <span>Tashila</span>
+            <span class="sub">Logistics &amp; Transport</span>
+          </div>
+        </div>
+        <div class="footer-nav">
+          <a href="index.html" data-i18n="nav_privacy">Privacy Policy</a>
+          <a href="delete-account.html" data-i18n="nav_delete">Delete Account</a>
+          <a href="terms.html" data-i18n="nav_terms">Terms of Service</a>
+          <a href="mailto:support@tashila.com" data-i18n="nav_contact">Contact Support</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Tashila Platform. All rights reserved.</p>
+        <p data-i18n="footer_compliance">Compliant with Google Play Developer Policy &amp; Global Privacy Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    const translations = {
+      ar: {
+        legal_hub: "مركز الخصوصية والشروط القانونية",
+        nav_privacy: "سياسة الخصوصية",
+        nav_delete: "حذف الحساب",
+        nav_terms: "شروط الخدمة",
+        nav_contact: "الاتصال بالدعم",
+        badge_delete: "البوابة الإلزامية لحذف الحساب متوافقة مع متجر Google Play",
+        del_title: "طلب <span class=\"highlight\" style=\"background: linear-gradient(135deg, #ef4444 0%, #f97316 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;\">حذف الحساب والبيانات</span>",
+        del_subtitle: "يحق لك في أي وقت تقديم طلب الحذف النهائي لحسابك وكافة بياناتك الشخصية من تطبيقي تسهيلة للزبائن (com.tashila.tashilaclient) وتسهيلة للسائقين (com.tashila.tashiladriver).",
+        del_how_title: "كيف تعمل آلية حذف الحساب",
+        del_how_desc: "يمكنك طلب حذف الحساب بكل سهولة إما مباشرة من داخل التطبيق أو عبر هذا النموذج الإلكتروني المخصص دون الحاجة لإعادة تثبيت التطبيق.",
+        del_box1_t: "البيانات التي سيتم حذفها",
+        del_box1_p: "رقم الهاتف، الصورة الشخصية، وثائق السائق (رخصة السياقة والبطاقة الرمادية)، سجلات التتبع والموقع الجغرافي، التقييمات ومعرفات الإشعارات.",
+        del_box2_t: "البيانات التي قد يتم الاحتفاظ بها",
+        del_box2_p: "الفواتير وسجلات العمليات المالية السابقة الضرورية للامتثال للقوانين الجبائية والتجارية المعمول بها.",
+        del_box3_t: "المدة الزمنية للتنفيذ",
+        del_box3_p: "يتم تعطيل الوصول للحساب فوراً عند الطلب، ويتم المسح النهائي للبيانات الشخصية من قواعد البيانات خلال 30 يوماً كحد أقصى.",
+        del_warn_t: "ملاحظة هامة خاصة بسائقي تسهيلة",
+        del_warn_p: "إذا كنت سائقاً معتمداً، سيؤدي حذف الحساب إلى إلغاء توثيقك كشريك سائق وحذف مركبتك من المنصة، ويجب تسوية أي مستحقات قبل تنفيذ الحذف.",
+        form_title: "نموذج طلب حذف الحساب والبيانات عبر الويب",
+        form_desc: "يرجى ملء النموذج أدناه لإرسال طلبك مباشرة إلى فريق إدارة البيانات في تسهيلة.",
+        form_app_label: "اختر نوع التطبيق والحساب المراد حذفه *",
+        opt_client: "تسهيلة (تطبيق الزبائن والشحنات)",
+        opt_driver: "تسهيلة سائق (تطبيق السائقين وأصحاب الشاحنات)",
+        opt_both: "حساب العميل والسائق معاً",
+        form_phone_label: "رقم الهاتف المسجل في الحساب *",
+        form_phone_help: "أدخل رقم هاتفك المستخدم في التسجيل للتحقق من ملكية الحساب.",
+        form_email_label: "البريد الإلكتروني (اختياري)",
+        form_email_help: "سنرسل إشعار إتمام الحذف إلى هذا البريد في حال توفيره.",
+        form_reason_label: "سبب المغادرة (اختياري)",
+        form_confirm_label: "أؤكد رغبتي في الحذف النهائي لحسابي في منصة تسهيلة وأدرك أن هذا الإجراء نهائي ولا يمكن التراجع عنه.",
+        form_submit_btn: "إرسال طلب الحذف النهائي",
+        success_title: "تم إنشاء طلب الحذف بنجاح",
+        success_p1: "تم تسجيل طلبك وتوجيهه إلى فريق الدعم عبر support@tashila.com.",
+        success_p2: "رمز المرجع: ",
+        inapp_title: "الحذف مباشرة من داخل تطبيق الهاتف",
+        inapp_desc: "في حال كان التطبيق مثبتاً على هاتفك الأندرويد، يمكنك اتباع الخطوات الآتية:",
+        inapp_step1: "افتح تطبيق تسهيلة أو تسهيلة سائق.",
+        inapp_step2: "انتقل إلى تبويب \"حسابي\" أو الملف الشخصي من الشريط السفلي.",
+        inapp_step3: "اضغط على الإعدادات > الأمان والحساب.",
+        inapp_step4: "اختر \"حذف الحساب\" وأكد العملية عبر رمز التحقق OTP.",
+        footer_compliance: "متوافق بالكامل مع معايير Google Play Developer وشروط الخصوصية العالمية."
+      }
+    };
+
+    let currentLang = 'en';
+    const langToggleBtn = document.getElementById('langToggle');
+    const langText = document.getElementById('langText');
+
+    langToggleBtn.addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'ar' : 'en';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+      langText.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (currentLang === 'ar' && translations.ar[key]) {
+          if (!el.getAttribute('data-i18n-en')) {
+            el.setAttribute('data-i18n-en', el.innerHTML);
+          }
+          el.innerHTML = translations.ar[key];
+        } else if (currentLang === 'en' && el.getAttribute('data-i18n-en')) {
+          el.innerHTML = el.getAttribute('data-i18n-en');
+        }
+      });
+    });
+
+    function handleDeletionSubmit(e) {
+      e.preventDefault();
+      const appType = document.getElementById('appType').value;
+      const phone = document.getElementById('phoneNumber').value;
+      const email = document.getElementById('userEmail').value;
+      const reason = document.getElementById('reason').value;
+
+      const randomRef = 'TSH-DEL-' + Math.floor(100000 + Math.random() * 900000);
+      document.getElementById('refCode').textContent = randomRef;
+      document.getElementById('confirmationBanner').style.display = 'block';
+
+      // Pre-fill mailto for redundant direct compliance
+      const subject = encodeURIComponent(`Account Deletion Request [${randomRef}] - ${phone}`);
+      const body = encodeURIComponent(
+        `Dear Tashila Support,\n\n` +
+        `I am requesting the permanent deletion of my account and personal data.\n\n` +
+        `Reference: ${randomRef}\n` +
+        `Application: ${appType}\n` +
+        `Registered Phone Number: ${phone}\n` +
+        `Notification Email: ${email || 'N/A'}\n` +
+        `Reason: ${reason || 'User choice'}\n\n` +
+        `Please confirm once the deletion is executed.\n\nThank you.`
+      );
+
+      // Open mail client as secondary fallback
+      setTimeout(() => {
+        window.location.href = `mailto:support@tashila.com?subject=${subject}&body=${body}`;
+      }, 800);
+    }
+  </script>
+</body>
+</html>

@@ -16,6 +16,7 @@ import '../../core/formatting/app_format.dart';
 import '../../core/models/models.dart';
 import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/client_avatar.dart';
 import 'trip_requests_deck.dart';
 import 'waiting_for_offer_card.dart';
 
@@ -2020,17 +2021,11 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                         ),
                       ),
                     ),
-                  SizedBox(width: 4),
-                  CircleAvatar(
+                  const SizedBox(width: 4),
+                  ClientAvatar(
+                    avatarUrl: request.clientAvatar,
                     radius: 22,
-                    backgroundColor: AppColors.brandOrange.withValues(
-                      alpha: 0.15,
-                    ),
-                    child: const Icon(
-                      Icons.person_rounded,
-                      color: AppColors.brandOrange,
-                      size: 22,
-                    ),
+                    iconSize: 22,
                   ),
                 ],
               ),
@@ -2262,14 +2257,10 @@ class _CompactClientRow extends StatelessWidget {
         padding: pad,
         child: Row(
           children: [
-            CircleAvatar(
+            ClientAvatar(
+              avatarUrl: request.clientAvatar,
               radius: r,
-              backgroundColor: AppColors.brandOrange.withValues(alpha: 0.15),
-              child: Icon(
-                Icons.person_rounded,
-                color: AppColors.brandOrange,
-                size: compact ? 20 : 24,
-              ),
+              iconSize: compact ? 20 : 24,
             ),
             SizedBox(width: compact ? 10 : 14),
             Expanded(

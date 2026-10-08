@@ -50,6 +50,9 @@ build/
 
 # Old app folders
 _old/
+*_old/
+*.zip
+apps/
 
 # Agent / dev tools
 .agent/

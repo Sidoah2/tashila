@@ -63,7 +63,7 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
       if (ok) _submitted = true;
     });
     if (ok) {
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(seconds: 2), () {
         if (mounted) {
           _finish();
         }
@@ -85,7 +85,10 @@ class _RateDriverScreenState extends ConsumerState<RateDriverScreen> {
 
   Future<void> _finish() async {
     if (!mounted) return;
-    context.go('/home');
+    await ref.read(appStateProvider.notifier).completeRatingSession();
+    if (mounted) {
+      context.go('/home');
+    }
   }
 
   String _getStarLabel(int stars) {

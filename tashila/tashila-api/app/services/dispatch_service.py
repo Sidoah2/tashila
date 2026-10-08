@@ -29,6 +29,7 @@ from app.core.redis import (
     set_trip_broadcast_offers,
     add_rejected_trip,
     remove_driver_from_offer,
+    get_driver_offer_trip_ids,
 )
 from app.services import trip_service
 from app.services.notification_service import push_trip_request
@@ -525,60 +526,82 @@ async def advance_after_reject(trip_id: str, driver_id: str) -> None:
         await signal_dispatch_wake(trip_id)
 
 
-async def build_current_offer_for_driver(driver_id: str) -> dict[str, Any] | None:
-    trip_id = await get_driver_offer_trip_id(driver_id)
-    if not trip_id:
-        return None
+async def build_all_current_offers_for_driver(driver_id: str) -> list[dict[str, Any]]:
+    trip_ids = await get_driver_offer_trip_ids(driver_id)
+    if not trip_ids:
+        single = await get_driver_offer_trip_id(driver_id)
+        if single:
+            trip_ids = [single]
+    if not trip_ids:
+        return []
 
-    trip = await trip_service.get_trip_by_id(trip_id)
-    if trip.get("status") != "requested":
-        await clear_trip_offer(trip_id)
-        return None
-
-    offer = await get_trip_offer(trip_id)
-    if not offer:
-        return None
-
-    driver_ids = offer.get("driverIds", [])
-    if not driver_ids and offer.get("driverId"):
-        driver_ids = [offer["driverId"]]
-    if driver_id not in driver_ids:
-        return None
-
-    expires_raw = offer.get("expiresAt")
-    if expires_raw:
-        expires_at = datetime.fromisoformat(str(expires_raw).replace("Z", "+00:00"))
-        if expires_at.tzinfo is None:
-            expires_at = expires_at.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) >= expires_at:
-            return None
-
+    valid_offers: list[dict[str, Any]] = []
     from app.services.trip_service import _get_client_info, _json_safe, _trip_route_metrics
 
-    client = await _get_client_info(trip.get("clientId", ""))
-    route_km, route_minutes = _trip_route_metrics(
-        trip.get("pickup"),
-        trip.get("dropoff"),
-        stored_distance_km=trip.get("distanceKm"),
-        stored_minutes=trip.get("estimatedMinutes"),
-    )
-    return {
-        "id": trip_id,
-        "tripId": trip_id,
-        "pickup": trip.get("pickup"),
-        "dropoff": trip.get("dropoff"),
-        "fare": trip.get("fare"),
-        "distanceKm": route_km,
-        "estimatedDurationMinutes": route_minutes,
-        "expiresAt": expires_raw,
-        "offeredAt": offer.get("offeredAt") or expires_raw,
-        "offerGeneration": offer.get("generation"),
-        "clientName": client.get("name"),
-        "clientPhone": client.get("phone"),
-        "truckType": trip.get("truckType"),
-        "client": {
-            "name": client.get("name"),
-            "phone": client.get("phone"),
-        },
-        "createdAt": _json_safe(trip.get("createdAt")),
-    }
+    for trip_id in trip_ids:
+        try:
+            if await is_trip_rejected_by_driver(driver_id, trip_id):
+                continue
+
+            trip = await trip_service.get_trip_by_id(trip_id)
+            if trip.get("status") != "requested":
+                await remove_driver_from_offer(trip_id, driver_id)
+                continue
+
+            offer = await get_trip_offer(trip_id)
+            if not offer:
+                continue
+
+            driver_ids = offer.get("driverIds", [])
+            if not driver_ids and offer.get("driverId"):
+                driver_ids = [offer["driverId"]]
+            if driver_id not in driver_ids:
+                continue
+
+            expires_raw = offer.get("expiresAt")
+            if expires_raw:
+                expires_at = datetime.fromisoformat(str(expires_raw).replace("Z", "+00:00"))
+                if expires_at.tzinfo is None:
+                    expires_at = expires_at.replace(tzinfo=timezone.utc)
+                if datetime.now(timezone.utc) >= expires_at:
+                    await remove_driver_from_offer(trip_id, driver_id)
+                    continue
+
+            client = await _get_client_info(trip.get("clientId", ""))
+            route_km, route_minutes = _trip_route_metrics(
+                trip.get("pickup"),
+                trip.get("dropoff"),
+                stored_distance_km=trip.get("distanceKm"),
+                stored_minutes=trip.get("estimatedMinutes"),
+            )
+            valid_offers.append({
+                "id": trip_id,
+                "tripId": trip_id,
+                "pickup": trip.get("pickup"),
+                "dropoff": trip.get("dropoff"),
+                "fare": trip.get("fare"),
+                "distanceKm": route_km,
+                "estimatedDurationMinutes": route_minutes,
+                "expiresAt": expires_raw,
+                "offeredAt": offer.get("offeredAt") or expires_raw,
+                "offerGeneration": offer.get("generation"),
+                "clientName": client.get("name"),
+                "clientPhone": client.get("phone"),
+                "truckType": trip.get("truckType"),
+                "client": {
+                    "name": client.get("name"),
+                    "phone": client.get("phone"),
+                },
+                "createdAt": _json_safe(trip.get("createdAt")),
+            })
+        except Exception:
+            logger.exception("Error checking offer %s for driver %s", trip_id, driver_id)
+            continue
+
+    valid_offers.sort(key=lambda o: str(o.get("expiresAt") or ""))
+    return valid_offers
+
+
+async def build_current_offer_for_driver(driver_id: str) -> dict[str, Any] | None:
+    offers = await build_all_current_offers_for_driver(driver_id)
+    return offers[0] if offers else None

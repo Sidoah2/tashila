@@ -67,6 +67,13 @@ class _DriverRatingSheetContentState extends ConsumerState<DriverRatingSheetCont
       _submitting = false;
       if (ok) _submitted = true;
     });
+    if (ok) {
+      Future.delayed(const Duration(seconds: 2), () {
+        if (mounted && _submitted) {
+          _finish();
+        }
+      });
+    }
     if (!ok) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('rating_submit_failed'.tr())),

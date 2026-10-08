@@ -6,6 +6,7 @@ import '../../core/formatting/app_format.dart';
 import '../../core/models/models.dart';
 import '../../core/state/driver_app_state.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/widgets/client_avatar.dart';
 
 const _goodTraitKeys = [
   'trait_good_punctual',
@@ -194,26 +195,10 @@ class _RateClientScreenState extends ConsumerState<RateClientScreen> {
                         ),
                         child: Row(
                           children: [
-                            Container(
-                              width: 52,
-                              height: 52,
-                              decoration: BoxDecoration(
-                                color: AppColors.brandOrange.withValues(
-                                  alpha: 0.12,
-                                ),
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: AppColors.brandOrange.withValues(
-                                    alpha: 0.3,
-                                  ),
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.person_rounded,
-                                color: AppColors.brandOrange,
-                                size: 28,
-                              ),
+                            ClientAvatar(
+                              avatarUrl: request?.clientAvatar,
+                              radius: 26,
+                              iconSize: 28,
                             ),
                             const SizedBox(width: 14),
                             Expanded(

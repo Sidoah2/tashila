@@ -67,6 +67,11 @@ void main() {
       }
       expect(success, isTrue);
       expect(container.read(appStateProvider).history.length, 1);
+      done = false;
+      notifier.completeRatingSession().then((_) => done = true);
+      while (!done) {
+        async.elapse(const Duration(milliseconds: 50));
+      }
       expect(container.read(appStateProvider).tripStage, TripStage.idle);
     });
   });

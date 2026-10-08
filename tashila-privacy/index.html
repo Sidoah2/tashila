@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Privacy Policy | Tashila & Tashila Driver</title>
+  <meta name="description" content="Official Privacy Policy for Tashila Client and Tashila Driver mobile applications, detailing data protection, location access, permissions, and account deletion.">
+  <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
+  <link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+
+  <!-- Ambient background glow -->
+  <div class="ambient-bg">
+    <div class="ambient-orb orb-1"></div>
+    <div class="ambient-orb orb-2"></div>
+  </div>
+
+  <!-- Header -->
+  <header class="site-header">
+    <div class="nav-container">
+      <a href="index.html" class="brand-wrapper">
+        <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
+        <div class="brand-title">
+          <span>Tashila</span>
+          <span class="sub" data-i18n="legal_hub">Legal &amp; Privacy Hub</span>
+        </div>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link active" data-i18n="nav_privacy">Privacy Policy</a>
+        <a href="delete-account.html" class="nav-link" data-i18n="nav_delete">Delete Account</a>
+        <a href="terms.html" class="nav-link" data-i18n="nav_terms">Terms of Service</a>
+        <button id="langToggle" class="lang-toggle-btn" aria-label="Toggle language">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"></path>
+          </svg>
+          <span id="langText">العربية</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-banner">
+    <div class="badge-pill" data-i18n="badge_compliance">
+      <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+      </svg>
+      <span>Google Play Store Compliant Privacy Document</span>
+    </div>
+    <h1 class="hero-title" data-i18n="hero_title">
+      Privacy Policy for <span class="highlight">Tashila</span>
+    </h1>
+    <p class="hero-subtitle" data-i18n="hero_desc">
+      This Privacy Policy describes how Tashila collects, uses, protects, and discloses information gathered through the Tashila Client and Tashila Driver mobile applications and services.
+    </p>
+    <div class="meta-bar">
+      <div class="meta-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+        <span data-i18n="meta_effective">Effective Date: September 19, 2026</span>
+      </div>
+      <div class="meta-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+        <span data-i18n="meta_updated">Last Updated: September 19, 2026</span>
+      </div>
+      <div class="meta-item">
+        <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+        </svg>
+        <span data-i18n="meta_status">Status: Active &amp; Verified</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Covered Apps Grid -->
+  <section class="coverage-banner">
+    <div class="coverage-cards">
+      <div class="coverage-card">
+        <div class="app-icon-badge">📦</div>
+        <div class="coverage-info">
+          <h4 data-i18n="app_client_title">Tashila (Client App)</h4>
+          <p>Package: com.tashila.tashilaclient</p>
+        </div>
+      </div>
+      <div class="coverage-card">
+        <div class="app-icon-badge">🚚</div>
+        <div class="coverage-info">
+          <h4 data-i18n="app_driver_title">Tashila Driver (Driver App)</h4>
+          <p>Package: com.tashila.tashiladriver</p>
+        </div>
+      </div>
+      <div class="coverage-card">
+        <div class="app-icon-badge">🛡️</div>
+        <div class="coverage-info">
+          <h4 data-i18n="app_admin_title">Tashila Dispatch &amp; Admin</h4>
+          <p>Infrastructure: tashila-production.up.railway.app</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="main-layout">
+
+    <!-- Sticky Table of Contents Sidebar -->
+    <aside class="toc-sidebar">
+      <div class="toc-title">
+        <span data-i18n="toc_heading">Contents</span>
+        <span>📑</span>
+      </div>
+      <nav class="toc-nav">
+        <ul>
+          <li><a href="#overview" data-i18n="toc_1">1. Overview &amp; Scope</a></li>
+          <li><a href="#data-collection" data-i18n="toc_2">2. Information We Collect</a></li>
+          <li><a href="#location-disclosure" data-i18n="toc_3">3. Location Data &amp; Background Use</a></li>
+          <li><a href="#camera-storage" data-i18n="toc_4">4. Camera &amp; Storage Permissions</a></li>
+          <li><a href="#how-we-use" data-i18n="toc_5">5. How We Use Data</a></li>
+          <li><a href="#third-parties" data-i18n="toc_6">6. Third-Party Services</a></li>
+          <li><a href="#data-retention" data-i18n="toc_7">7. Retention &amp; Security</a></li>
+          <li><a href="#account-deletion" data-i18n="toc_8">8. Account &amp; Data Deletion</a></li>
+          <li><a href="#children-privacy" data-i18n="toc_9">9. Children's Privacy</a></li>
+          <li><a href="#user-rights" data-i18n="toc_10">10. Your Rights &amp; Choices</a></li>
+          <li><a href="#contact" data-i18n="toc_11">11. Contact Information</a></li>
+        </ul>
+      </nav>
+      <div class="toc-actions">
+        <a href="delete-account.html" class="btn-action btn-primary" data-i18n="btn_delete_page">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+          <span>Account Deletion Page</span>
+        </a>
+        <button onclick="window.print()" class="btn-action btn-secondary" data-i18n="btn_print">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+          </svg>
+          <span>Print / PDF Copy</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Policy Text Article -->
+    <article class="policy-content" id="policyContent">
+
+      <!-- Section 1 -->
+      <section class="policy-section" id="overview">
+        <div class="section-header">
+          <span class="section-num">01</span>
+          <h2 data-i18n="s1_title">Overview &amp; Scope</h2>
+        </div>
+        <p data-i18n="s1_p1">
+          Welcome to <strong>Tashila</strong> ("we", "us", or "our"). Tashila operates an on-demand freight and logistics transportation technology platform that connects customers needing cargo transportation ("Clients") with independent transport providers operating single-cabin and double-cabin utility trucks ("Drivers").
+        </p>
+        <p data-i18n="s1_p2">
+          This Privacy Policy applies to the <strong>Tashila Client</strong> mobile application (<code>com.tashila.tashilaclient</code>), the <strong>Tashila Driver</strong> mobile application (<code>com.tashila.tashiladriver</code>), our website, APIs, and associated online services (collectively, the "Services").
+        </p>
+        <p data-i18n="s1_p3">
+          By downloading, accessing, or using any of our applications, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with our policies and practices, please do not use our Services.
+        </p>
+      </section>
+
+      <!-- Section 2 -->
+      <section class="policy-section" id="data-collection">
+        <div class="section-header">
+          <span class="section-num">02</span>
+          <h2 data-i18n="s2_title">Information We Collect</h2>
+        </div>
+        <p data-i18n="s2_p1">
+          To provide safe, reliable, and efficient logistics services, we collect information directly provided by you, automatically generated during app usage, and gathered from third-party partners.
+        </p>
+
+        <h3 data-i18n="s2_sub1">A. Information You Provide to Us</h3>
+        <ul>
+          <li><strong data-i18n="s2_li1_t">Account Registration Details:</strong> When you register as a Client or Driver, we collect your mobile phone number for One-Time Password (OTP) verification, full name, profile picture, and language preference.</li>
+          <li><strong data-i18n="s2_li2_t">Driver Verification Documents (KYC):</strong> For Tashila Driver accounts, we collect and verify statutory identification documents including government-issued driver's license, vehicle registration papers ("Carte Grise"), vehicle insurance certificates, vehicle type classification (Single Cabin or Double Cabin pickup truck), and vehicle license plate number.</li>
+          <li><strong data-i18n="s2_li3_t">Communications &amp; Support:</strong> Records of inquiries, dispute reports, customer service chats, and ratings or feedback provided after completing trips.</li>
+        </ul>
+
+        <h3 data-i18n="s2_sub2">B. Information Automatically Collected</h3>
+        <ul>
+          <li><strong data-i18n="s2_li4_t">Precise &amp; Coarse Location Data:</strong> Real-time GPS coordinates collected from your mobile device (see Section 3 for detailed disclosure).</li>
+          <li><strong data-i18n="s2_li5_t">Device &amp; Hardware Identifiers:</strong> Device model, operating system version, unique device identifier (Android ID), network carrier, IP address, and Firebase Cloud Messaging (FCM) push tokens used to send order alerts.</li>
+          <li><strong data-i18n="s2_li6_t">Transaction &amp; Order History:</strong> Pickup coordinates, delivery destination, timestamp of request, completion time, truck category chosen, calculated distance, and agreed fare.</li>
+        </ul>
+      </section>
+
+      <!-- Section 3 -->
+      <section class="policy-section" id="location-disclosure">
+        <div class="section-header">
+          <span class="section-num">03</span>
+          <h2 data-i18n="s3_title">Location Data &amp; Background Use Disclosure</h2>
+        </div>
+
+        <div class="callout callout-warning">
+          <div class="callout-title">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+            </svg>
+            <span data-i18n="s3_alert_t">Prominent Disclosure: Location Access in Tashila &amp; Tashila Driver</span>
+          </div>
+          <p data-i18n="s3_alert_p">
+            Location access is essential to the core functionality of Tashila freight transportation. Below we explicitly detail how location is gathered for both apps, including background location tracking.
+          </p>
+        </div>
+
+        <h3 data-i18n="s3_client_t">1. Tashila Client App (Foreground Location)</h3>
+        <p data-i18n="s3_client_p">
+          The Client app uses <code>ACCESS_FINE_LOCATION</code> and <code>ACCESS_COARSE_LOCATION</code> exclusively while the application is active on screen (foreground) to:
+        </p>
+        <ul>
+          <li>Automatically set your current cargo pickup pin on the interactive map.</li>
+          <li>Display nearby active drivers and available truck types (Single Cabin / Double Cabin).</li>
+          <li>Estimate travel route distances and trip pricing through Google Maps API.</li>
+        </ul>
+
+        <h3 data-i18n="s3_driver_t">2. Tashila Driver App (Foreground &amp; Background Location)</h3>
+        <p data-i18n="s3_driver_p1">
+          The Tashila Driver app collects precise location data via the <code>BackgroundService</code> <strong>even when the application is running in the background or when the screen is closed</strong>, under the following strict conditions:
+        </p>
+        <ul>
+          <li><strong>Dispatch &amp; Order Matching:</strong> While a driver has turned their status to <em>"Online"</em>, continuous background location enables our server algorithm to match nearby customer shipment requests with the most optimal driver, preventing wasted fuel and lengthy wait times.</li>
+          <li><strong>Real-Time Transit &amp; Safety Tracking:</strong> During an accepted and ongoing delivery mission, background location tracking transmits accurate transit telemetry to the customer and dispatch console. This ensures cargo safety, transparency, accurate arrival estimates, and verification of pickup and drop-off milestones.</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-title">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+            </svg>
+            <span data-i18n="s3_driver_ctrl_t">Driver Control Over Location</span>
+          </div>
+          <p data-i18n="s3_driver_ctrl_p">
+            Drivers maintain full control over background location tracking. When a driver toggles the status switch to <strong>"Offline"</strong>, background location reporting immediately ceases completely.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 4 -->
+      <section class="policy-section" id="camera-storage">
+        <div class="section-header">
+          <span class="section-num">04</span>
+          <h2 data-i18n="s4_title">Camera &amp; Device Storage Permissions</h2>
+        </div>
+        <p data-i18n="s4_p1">
+          Our applications request access to the device camera (<code>android.permission.CAMERA</code>) and media storage under explicit user confirmation for the following exclusive purposes:
+        </p>
+        <div class="feature-grid">
+          <div class="feature-box">
+            <div class="feature-box-icon">📷</div>
+            <h4 data-i18n="s4_f1_t">Driver KYC Verification</h4>
+            <p data-i18n="s4_f1_p">Drivers photograph their valid driver's license and vehicle registration document during onboarding so administrators can review and approve roadworthiness.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-box-icon">👤</div>
+            <h4 data-i18n="s4_f2_t">Profile Avatar Upload</h4>
+            <p data-i18n="s4_f2_p">Users may upload a profile picture from their gallery or camera to identify themselves to drivers and clients for seamless order handoff.</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-box-icon">🔒</div>
+            <h4 data-i18n="s4_f3_t">Secure Cloud Storage</h4>
+            <p data-i18n="s4_f3_p">Uploaded photos are transmitted over encrypted TLS connections to secured cloud buckets (Cloudinary) and are never used for marketing purposes.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Section 5 -->
+      <section class="policy-section" id="how-we-use">
+        <div class="section-header">
+          <span class="section-num">05</span>
+          <h2 data-i18n="s5_title">How We Use Your Information</h2>
+        </div>
+        <p data-i18n="s5_p1">We utilize collected data solely for legitimate business operations, specifically:</p>
+        <ul>
+          <li>Matching freight requests with suitable drivers in the vicinity based on truck size (single vs. double cabin).</li>
+          <li>Facilitating direct in-app or phone dialer communication between assigned Driver and Client to coordinate loading and unloading.</li>
+          <li>Generating transparent fare estimates, trip receipts, and trip route logs.</li>
+          <li>Investigating customer disputes, vehicle breakdowns, or safety concerns.</li>
+          <li>Sending critical push alerts regarding ride acceptance, driver arrival, or security notifications via Firebase Cloud Messaging.</li>
+          <li>Complying with applicable legal, fiscal, and transportation regulatory requirements.</li>
+        </ul>
+      </section>
+
+      <!-- Section 6 -->
+      <section class="policy-section" id="third-parties">
+        <div class="section-header">
+          <span class="section-num">06</span>
+          <h2 data-i18n="s6_title">Third-Party Service Providers</h2>
+        </div>
+        <p data-i18n="s6_p1">
+          We do not sell, rent, or trade your personal information. We partner with vetted third-party service providers who adhere to rigorous data privacy standards:
+        </p>
+
+        <div class="data-table-wrapper">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th data-i18n="th_provider">Provider</th>
+                <th data-i18n="th_purpose">Purpose</th>
+                <th data-i18n="th_data">Data Processed</th>
+                <th data-i18n="th_policy">Privacy Link</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Google Maps Platform</strong></td>
+                <td>Geocoding, route mapping &amp; distance calculation</td>
+                <td>GPS coordinates, destination addresses</td>
+                <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy</a></td>
+              </tr>
+              <tr>
+                <td><strong>Firebase (Google LLC)</strong></td>
+                <td>Push notifications for real-time dispatch</td>
+                <td>Device tokens, OS metadata, app instance IDs</td>
+                <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy</a></td>
+              </tr>
+              <tr>
+                <td><strong>Cloudinary Inc.</strong></td>
+                <td>Encrypted storage of KYC verification photos &amp; avatars</td>
+                <td>Uploaded image files</td>
+                <td><a href="https://cloudinary.com/privacy" target="_blank" rel="noopener">Cloudinary Privacy</a></td>
+              </tr>
+              <tr>
+                <td><strong>Railway &amp; MongoDB Atlas</strong></td>
+                <td>Secure cloud database &amp; API infrastructure</td>
+                <td>Encrypted backend database records</td>
+                <td><a href="https://www.mongodb.com/legal/privacy-policy" target="_blank" rel="noopener">MongoDB Privacy</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Section 7 -->
+      <section class="policy-section" id="data-retention">
+        <div class="section-header">
+          <span class="section-num">07</span>
+          <h2 data-i18n="s7_title">Data Retention &amp; Security Standards</h2>
+        </div>
+        <p data-i18n="s7_p1">
+          <strong>Security:</strong> All communication between Tashila mobile apps and our backend servers occurs over modern Transport Layer Security (HTTPS / TLS 1.3). Sensitive credentials and access tokens are hashed and securely stored.
+        </p>
+        <p data-i18n="s7_p2">
+          <strong>Retention:</strong> We retain user personal data for as long as the account remains active. If you request account deletion, we immediately deactivate the account and delete personal identifiers, location logs, and profile assets within 30 business days, retaining only anonymized telemetry or statutory fiscal invoice records required by local commercial law.
+        </p>
+      </section>
+
+      <!-- Section 8 -->
+      <section class="policy-section" id="account-deletion">
+        <div class="section-header">
+          <span class="section-num">08</span>
+          <h2 data-i18n="s8_title">Account &amp; Data Deletion Policy</h2>
+        </div>
+        <p data-i18n="s8_p1">
+          In strict adherence to Google Play Store requirements, users have the unconditional right to request the permanent deletion of their account and all associated personal data.
+        </p>
+
+        <h3 data-i18n="s8_methods_t">How to Request Account Deletion</h3>
+        <ol>
+          <li><strong data-i18n="s8_m1_t">Method 1 (In-App):</strong> Navigate to <em>Profile &gt; Settings &gt; Delete Account</em> inside either the Tashila Client or Tashila Driver app and confirm the verification prompt.</li>
+          <li><strong data-i18n="s8_m2_t">Method 2 (Web Form):</strong> Visit our dedicated <a href="delete-account.html">Account Deletion Web Page</a> to submit an automated deletion request with your registered phone number.</li>
+          <li><strong data-i18n="s8_m3_t">Method 3 (Direct Email):</strong> Send an email from your registered email address or citing your phone number to <code>support@tashila.com</code> with the subject <em>"Account Deletion Request"</em>.</li>
+        </ol>
+
+        <div class="callout callout-danger">
+          <div class="callout-title">
+            <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
+            </svg>
+            <span data-i18n="s8_warning_t">What Happens Upon Deletion</span>
+          </div>
+          <p data-i18n="s8_warning_p">
+            Account deletion is permanent. Your phone profile, avatar, driver licensing documents, vehicle records, rating history, and location logs will be purged permanently from our active production databases.
+          </p>
+        </div>
+      </section>
+
+      <!-- Section 9 -->
+      <section class="policy-section" id="children-privacy">
+        <div class="section-header">
+          <span class="section-num">09</span>
+          <h2 data-i18n="s9_title">Children's Privacy Protection</h2>
+        </div>
+        <p data-i18n="s9_p1">
+          Our Services are strictly directed toward adults and business operators capable of entering legally binding commercial transport contracts. We do not knowingly collect personal identifiable information from children under the age of 18 (and specifically under 13). If we become aware that a child under 13 has provided us with personal data, we will immediately delete that information from our records.
+        </p>
+      </section>
+
+      <!-- Section 10 -->
+      <section class="policy-section" id="user-rights">
+        <div class="section-header">
+          <span class="section-num">10</span>
+          <h2 data-i18n="s10_title">Your Legal Rights &amp; Choices</h2>
+        </div>
+        <p data-i18n="s10_p1">Depending on your jurisdiction, you possess the following rights regarding your personal information:</p>
+        <ul>
+          <li><strong>Right of Access:</strong> Request a copy of the personal data we maintain about you.</li>
+          <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete profile or vehicle information.</li>
+          <li><strong>Right to Erasure:</strong> Request permanent removal of your data as outlined in Section 8.</li>
+          <li><strong>Revocation of Permissions:</strong> Revoke Location or Camera permissions at any time via your Android device OS settings (<code>Settings &gt; Apps &gt; Tashila &gt; Permissions</code>).</li>
+        </ul>
+      </section>
+
+      <!-- Section 11 -->
+      <section class="policy-section" id="contact">
+        <div class="section-header">
+          <span class="section-num">11</span>
+          <h2 data-i18n="s11_title">Contact Information &amp; Data Controller</h2>
+        </div>
+        <p data-i18n="s11_p1">
+          If you have questions, inquiries, complaints, or feedback regarding this Privacy Policy or our privacy practices, please contact our Data Protection Officer:
+        </p>
+        <div class="feature-grid">
+          <div class="feature-box">
+            <div class="feature-box-icon">📧</div>
+            <h4>Support Email</h4>
+            <p><a href="mailto:support@tashila.com" style="color: var(--primary);">support@tashila.com</a></p>
+            <p><a href="mailto:admin@tashila.com" style="color: var(--primary);">admin@tashila.com</a></p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-box-icon">🏢</div>
+            <h4>Platform Operator</h4>
+            <p><strong>Tashila Logistics &amp; Transport</strong></p>
+            <p>Algiers, Algeria</p>
+          </div>
+          <div class="feature-box">
+            <div class="feature-box-icon">⏱️</div>
+            <h4>Response Time</h4>
+            <p>We review and respond to formal privacy inquiries within 48 to 72 business hours.</p>
+          </div>
+        </div>
+      </section>
+
+    </article>
+  </main>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      <div class="footer-top">
+        <div class="brand-wrapper">
+          <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
+          <div class="brand-title">
+            <span>Tashila</span>
+            <span class="sub">Logistics &amp; Transport</span>
+          </div>
+        </div>
+        <div class="footer-nav">
+          <a href="index.html" data-i18n="nav_privacy">Privacy Policy</a>
+          <a href="delete-account.html" data-i18n="nav_delete">Delete Account</a>
+          <a href="terms.html" data-i18n="nav_terms">Terms of Service</a>
+          <a href="mailto:support@tashila.com" data-i18n="nav_contact">Contact Support</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <p>&copy; 2026 Tashila Platform. All rights reserved.</p>
+        <p data-i18n="footer_compliance">Compliant with Google Play Developer Policy &amp; Global Privacy Standards.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Bilingual Translations & Script -->
+  <script>
+    const translations = {
+      ar: {
+        legal_hub: "مركز الخصوصية والشروط القانونية",
+        nav_privacy: "سياسة الخصوصية",
+        nav_delete: "حذف الحساب",
+        nav_terms: "شروط الخدمة",
+        nav_contact: "الاتصال بالدعم",
+        badge_compliance: "وثيقة خصوصية متوافقة بالكامل مع متطلبات Google Play",
+        hero_title: "سياسة الخصوصية لتطبيق <span class=\"highlight\">تسهيلة</span>",
+        hero_desc: "توضح سياسة الخصوصية هذه كيفية قيام منصة تسهيلة بجمع واستخدام وحماية ومشاركة بياناتك الشخصية من خلال تطبيقي تسهيلة للعميل وتسهيلة للسائق.",
+        meta_effective: "تاريخ السريان: 19 سبتمبر 2026",
+        meta_updated: "آخر تحديث: 19 سبتمبر 2026",
+        meta_status: "الحالة: موثقة ونشطة",
+        app_client_title: "تسهيلة (تطبيق الزبائن)",
+        app_driver_title: "تسهيلة سائق (تطبيق السائقين)",
+        app_admin_title: "نظام التوزيع والإدارة",
+        toc_heading: "الفهرس والمحتويات",
+        toc_1: "1. النظرة العامة والنطاق",
+        toc_2: "2. المعلومات التي نجمعها",
+        toc_3: "3. بيانات الموقع الجغرافي واستخدامه في الخلفية",
+        toc_4: "4. أذونات الكاميرا ومساحة التخزين",
+        toc_5: "5. كيف نستخدم معلوماتك",
+        toc_6: "6. الأطراف الثالثة ومقدمو الخدمات",
+        toc_7: "7. الاحتفاظ بالبيانات ومعايير الأمان",
+        toc_8: "8. طلب حذف الحساب والبيانات",
+        toc_9: "9. حماية خصوصية الأطفال",
+        toc_10: "10. حقوقك وخياراتك القانونية",
+        toc_11: "11. معلومات الاتصال بالمسؤول",
+        btn_delete_page: "صفحة حذف الحساب والبيانات",
+        btn_print: "طباعة / حفظ كملف PDF",
+        s1_title: "01. النظرة العامة والنطاق",
+        s1_p1: "مرحباً بكم في <strong>تسهيلة</strong> (\"نحن\" أو \"المنصة\"). تدير تسهيلة منصة تقنية لنقل وشحن البضائع عند الطلب تربط بين الزبائن الراغبين في نقل الحمولات (\"الزبائن\") وسائقي الشاحنات النفعية بمقصورة فردية أو مزدوجة (\"السائقون\").",
+        s1_p2: "تنطبق سياسة الخصوصية هذه على تطبيق <strong>تسهيلة للزبائن</strong> (<code>com.tashila.tashilaclient</code>) وتطبيق <strong>تسهيلة للسائقين</strong> (<code>com.tashila.tashiladriver</code>) وبوابتنا وخدماتنا الرقمية المرتبطة بها.",
+        s1_p3: "عبر تنزيل أو استخدام أي من تطبيقاتنا، فإنك تقر بأنك قد قرأت وفهمت سياسة الخصوصية هذه وتوافق على بنودها.",
+        s2_title: "02. المعلومات التي نجمعها",
+        s2_p1: "لتقديم خدمة نقل آمنة وسريعة وموثوقة، نجمع المعلومات التي تزودنا بها مباشرة، والمعلومات الناتجة تلقائياً أثناء تشغيل التطبيق.",
+        s2_sub1: "أ. معلومات تقدمها لنا مباشرة",
+        s2_li1_t: "بيانات التسجيل والحساب:",
+        s2_li2_t: "وثائق إثبات هوية السائق (KYC):",
+        s2_li3_t: "المراسلات والتقييمات:",
+        s2_sub2: "ب. المعلومات التي تُجمع تلقائياً",
+        s2_li4_t: "بيانات الموقع الدقيقة والتقريبية:",
+        s2_li5_t: "معلومات الجهاز ومعرفات النظام:",
+        s2_li6_t: "سجل العمليات والشحنات:",
+        s3_title: "03. بيانات الموقع الجغرافي واستخدامه في الخلفية",
+        s3_alert_t: "إفصاح صريح ومهم: الوصول إلى الموقع في تطبيقي تسهيلة وتسهيلة سائق",
+        s3_alert_p: "يعد الوصول إلى الموقع الجغرافي وظيفة جوهرية وأساسية لتشغيل منصة شحن تسهيلة. فيما يلي نفصل بدقة استخدام الموقع بما في ذلك التتبع في الخلفية.",
+        s3_client_t: "1. تطبيق الزبون (الموقع أثناء الاستخدام فقط)",
+        s3_client_p: "يستخدم تطبيق الزبون إذن الموقع في الواجهة الأمامية فقط لتحديد نقطة انطلاق البضاعة وعرض أقرب الشاحنات المتوفرة وتقدير المسافة وتكلفة الرحلة.",
+        s3_driver_t: "2. تطبيق السائق (الموقع في الواجهة الأمامية والخلفية)",
+        s3_driver_p1: "يجمع تطبيق سائق تسهيلة بيانات الموقع الدقيقة حتى عندما يكون التطبيق مغلقاً أو يعمل في الخلفية والشاشة مقفلة عبر خدمة BackgroundService وذلك للأسباب الصريحة التالية:",
+        s3_driver_ctrl_t: "تحكم كامل للسائق في تتبع الموقع",
+        s3_driver_ctrl_p: "يملك السائق التحكم الكامل، فبمجرد تحويل حالته داخل التطبيق إلى \"غير متصل\" (Offline)، يتوقف إرسال وتتبع الموقع في الخلفية فوراً وبشكل كلي.",
+        s4_title: "04. أذونات الكاميرا ومساحة التخزين",
+        s4_p1: "يطلب التطبيق إذن الكاميرا ومساحة التخزين بموافقة المستخدم للأغراض التالية فقط:",
+        s4_f1_t: "التحقق من ملفات السائق",
+        s4_f1_p: "يقوم السائق بتصوير رخصة السياقة وبطاقة ترقيم المركبة (البطاقة الرمادية) لمراجعتها واعتمادها من الإدارة.",
+        s4_f2_t: "الصورة الشخصية",
+        s4_f2_p: "إمكانية رفع صورة للملف الشخصي للتعرف على السائق أو العميل أثناء تسليم الشحنة.",
+        s4_f3_t: "تخزين سحابي مشفر",
+        s4_f3_p: "يتم نقل الصور عبر بروتوكول TLS مشفر وتخزينها بأمان تام عبر سيرفرات Cloudinary دون أي استخدام إعلاني.",
+        s5_title: "05. كيف نستخدم معلوماتك",
+        s5_p1: "نستخدم البيانات المجمعة لتشغيل الخدمة وتوزيع طلبات الشحن بدقة، وإصدار الفواتير، وحل النزاعات، وإرسال إشعارات التنبيهات الفورية عبر Firebase.",
+        s6_title: "06. الأطراف الثالثة ومقدمو الخدمات",
+        s6_p1: "نحن لا نبيع أو نؤجر بياناتك لأي معلنين أو أطراف خارجية. نتعامل فقط مع خدمات موثوقة وعالمية للأمان والخرائط.",
+        th_provider: "مقدم الخدمة",
+        th_purpose: "الغرض من الاستخدام",
+        th_data: "نوع البيانات",
+        th_policy: "سياسة الخصوصية",
+        s7_title: "07. الاحتفاظ بالبيانات ومعايير الأمان",
+        s7_p1: "تستخدم منصة تسهيلة تشفيراً حديثاً (TLS 1.3 / HTTPS) لجميع الاتصالات، مع قواعد بيانات مؤمنة وفق أعلى المعايير.",
+        s7_p2: "نحتفظ بالبيانات طالما كان الحساب نشطاً، وعند طلب حذف الحساب يتم مسح البيانات الشخصية خلال 30 يوماً عمل.",
+        s8_title: "08. طلب حذف الحساب والبيانات",
+        s8_p1: "وفقاً لسياسات متجر Google Play، يحق لكل مستخدم تقديم طلب فوري لحذف حسابه وكافة البيانات المرتبطة به نهائياً.",
+        s8_methods_t: "طرق حذف الحساب المتاحة:",
+        s8_m1_t: "الطريقة 1 (من داخل التطبيق):",
+        s8_m2_t: "الطريقة 2 (نموذج الويب المباشر):",
+        s8_m3_t: "الطريقة 3 (عبر البريد الإلكتروني):",
+        s8_warning_t: "ماذا يترتب على عملية الحذف",
+        s8_warning_p: "الحذف نهائي ولا يمكن التراجع عنه. يتم مسح رقم الهاتف والصور الشخصية ووثائق السائق وسجلات الموقع نهائياً من قواعد بياناتنا النشطة.",
+        s9_title: "09. حماية خصوصية الأطفال",
+        s9_p1: "خدماتنا موجهة فقط للبالغين المؤهلين قانونياً (18 سنة فما فوق). نحن لا نجمع إطلاقاً أي بيانات من أطفال تحت سن 13 عاماً.",
+        s10_title: "10. حقوقك وخياراتك القانونية",
+        s10_p1: "يحق لك في أي وقت طلب الوصول لبياناتك، أو تصحيحها، أو إيقاف إذن الموقع والكاميرا من إعدادات هاتفك الذكي، أو طلب الحذف الكامل.",
+        s11_title: "11. معلومات الاتصال بالمسؤول",
+        s11_p1: "إذا كان لديك أي استفسار أو شكوى بخصوص سياسة الخصوصية، يمكنك التواصل مع مسؤول حماية البيانات عبر البريد التالي:",
+        footer_compliance: "متوافق بالكامل مع معايير Google Play Developer وشروط الخصوصية العالمية."
+      }
+    };
+
+    let currentLang = 'en';
+    const langToggleBtn = document.getElementById('langToggle');
+    const langText = document.getElementById('langText');
+
+    langToggleBtn.addEventListener('click', () => {
+      currentLang = currentLang === 'en' ? 'ar' : 'en';
+      document.documentElement.lang = currentLang;
+      document.documentElement.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+      langText.textContent = currentLang === 'ar' ? 'English' : 'العربية';
+
+      document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        if (currentLang === 'ar' && translations.ar[key]) {
+          if (!el.getAttribute('data-i18n-en')) {
+            el.setAttribute('data-i18n-en', el.innerHTML);
+          }
+          el.innerHTML = translations.ar[key];
+        } else if (currentLang === 'en' && el.getAttribute('data-i18n-en')) {
+          el.innerHTML = el.getAttribute('data-i18n-en');
+        }
+      });
+    });
+
+    // Active sidebar TOC highlight on scroll
+    const sections = document.querySelectorAll('.policy-section');
+    const navLinks = document.querySelectorAll('.toc-nav a');
+
+    window.addEventListener('scroll', () => {
+      let current = '';
+      sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        if (pageYOffset >= sectionTop - 120) {
+          current = section.getAttribute('id');
+        }
+      });
+
+      navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -194,6 +194,26 @@ async def _get_driver_info(driver_id: str | None) -> dict[str, Any] | None:
     driver = await _find_driver(driver_id)
     if driver is None:
         return None
+
+    rating = driver.get("rating")
+    if rating is None:
+        try:
+            agg = await get_database()[TRIPS_COLLECTION].aggregate([
+                {"$match": {"driverId": driver_id, "driverRating": {"$ne": None}}},
+                {"$group": {"_id": None, "avgRating": {"$avg": "$driverRating"}}},
+            ]).to_list(1)
+            if agg and agg[0].get("avgRating") is not None:
+                rating = round(float(agg[0]["avgRating"]), 1)
+            else:
+                rating = 5.0
+        except Exception:
+            rating = 5.0
+    else:
+        try:
+            rating = round(float(rating), 1)
+        except (ValueError, TypeError):
+            rating = 5.0
+
     return {
         "id": driver["id"],
         "phone": driver.get("phone"),
@@ -203,7 +223,7 @@ async def _get_driver_info(driver_id: str | None) -> dict[str, Any] | None:
         "vehiclePlate": driver.get("vehiclePlate"),
         "vehicleColor": driver.get("vehicleColor"),
         "vehicleModel": driver.get("vehicleModel"),
-        "rating": driver.get("rating"),
+        "rating": rating,
     }
 
 
@@ -679,11 +699,9 @@ async def get_current_offer_for_driver(driver_id: str) -> dict[str, Any] | None:
 
 
 async def get_trip_requests_for_driver(driver_id: str) -> list[dict[str, Any]]:
-    """Exclusive dispatch: at most one trip when this driver holds the active offer."""
-    offer = await get_current_offer_for_driver(driver_id)
-    if offer is None:
-        return []
-    return [offer]
+    from app.services import dispatch_service
+
+    return await dispatch_service.build_all_current_offers_for_driver(driver_id)
 
 
 async def accept_trip(trip_id: str, driver_id: str) -> dict[str, Any]:

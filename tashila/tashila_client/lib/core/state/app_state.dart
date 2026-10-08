@@ -143,6 +143,7 @@ class AppState {
     this.driverVehicleColor = '',
     this.driverVehicleModel = '',
     this.driverAvatarUrl = '',
+    this.driverRating = 5.0,
     this.driverLat,
     this.driverLng,
     this.routePoints = const [],
@@ -201,6 +202,7 @@ class AppState {
   final String driverVehicleColor;
   final String driverVehicleModel;
   final String driverAvatarUrl;
+  final double driverRating;
   final double? driverLat;
   final double? driverLng;
   final bool showDriverCancelledDialog;
@@ -256,6 +258,7 @@ class AppState {
     String? driverVehicleColor,
     String? driverVehicleModel,
     String? driverAvatarUrl,
+    double? driverRating,
     double? driverLat,
     double? driverLng,
     bool clearDriverLocation = false,
@@ -304,6 +307,7 @@ class AppState {
       driverVehicleColor: driverVehicleColor ?? this.driverVehicleColor,
       driverVehicleModel: driverVehicleModel ?? this.driverVehicleModel,
       driverAvatarUrl: driverAvatarUrl ?? this.driverAvatarUrl,
+      driverRating: driverRating ?? this.driverRating,
       driverLat: clearDriverLocation ? null : (driverLat ?? this.driverLat),
       driverLng: clearDriverLocation ? null : (driverLng ?? this.driverLng),
       routePoints: routePoints ?? this.routePoints,
@@ -1342,6 +1346,9 @@ class AppStateNotifier extends Notifier<AppState> {
       driverVehicleColor: color,
       driverVehicleModel: model,
       driverAvatarUrl: driver?['avatarUrl'] as String? ?? state.driverAvatarUrl,
+      driverRating: (driver?['rating'] as num?)?.toDouble() ??
+          (data['driverRating'] as num?)?.toDouble() ??
+          state.driverRating,
       selectedTruck: truckFromDriver ?? state.selectedTruck,
       estimatedPrice: fare ?? state.estimatedPrice,
       distanceKm: dist ?? state.distanceKm,
@@ -1543,7 +1550,6 @@ class AppStateNotifier extends Notifier<AppState> {
   }
 
   Future<void> completeRatingSession() async {
-    if (state.tripStage != TripStage.arrivedSummary) return;
     await _teardownActiveTrip();
     _refreshFareEstimate();
   }
@@ -1649,11 +1655,6 @@ class AppStateNotifier extends Notifier<AppState> {
       } else {
         state = state.copyWith(history: [record, ...state.history]);
       }
-      // Tear down trip state immediately so that /home shows clean
-      // pickup/dropoff fields and no stale route line. The caller
-      // (rate_driver_screen._finish) no longer needs to call
-      // completeRatingSession() separately.
-      await _teardownActiveTrip();
       _refreshFareEstimate();
       return true;
     }

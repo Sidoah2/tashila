@@ -247,6 +247,16 @@ TripRequest _tripRequestFromApiMap(Map<String, dynamic> m) {
     dropOffLatLng: LatLng(dropoffLat, dropoffLng),
     expiresAt: expiresAt,
     truckType: migrateTruckType(m['truckType'] as String?),
+    clientRating:
+        ((client['rating'] as num?) ?? (m['clientRating'] as num?))
+            ?.toDouble(),
+    clientAvatar:
+        client['avatarUrl'] as String? ??
+        client['avatar'] as String? ??
+        client['clientAvatar'] as String? ??
+        m['clientAvatar'] as String? ??
+        m['clientAvatarUrl'] as String? ??
+        m['avatarUrl'] as String?,
     startedAt: startedAtStr != null ? DateTime.tryParse(startedAtStr) : null,
     completedAt: completedAtStr != null
         ? DateTime.tryParse(completedAtStr)

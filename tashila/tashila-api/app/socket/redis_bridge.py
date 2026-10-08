@@ -35,7 +35,9 @@ async def handle_channel(channel: str, data: dict[str, Any]) -> None:
             trip_id = data.get("tripId")
             driver_id = data.get("driverId")
             if trip_id and driver_id:
-                driver = await driver_service.get_driver_doc(driver_id)
+                driver = await trip_service._get_driver_info(driver_id)
+                if not driver:
+                    driver = await driver_service.get_driver_doc(driver_id)
                 await notify_driver_assigned(trip_id, driver)
                 await sio.emit(
                     "admin:trip_status_changed",

@@ -6,8 +6,8 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-if sys.version_info < (3, 12):
-    pytest.skip("Requires Python 3.12+ (see runtime.txt)", allow_module_level=True)
+if sys.version_info < (3, 11):
+    pytest.skip("Requires Python 3.11+ (see runtime.txt)", allow_module_level=True)
 
 # Minimal env for Settings validation before app import
 os.environ.setdefault("MONGO_URI", "mongodb://localhost:27017")

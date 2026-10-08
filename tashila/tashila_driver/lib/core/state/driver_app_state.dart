@@ -1321,7 +1321,19 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         _applyIncomingOffer(offer);
         return;
       }
-      _setState(state.copyWith(clearIncomingOffers: true, clearError: true));
+      final now = DateTime.now().toUtc();
+      final nonExpired = state.incomingOffers
+          .where((o) => o.expiresAt.isAfter(now))
+          .toList(growable: false);
+      if (nonExpired.length != state.incomingOffers.length) {
+        _setState(
+          state.copyWith(
+            incomingOffers: nonExpired,
+            clearIncomingOffers: nonExpired.isEmpty,
+            clearError: true,
+          ),
+        );
+      }
     } catch (e) {
       _setState(state.copyWith(error: e.toString()));
     }

@@ -27,8 +27,8 @@ async def main() -> None:
     await connect_db()
     db = get_database()
 
-    # Clear users, drivers, and trips by default
-    collections = ["users", "drivers", "trips"]
+    # Clear transactional and user data by default
+    collections = ["users", "drivers", "trips", "driver_payments"]
     
     # Check if they also want to clear pricing/admin_users
     clear_system = os.environ.get("CLEAR_SYSTEM") == "true"
