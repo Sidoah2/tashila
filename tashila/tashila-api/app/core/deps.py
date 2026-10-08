@@ -70,6 +70,11 @@ async def _ensure_not_suspended(user_id: str) -> None:
 async def get_current_user(token: str = Depends(get_token_from_header)) -> dict[str, Any]:
     payload = decode_token(token, settings.jwt_secret)
     await _ensure_not_blacklisted(payload.get("jti"))
+    if payload.get("type", "access") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
 
     user = await _find_by_id(USERS_COLLECTION, payload["sub"])
     if user is None:
@@ -94,6 +99,11 @@ async def get_current_user(token: str = Depends(get_token_from_header)) -> dict[
 async def get_current_driver(token: str = Depends(get_token_from_header)) -> dict[str, Any]:
     payload = decode_token(token, settings.jwt_secret)
     await _ensure_not_blacklisted(payload.get("jti"))
+    if payload.get("type", "access") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
 
     driver = await _find_by_id(DRIVERS_COLLECTION, payload["sub"])
     if driver is None:
@@ -118,6 +128,11 @@ async def get_current_driver(token: str = Depends(get_token_from_header)) -> dic
 async def get_current_admin(token: str = Depends(get_token_from_header)) -> dict[str, Any]:
     payload = decode_token(token, settings.admin_jwt_secret)
     await _ensure_not_blacklisted(payload.get("jti"))
+    if payload.get("type", "access") != "access":
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid token type",
+        )
 
     if payload.get("role") != "admin":
         raise HTTPException(

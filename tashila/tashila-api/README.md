@@ -5,7 +5,7 @@ Production-ready FastAPI backend for the Tashila ride-hailing platform. Deployed
 ## Stack
 
 - **FastAPI** + **Uvicorn**
-- **MongoDB** via Motor + Beanie ODM
+- **MongoDB** via **Motor** (async MongoDB driver)
 - **Redis** for caching, OTP rate limits, and sessions
 - **JWT** auth (user + admin) with **python-jose** and **passlib**
 - **Socket.IO** scaffold for real-time trip updates
@@ -16,7 +16,7 @@ Production-ready FastAPI backend for the Tashila ride-hailing platform. Deployed
 tashila-api/
 ├── app/
 │   ├── core/          # config, DB, Redis, security, deps, exceptions
-│   ├── models/        # Beanie documents
+│   ├── models/        # Pydantic schemas and models
 │   ├── routers/       # HTTP route modules
 │   ├── services/      # business logic
 │   ├── socket/        # Socket.IO server

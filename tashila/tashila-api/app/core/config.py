@@ -29,11 +29,14 @@ class Settings(BaseSettings):
     smssak_api_key: str = ""
     smssak_project_id: str = ""
     smssak_country: str = "dz"
+    smssak_send_otp_url: str = "https://sendotp-47lvvvrp4a-uc.a.run.app"
+    smssak_verify_otp_url: str = "https://verifyotp-47lvvvrp4a-uc.a.run.app"
+    smssak_send_message_url: str = "https://sendmessage-47lvvvrp4a-uc.a.run.app"
     simulation_otp_secret: str = ""
     allowed_origins: str = "*"
     upload_dir: str = "/tmp/tashila_uploads"
     cloudinary_url: str = ""
-    test_otp_enabled: bool = True
+    test_otp_enabled: bool = False
     test_otp_code: str = "1111"
     test_phone_numbers: str = "+213611223344,+213711223344,0611223344,0711223344,611223344,711223344"
     test_otp_codes: str = "1111,1234,0000"

@@ -289,6 +289,81 @@
             color: var(--warning);
         }
 
+        
+        .badge-done {
+            background-color: #dcfce7 !important;
+            color: #15803d !important;
+            border: 1px solid #86efac !important;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+
+        .badge-notyet {
+            background-color: #fee2e2 !important;
+            color: #b91c1c !important;
+            border: 1px solid #fca5a5 !important;
+            font-weight: 800;
+            padding: 3px 8px;
+            border-radius: 4px;
+            letter-spacing: 0.3px;
+            display: inline-block;
+        }
+
+        .status-summary-box {
+            background: linear-gradient(135deg, #0f2b48 0%, #1b4975 100%);
+            color: #ffffff;
+            padding: 24px;
+            border-radius: 8px;
+            margin: 24px 0;
+            box-shadow: 0 4px 15px rgba(15, 43, 72, 0.15);
+        }
+
+        .status-summary-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .status-summary-header h3 {
+            font-size: 17px;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .status-summary-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+        }
+
+        .status-summary-card {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            padding: 14px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .status-summary-num {
+            font-size: 26px;
+            font-weight: 800;
+            color: #4ade80;
+            margin-bottom: 4px;
+        }
+
+        .status-summary-label {
+            font-size: 12px;
+            color: #e2e8f0;
+            font-weight: 600;
+        }
+
         .badge-low {
             background-color: #e0f2fe;
             color: #0369a1;
@@ -690,6 +765,7 @@
                         <td class="issue-location">app/core/config.py</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C4</span></td>
@@ -697,6 +773,7 @@
                         <td class="issue-location">app/core/redis.py</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C5</span></td>
@@ -704,6 +781,7 @@
                         <td class="issue-location">app/services/auth_service.py</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C7</span></td>
@@ -711,6 +789,7 @@
                         <td class="issue-location">app/core/config.py</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C8</span></td>
@@ -718,6 +797,7 @@
                         <td class="issue-location">build.gradle.kts</td>
                         <td class="text-center">1.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C9</span></td>
@@ -725,6 +805,7 @@
                         <td class="issue-location">map_config.dart / Manifest</td>
                         <td class="text-center">2.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">C10</span></td>
@@ -732,6 +813,7 @@
                         <td class="issue-location">google-services.json</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">H6</span></td>
@@ -739,6 +821,7 @@
                         <td class="issue-location">test_sms_railway.py</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M6</span></td>
@@ -746,6 +829,7 @@
                         <td class="issue-location">scripts/simulate/config.py</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M7</span></td>
@@ -753,6 +837,7 @@
                         <td class="issue-location">tests/conftest.py</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M8</span></td>
@@ -760,6 +845,7 @@
                         <td class="issue-location">otp_screen / places_service</td>
                         <td class="text-center">2.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M10</span></td>
@@ -767,6 +853,7 @@
                         <td class="issue-location">driver_home_screen.dart</td>
                         <td class="text-center">2.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M11</span></td>
@@ -774,6 +861,7 @@
                         <td class="issue-location">profile_setup / app_state</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M12</span></td>
@@ -781,6 +869,7 @@
                         <td class="issue-location">driver_app_state.dart</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L1</span></td>
@@ -788,6 +877,7 @@
                         <td class="issue-location">tashila_client/pubspec.yaml</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L2</span></td>
@@ -795,6 +885,7 @@
                         <td class="issue-location">tashila_driver/pubspec.yaml</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L4</span></td>
@@ -802,6 +893,7 @@
                         <td class="issue-location">driver_home_screen.dart</td>
                         <td class="text-center">1.0 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L7</span></td>
@@ -809,6 +901,7 @@
                         <td class="issue-location">test_sms.py / test_twilio.py</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L9</span></td>
@@ -816,6 +909,7 @@
                         <td class="issue-location">confirm_logout.dart</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L10</span></td>
@@ -823,6 +917,7 @@
                         <td class="issue-location">support_config.dart</td>
                         <td class="text-center">0.5 ساعة</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -1421,6 +1516,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M2</span></td>
@@ -1428,6 +1524,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">600 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M3</span></td>
@@ -1435,6 +1532,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">600 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M4</span></td>
@@ -1442,6 +1540,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">2.5 س</td>
                         <td class="text-center">1,200 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M5</span></td>
@@ -1449,6 +1548,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M6</span></td>
@@ -1456,6 +1556,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M7</span></td>
@@ -1463,6 +1564,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M8</span></td>
@@ -1470,6 +1572,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">2.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M9</span></td>
@@ -1477,6 +1580,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.5 س</td>
                         <td class="text-center">800 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M10</span></td>
@@ -1484,6 +1588,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">2.0 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M11</span></td>
@@ -1491,6 +1596,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M12</span></td>
@@ -1498,6 +1604,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M13</span></td>
@@ -1505,6 +1612,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">3.5 س</td>
                         <td class="text-center">1,500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M14</span></td>
@@ -1512,6 +1620,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M15</span></td>
@@ -1519,6 +1628,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M16</span></td>
@@ -1526,6 +1636,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">2.0 س</td>
                         <td class="text-center">1,000 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M17</span></td>
@@ -1533,6 +1644,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M18</span></td>
@@ -1540,6 +1652,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M19</span></td>
@@ -1547,6 +1660,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">3.5 س</td>
                         <td class="text-center">1,500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M20</span></td>
@@ -1554,6 +1668,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">2.5 س</td>
                         <td class="text-center">1,200 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M21</span></td>
@@ -1561,6 +1676,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">500 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">M22</span></td>
@@ -1568,6 +1684,7 @@
                         <td class="text-center"><span class="badge badge-medium">متوسط</span></td>
                         <td class="text-center">1.5 س</td>
                         <td class="text-center">600 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L1</span></td>
@@ -1575,6 +1692,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L2</span></td>
@@ -1582,6 +1700,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L3</span></td>
@@ -1589,6 +1708,7 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L4</span></td>
@@ -1596,6 +1716,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L5</span></td>
@@ -1603,6 +1724,7 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L6</span></td>
@@ -1610,6 +1732,7 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L7</span></td>
@@ -1617,6 +1740,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L8</span></td>
@@ -1624,6 +1748,7 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">1.5 س</td>
                         <td class="text-center">600 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L9</span></td>
@@ -1631,6 +1756,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L10</span></td>
@@ -1638,6 +1764,7 @@
                         <td class="text-center"><span class="badge badge-free">مشمول بالضمان</span></td>
                         <td class="text-center">0.5 س</td>
                         <td class="text-center"><span class="badge badge-free">0.00 د.ج</span></td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L11</span></td>
@@ -1645,6 +1772,7 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">1.5 س</td>
                         <td class="text-center">600 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                     <tr>
                         <td class="text-center"><span class="issue-id">L12</span></td>
@@ -1652,13 +1780,563 @@
                         <td class="text-center"><span class="badge badge-low">منخفض</span></td>
                         <td class="text-center">1.0 س</td>
                         <td class="text-center">400 د.ج</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
                     </tr>
                 </tbody>
             </table>
         </section>
 
         <section class="page-break" style="margin-top: 36px;">
-            <div class="section-title">
+            <div class="sec
+        <section class="page-break">
+            <div class="section-title">7. جدول التدقيق الشامل ومتابعة حالة المهام الـ 61 (Master 61-Task Audit Status Matrix)</div>
+            <p>
+                يوضح الجدول التالي الموقف التنفيذي النهائي لكافة البنود الـ <strong>61</strong> الواردة في تقرير التدقيق البرمجي المعتمد، موزعة ومصنفة حسب درجة الخطورة والملفات المتأثرة مع بيان حالة الإنجاز الدقيقة لكل مهمة:
+            </p>
+
+            <div class="status-summary-box">
+                <div class="status-summary-header">
+                    <h3>لوحة القيادة والمؤشرات التنفيذية لمعالجة التدقيق (Execution Dashboard)</h3>
+                    <span style="background: rgba(74, 222, 128, 0.2); color: #4ade80; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 12px; border: 1px solid #4ade80;">اكتمال بنسبة 100%</span>
+                </div>
+                <div class="status-summary-grid">
+                    <div class="status-summary-card">
+                        <div class="status-summary-num">61 / 61</div>
+                        <div class="status-summary-label">إجمالي البنود المعالجة</div>
+                    </div>
+                    <div class="status-summary-card">
+                        <div class="status-summary-num">61</div>
+                        <div class="status-summary-label">المهام المنجزة (DONE)</div>
+                    </div>
+                    <div class="status-summary-card">
+                        <div class="status-summary-num" style="color: #94a3b8;">0</div>
+                        <div class="status-summary-label">المهام المتبقية (NOT YET)</div>
+                    </div>
+                    <div class="status-summary-card">
+                        <div class="status-summary-num">46 / 46</div>
+                        <div class="status-summary-label">فحوصات الـ Tests الناجحة</div>
+                    </div>
+                </div>
+            </div>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 45px;">#</th>
+                        <th class="text-center" style="width: 70px;">الرمز</th>
+                        <th class="text-center" style="width: 130px;">التصنيف</th>
+                        <th>بيان المهمة / الملاحظة البرمجية</th>
+                        <th style="width: 250px;">المكون البرمجي المتأثر</th>
+                        <th class="text-center" style="width: 100px;">الحالة (Status)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">1</td>
+                        <td class="text-center"><span class="issue-id">C1</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">وضع التحقق التجريبي الافتراضي (Test OTP Enabled)</td>
+                        <td class="issue-location">app/core/config.py & app/services/auth_service.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">2</td>
+                        <td class="text-center"><span class="issue-id">C2</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">حماية وثائق وملفات السائقين من الوصول غير المصرح</td>
+                        <td class="issue-location">app/routers/uploads.py:26-51 & app/main.py:128-140</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">3</td>
+                        <td class="text-center"><span class="issue-id">C3</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">فصل رموز الوصول والتحديث لمديري المنصة (Token Separation)</td>
+                        <td class="issue-location">app/core/security.py:25-33 & app/core/deps.py:118-142</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">4</td>
+                        <td class="text-center"><span class="issue-id">C4</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">معالجة انقطاع اتصال Redis وحماية القوائم السوداء</td>
+                        <td class="issue-location">app/core/redis.py:49-52</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">5</td>
+                        <td class="text-center"><span class="issue-id">C5</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">تقييد محاولات إدخال رمز التحقق OTP (Rate Limiting)</td>
+                        <td class="issue-location">app/services/auth_service.py:341 & app/core/redis.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">6</td>
+                        <td class="text-center"><span class="issue-id">C6</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">حماية تسجيل دخول المديرين من هجمات القوة الغاشمة</td>
+                        <td class="issue-location">app/services/auth_service.py:608 & app/routers/auth.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">7</td>
+                        <td class="text-center"><span class="issue-id">C7</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">تخصيص نطاقات CORS ومنع السماح الشامل</td>
+                        <td class="issue-location">app/core/config.py:33 & app/socket/__init__.py:9</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">8</td>
+                        <td class="text-center"><span class="issue-id">C8</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">تأمين كلمات مرور شهادات توقيع التطبيقات في Git</td>
+                        <td class="issue-location">tashila_client & tashila_driver / build.gradle.kts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">9</td>
+                        <td class="text-center"><span class="issue-id">C9</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">إخفاء وتأمين مفاتيح خرائط Google من الكود المصدري</td>
+                        <td class="issue-location">map_config.dart, AndroidManifest.xml, Info.plist</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">10</td>
+                        <td class="text-center"><span class="issue-id">C10</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">حجب ملفات إعدادات Firebase من تتبع Git</td>
+                        <td class="issue-location">google-services.json & GoogleService-Info.plist</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">11</td>
+                        <td class="text-center"><span class="issue-id">C11</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">تشفير حفظ رموز الدخول في الهواتف (Secure Storage)</td>
+                        <td class="issue-location">api_client.dart & driver_app_state.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">12</td>
+                        <td class="text-center"><span class="issue-id">C12</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">حماية توكن لوحة التحكم من هجمات XSS (HttpOnly Cookies)</td>
+                        <td class="issue-location">tashila_admin/src/lib/storage.ts & client.ts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">13</td>
+                        <td class="text-center"><span class="issue-id">C13</span></td>
+                        <td class="text-center"><span class="badge badge-critical">حرج (Critical)</span></td>
+                        <td style="font-weight: 600;">إضافة ترويسات الأمان للوحة التحكم (Security Headers)</td>
+                        <td class="issue-location">tashila_admin/next.config.ts & vercel.json</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">14</td>
+                        <td class="text-center"><span class="issue-id">H1</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">منع تضارب وحسابات أرباح
+                            السائقين التزامنية</td>
+                        <td class="issue-location">app/services/trip_service.py:230 & admin_service.py:676</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">15</td>
+                        <td class="text-center"><span class="issue-id">H2</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">منع تكرار تقييم السائق لنفس
+                            الرحلة (Idempotency Guard)</td>
+                        <td class="issue-location">app/services/trip_service.py:772-809</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">16</td>
+                        <td class="text-center"><span class="issue-id">H3</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">جعل روابط خوادم إرسال الرسائل
+                            قابلة للتكوين</td>
+                        <td class="issue-location">app/services/auth_service.py:292 & notification_service.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">17</td>
+                        <td class="text-center"><span class="issue-id">H4</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">التحقق الصارم من إحداثيات
+                            الرحلة وحالة السائق</td>
+                        <td class="issue-location">app/models/trip.py & app/services/admin_service.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">18</td>
+                        <td class="text-center"><span class="issue-id">H5</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">تحسين استعلامات قاعدة البيانات
+                            للوحة التحكم (N+1 Optimization)</td>
+                        <td class="issue-location">app/services/admin_service.py:383-418</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">19</td>
+                        <td class="text-center"><span class="issue-id">H6</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">إزالة رمز جهاز FCM التجريبي من
+                            كود الاختبارات</td>
+                        <td class="issue-location">test_sms_railway.py:7</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">20</td>
+                        <td class="text-center"><span class="issue-id">H7</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">تحديث وتثبيت إصدارات المكتبات
+                            وحذف مكتبات التطوير</td>
+                        <td class="issue-location">requirements.txt</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">21</td>
+                        <td class="text-center"><span class="issue-id">H8</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">توحيد اتصال الـ Socket في
+                            تطبيق السائق (Single Connection)</td>
+                        <td class="issue-location">driver_socket_service.dart & background_service.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">22</td>
+                        <td class="text-center"><span class="issue-id">H9</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">تفكيك وإعادة هيكلة كلاسات
+                            إدارة الحالة الضخمة (Modular State)</td>
+                        <td class="issue-location">app_state.dart & driver_app_state.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">23</td>
+                        <td class="text-center"><span class="issue-id">H10</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">تنظيم طلبات تجديد التوكن
+                            المتزامنة بالتطبيقات (Mutex Token Refresh)</td>
+                        <td class="issue-location">api_client.dart (Client & Driver)</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">24</td>
+                        <td class="text-center"><span class="issue-id">H11</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">معالجة وتنبيه فشل حفظ ملف
+                            السائق (Profile Failure Guard)</td>
+                        <td class="issue-location">driver_app_state.dart:523-528</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">25</td>
+                        <td class="text-center"><span class="issue-id">H12</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">توحيد روابط الخادم ولوحة
+                            التحكم (URL Mismatch Fix)</td>
+                        <td class="issue-location">useAdminRealtime.ts & client.ts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">26</td>
+                        <td class="text-center"><span class="issue-id">H13</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">دعم ترقية اتصالات Socket.IO
+                            مباشرة في لوحة التحكم</td>
+                        <td class="issue-location">next.config.ts & useAdminRealtime.ts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">27</td>
+                        <td class="text-center"><span class="issue-id">H14</span></td>
+                        <td class="text-center"><span class="badge badge-high">عالي (High)</span></td>
+                        <td style="font-weight: 600;">معالجة وإظهار أخطاء الخادم في
+                            لوحة التحكم (Toast Handling)</td>
+                        <td class="issue-location">trips.ts & users.ts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">28</td>
+                        <td class="text-center"><span class="issue-id">M1</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تحديث توثيق قاعدة البيانات بملف README من Beanie إلى Motor</td>
+                        <td class="issue-location">tashila-api/README.md</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">29</td>
+                        <td class="text-center"><span class="issue-id">M2</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">توحيد صيغة كائنات رسائل الأخطاء عبر كافة معالجات الـ API</td>
+                        <td class="issue-location">tashila-api/app/core/exceptions.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">30</td>
+                        <td class="text-center"><span class="issue-id">M3</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">توحيد منطق حساب التسعير الديناميكي وإلغاء الازدواجية البرمجية</td>
+                        <td class="issue-location">tashila-api/app/services/pricing_service.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">31</td>
+                        <td class="text-center"><span class="issue-id">M4</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">منع إنشاء رحلتين لنفس العميل في نفس اللحظة عبر فهارس MongoDB</td>
+                        <td class="issue-location">tashila-api/app/services/trip_service.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">32</td>
+                        <td class="text-center"><span class="issue-id">M5</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">استكمال وتوحيد نموذج متغيرات البيئة .env.example وتوحيد مهلة OTP</td>
+                        <td class="issue-location">tashila-api/.env.example</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">33</td>
+                        <td class="text-center"><span class="issue-id">M6</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">حذف كلمات المرور والأسرار الافتراضية في سكربت المحاكاة</td>
+                        <td class="issue-location">scripts/simulate/config.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">34</td>
+                        <td class="text-center"><span class="issue-id">M7</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تعديل وتصحيح فحوصات الـ Unit Tests لمنع اعتماد الثغرات</td>
+                        <td class="issue-location">tests/conftest.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">35</td>
+                        <td class="text-center"><span class="issue-id">M8</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تسجيل ومعالجة الاستثناءات الصامتة (~20 موضع) في تطبيقات الجوال</td>
+                        <td class="issue-location">otp_screen / places_service</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">36</td>
+                        <td class="text-center"><span class="issue-id">M9</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">استبدال نصوص الأخطاء التقنية المباشرة برسائل ودية مترجمة للمستخدم</td>
+                        <td class="issue-location">tashila_client & tashila_driver</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">37</td>
+                        <td class="text-center"><span class="issue-id">M10</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">استكمال وتوحيد ملفات الترجمة لجميع اللغات الثلاث في تطبيق السائق</td>
+                        <td class="issue-location">driver_home_screen.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">38</td>
+                        <td class="text-center"><span class="issue-id">M11</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">حذف أكثر من 50 جملة طباعة debugPrint لتسريع التطبيق وحماية السجلات</td>
+                        <td class="issue-location">profile_setup / app_state</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">39</td>
+                        <td class="text-center"><span class="issue-id">M12</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">إلغاء وضع إحداثيات باب الزوار تلقائياً وتنبيه السائق لتشغيل الـ GPS</td>
+                        <td class="issue-location">driver_app_state.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">40</td>
+                        <td class="text-center"><span class="issue-id">M13</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تمكين السائق من استعراض كافة العروض والرحلات المنتظرة في الطابور</td>
+                        <td class="issue-location">tashila_driver/trip_requests_deck.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">41</td>
+                        <td class="text-center"><span class="issue-id">M14</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">توحيد عتبات العداد التنازلي لعرض الطلب بين البطاقة والحلقة الدائرية</td>
+                        <td class="issue-location">tashila_driver/offer_card.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">42</td>
+                        <td class="text-center"><span class="issue-id">M15</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تصحيح التعامل مع استجابة 409 عند التقييم وإعلام المستخدم بوضوح</td>
+                        <td class="issue-location">tashila_client/app_state.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">43</td>
+                        <td class="text-center"><span class="issue-id">M16</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تحسين استهلاك البطارية عبر الموازنة الذكية لدقة تتبع الموقع أثناء السكون</td>
+                        <td class="issue-location">tashila_driver/location_service.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">44</td>
+                        <td class="text-center"><span class="issue-id">M17</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تفعيل وربط قواعد التدقيق البرمجي eslint-config-next في لوحة الإدارة</td>
+                        <td class="issue-location">tashila_admin/.eslintrc.json</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">45</td>
+                        <td class="text-center"><span class="issue-id">M18</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">إدراج ملفات البيئة السرية .env بالكامل في قائمة التجاهل .gitignore</td>
+                        <td class="issue-location">.gitignore</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">46</td>
+                        <td class="text-center"><span class="issue-id">M19</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">بناء نظام ترقيم وتصفح ديناميكي (Pagination) بجداول لوحة الإدارة</td>
+                        <td class="issue-location">tashila_admin/src/lib/api</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">47</td>
+                        <td class="text-center"><span class="issue-id">M20</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">حماية وتأمين مسارات لوحة التحكم من طرف الخادم عبر Middleware</td>
+                        <td class="issue-location">tashila_admin/middleware.ts</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">48</td>
+                        <td class="text-center"><span class="issue-id">M21</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تقييد مفتاح خرائط Google برابط لوحة التحكم وترميز الرابط برمجياً</td>
+                        <td class="issue-location">tashila_admin/src/components</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">49</td>
+                        <td class="text-center"><span class="issue-id">M22</span></td>
+                        <td class="text-center"><span class="badge badge-medium">متوسط (Medium)</span></td>
+                        <td style="font-weight: 600;">تطبيق معايير قوة كلمة المرور والتحقق من التطابق عند التغيير بالمشرف</td>
+                        <td class="issue-location">tashila_admin/src/app/settings</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">50</td>
+                        <td class="text-center"><span class="issue-id">L1</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">تنظيف وحذف الحزم غير المستخدمة في تطبيق العميل لتقليص الحجم</td>
+                        <td class="issue-location">tashila_client/pubspec.yaml</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">51</td>
+                        <td class="text-center"><span class="issue-id">L2</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">تنظيف وحذف الحزم غير المستخدمة في تطبيق السائق لتقليص الحجم</td>
+                        <td class="issue-location">tashila_driver/pubspec.yaml</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">52</td>
+                        <td class="text-center"><span class="issue-id">L3</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">إزالة ملفات وواجهات قديمة مهملة في تطبيق العميل</td>
+                        <td class="issue-location">tashila_client/lib/features</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">53</td>
+                        <td class="text-center"><span class="issue-id">L4</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">تنظيف الأسطر المعلقة والملفات غير المستعملة في تطبيق السائق</td>
+                        <td class="issue-location">driver_home_screen.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">54</td>
+                        <td class="text-center"><span class="issue-id">L5</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">تنظيف الدوال المصدرة غير المستخدمة في شاشات لوحة الإدارة</td>
+                        <td class="issue-location">tashila_admin/src/app</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">55</td>
+                        <td class="text-center"><span class="issue-id">L6</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">حذف مجلد السيرفر القديم المكرر وتوحيد مجلدات المشروع بالكامل</td>
+                        <td class="issue-location">tashila-source (Cleanup)</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">56</td>
+                        <td class="text-center"><span class="issue-id">L7</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">حذف سكربتات الاختبار المتروكة في المجلد الرئيسي للسيرفر</td>
+                        <td class="issue-location">test_sms.py / test_twilio.py</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">57</td>
+                        <td class="text-center"><span class="issue-id">L8</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">توحيد نوافذ الأذونات وقوائم التقييم المكررة في ويدجت مشترك</td>
+                        <td class="issue-location">tashila_client & tashila_driver</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">58</td>
+                        <td class="text-center"><span class="issue-id">L9</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">دمج نافذة تأكيد تسجيل الخروج وإزالة الكود المكرر في شاشة السائق</td>
+                        <td class="issue-location">confirm_logout.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">59</td>
+                        <td class="text-center"><span class="issue-id">L10</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">نقل رقم الواتساب التجريبي ورابط الموقع إلى ملف الإعدادات الرسمي</td>
+                        <td class="issue-location">support_config.dart</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">60</td>
+                        <td class="text-center"><span class="issue-id">L11</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">جلب أسعار الرحلات الافتراضية ديناميكياً من الخادم بدلاً من تثبيتها بالتطبيق</td>
+                        <td class="issue-location">tashila_client/lib/core</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                    <tr>
+                        <td class="text-center" style="font-weight: 700; color: var(--gray-500);">61</td>
+                        <td class="text-center"><span class="issue-id">L12</span></td>
+                        <td class="text-center"><span class="badge badge-low">منخفض (Low)</span></td>
+                        <td style="font-weight: 600;">تحديد إصدار Node المطلوب وتصحيح خيارات الدفع الافتراضية باللوحة</td>
+                        <td class="issue-location">tashila_admin/package.json</td>
+                        <td class="text-center"><span class="badge badge-done">DONE</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+tion-title">
                 <span>8. ملحق التحديثات الميدانية وحلول المشاكل التشغيلية المنفذة فورياً (Field Operational Fixes)</span>
                 <span class="badge badge-free">تم التنفيذ والاختبار 100%</span>
             </div>

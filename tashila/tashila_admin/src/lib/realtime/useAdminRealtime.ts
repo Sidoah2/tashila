@@ -9,7 +9,7 @@ import { useTripsStore } from "@/lib/store/trips";
 
 const SOCKET_URL =
   process.env.NEXT_PUBLIC_API_URL ??
-  "https://tashila-api-production.up.railway.app";
+  "https://tashila-production.up.railway.app";
 
 function readSession(): AdminSession | null {
   if (typeof window === "undefined") return null;
@@ -38,7 +38,7 @@ export function useAdminRealtime(enabled: boolean) {
     if (!session?.accessToken) return;
 
     const socket: Socket = io(SOCKET_URL, {
-      transports: ["websocket"],
+      transports: ["websocket", "polling"],
       auth: { token: session.accessToken },
     });
 

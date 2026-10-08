@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:http_parser/http_parser.dart';
 import 'package:flutter/foundation.dart';
@@ -106,24 +107,44 @@ class ApiClient {
     await prefs.remove(_kRefreshToken);
   }
 
+  Completer<bool>? _refreshCompleter;
+
   Future<bool> _tryRefresh() async {
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+    final completer = Completer<bool>();
+    _refreshCompleter = completer;
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final refresh = prefs.getString(_kRefreshToken);
-      if (refresh == null) return false;
+      if (refresh == null) {
+        completer.complete(false);
+        _refreshCompleter = null;
+        return false;
+      }
       final response = await Dio().post(
         '$kApiBaseUrl/auth/token/refresh',
         data: {'refreshToken': refresh},
       );
       final newAccess = response.data['accessToken'] as String?;
       final newRefresh = response.data['refreshToken'] as String?;
-      if (newAccess == null) return false;
+      if (newAccess == null) {
+        completer.complete(false);
+        _refreshCompleter = null;
+        return false;
+      }
       await prefs.setString(_kAccessToken, newAccess);
       if (newRefresh != null) {
         await prefs.setString(_kRefreshToken, newRefresh);
       }
+      completer.complete(true);
+      _refreshCompleter = null;
       return true;
     } catch (_) {
+      completer.complete(false);
+      _refreshCompleter = null;
       return false;
     }
   }

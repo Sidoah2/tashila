@@ -15,18 +15,32 @@ VALID_ROLES = frozenset({"client", "driver", "admin"})
 
 
 def hash_password(plain: str) -> str:
-    return pwd_context.hash(plain)
+    try:
+        import bcrypt
+        return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+    except Exception:
+        return pwd_context.hash(plain)
 
 
 def verify_password(plain: str, hashed: str) -> bool:
-    return pwd_context.verify(plain, hashed)
+    try:
+        import bcrypt
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return pwd_context.verify(plain, hashed)
 
 
-def _build_payload(sub: str, role: str, expires_delta: timedelta) -> dict[str, Any]:
+def _build_payload(
+    sub: str,
+    role: str,
+    expires_delta: timedelta,
+    token_type: str = "access",
+) -> dict[str, Any]:
     now = datetime.now(timezone.utc)
     return {
         "sub": sub,
         "role": role,
+        "type": token_type,
         "iat": now,
         "exp": now + expires_delta,
         "jti": str(uuid.uuid4()),
@@ -42,6 +56,7 @@ def create_access_token(sub: str, role: str) -> str:
         sub,
         role,
         timedelta(minutes=settings.jwt_expire_minutes),
+        token_type="access",
     )
     return _encode(payload, settings.jwt_secret)
 
@@ -51,6 +66,7 @@ def create_refresh_token(sub: str, role: str) -> str:
         sub,
         role,
         timedelta(days=settings.jwt_refresh_expire_days),
+        token_type="refresh",
     )
     return _encode(payload, settings.jwt_refresh_secret)
 
@@ -60,6 +76,7 @@ def create_admin_access_token(sub: str) -> str:
         sub,
         "admin",
         timedelta(minutes=settings.admin_jwt_expire_minutes),
+        token_type="access",
     )
     return _encode(payload, settings.admin_jwt_secret)
 
@@ -69,6 +86,7 @@ def create_admin_refresh_token(sub: str) -> str:
         sub,
         "admin",
         timedelta(days=settings.jwt_refresh_expire_days),
+        token_type="refresh",
     )
     return _encode(payload, settings.admin_jwt_secret)
 

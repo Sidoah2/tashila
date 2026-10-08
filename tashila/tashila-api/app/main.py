@@ -127,17 +127,9 @@ def create_app() -> FastAPI:
     application.include_router(admin_accounts.router)
     application.include_router(uploads.router)
 
-    # Serve local uploads only when Cloudinary is not configured.
-    # With Cloudinary, all returned URLs are absolute (https://res.cloudinary.com/…)
-    # so there is nothing to serve locally.
-    if not settings.cloudinary_url:
-        upload_root = Path(settings.upload_dir)
-        upload_root.mkdir(parents=True, exist_ok=True)
-        application.mount(
-            "/uploads",
-            StaticFiles(directory=str(upload_root)),
-            name="uploads",
-        )
+    # Uploads are served through uploads.router to enforce authentication and access control.
+    upload_root = Path(settings.upload_dir)
+    upload_root.mkdir(parents=True, exist_ok=True)
 
     @application.get("/health", tags=["system"])
     async def health() -> dict[str, str]:
