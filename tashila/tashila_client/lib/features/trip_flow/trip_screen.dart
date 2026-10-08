@@ -535,24 +535,21 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: List.generate(5, (index) {
-                        final rating = state.driverRating > 0 ? state.driverRating : 5.0;
+                        final rating =
+                            state.driverRating > 0 ? state.driverRating : 5.0;
                         final starVal = index + 1;
                         IconData iconData;
-                        Color iconColor;
                         if (rating >= starVal) {
                           iconData = Icons.star_rounded;
-                          iconColor = const Color(0xFFFFB800);
                         } else if (rating >= starVal - 0.5) {
                           iconData = Icons.star_half_rounded;
-                          iconColor = const Color(0xFFFFB800);
                         } else {
-                          iconData = Icons.star_rounded;
-                          iconColor = Colors.grey.shade300;
+                          iconData = Icons.star_outline_rounded;
                         }
                         return Icon(
                           iconData,
-                          color: iconColor,
-                          size: 15,
+                          color: Colors.amber,
+                          size: 14,
                         );
                       }),
                     ),

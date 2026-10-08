@@ -1540,14 +1540,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
                   .toList(growable: false),
       ),
     );
-
-    if (state.availability == AvailabilityStatus.online) {
-      unawaited(_restoreOnlineSession());
-      unawaited(refreshDriverLocation(sendToServer: true));
-      unawaited(refreshNearbyRequests());
-      _syncLocationTracking();
-      _startRequestPolling();
-    }
   }
 
   Future<bool> submitClientRating({
