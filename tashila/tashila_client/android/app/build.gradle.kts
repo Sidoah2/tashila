@@ -1,5 +1,6 @@
 import java.util.Properties
 import java.io.FileInputStream
+import java.util.Base64
 
 plugins {
     id("com.android.application")
@@ -28,7 +29,7 @@ android {
     if (keystorePropertiesFile.exists()) {
         keystoreProperties.load(FileInputStream(keystorePropertiesFile))
     }
-    val fallbackMapsKey = String(java.util.Base64.getDecoder().decode("QUl6YVN5Q0htQW5QRzA2Vm0yVjVYUERzUVltZnpIeTEzSUNDRHRN"))
+    val fallbackMapsKey = String(Base64.getDecoder().decode("QUl6YVN5Q0htQW5QRzA2Vm0yVjVYUERzUVltZnpIeTEzSUNDRHRN"))
     val resolvedMapsKey = project.findProperty("GOOGLE_MAPS_API_KEY") as String?
         ?: System.getenv("GOOGLE_MAPS_API_KEY")
         ?: keystoreProperties.getProperty("MAPS_API_KEY")
