@@ -45,6 +45,8 @@ releases/
 node_modules/
 .next/
 build/
+**/build/
+**/.gradle/
 .dart_tool/
 .flutter-plugins-dependencies
 
