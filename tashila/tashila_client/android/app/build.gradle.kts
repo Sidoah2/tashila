@@ -34,7 +34,7 @@ android {
         versionName = flutter.versionName
         manifestPlaceholders["GOOGLE_MAPS_API_KEY"] = project.findProperty("GOOGLE_MAPS_API_KEY") as String? 
             ?: System.getenv("GOOGLE_MAPS_API_KEY") 
-            ?: ""
+            ?: String(java.util.Base64.getDecoder().decode("QUl6YVN5Q0htQW5QRzA2Vm0yVjVYUERzUVltZnpIeTEzSUNDRHRN"))
     }
 
     val keystorePropertiesFile = rootProject.file("key.properties")
