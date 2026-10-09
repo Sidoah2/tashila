@@ -79,13 +79,7 @@ async def handle_channel(channel: str, data: dict[str, Any]) -> None:
                         "status": "cancelled",
                     },
                 )
-                trip = await trip_service.get_trip_by_id(trip_id)
-                if trip.get("driverId") == driver_id and trip.get("status") in (
-                    "accepted",
-                    "headingToPickup",
-                    "inProgress",
-                ):
-                    await dispatch_service.on_trip_finished(driver_id)
+                await dispatch_service.on_trip_finished(driver_id)
 
         elif channel == "trip:rejected_by_driver":
             trip_id = data.get("tripId")

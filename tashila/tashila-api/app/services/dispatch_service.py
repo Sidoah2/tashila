@@ -110,7 +110,9 @@ async def find_dispatch_candidates(trip: dict[str, Any]) -> list[dict[str, Any]]
                     and driver.get("approvalStatus") == "approved"
                 ):
                     busy_mongo = await _driver_ids_with_active_trips()
-                    if driver_id not in busy_mongo and not await is_driver_busy(driver_id):
+                    if driver_id not in busy_mongo:
+                        if await is_driver_busy(driver_id):
+                            await clear_driver_busy(driver_id)
                         from app.services.trip_service import _serialize_doc
                         return [{**_serialize_doc(driver), "id": driver_id, "distanceMeters": 0}]
         except Exception:
@@ -150,7 +152,10 @@ async def find_dispatch_candidates(trip: dict[str, Any]) -> list[dict[str, Any]]
         if driver_id in busy_mongo:
             continue
         if await is_driver_busy(driver_id):
-            continue
+            if driver_id not in busy_mongo:
+                await clear_driver_busy(driver_id)
+            else:
+                continue
         candidates.append({**doc, "id": driver_id})
         if len(candidates) >= settings.max_dispatch_candidates:
             break
