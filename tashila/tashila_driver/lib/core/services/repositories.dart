@@ -35,6 +35,7 @@ abstract class ProfileRepository {
 abstract class TripRepository {
   Future<List<TripRequest>> fetchNearbyRequests();
   Future<IncomingOffer?> fetchCurrentOffer();
+  Future<List<IncomingOffer>> fetchIncomingOffers();
   Future<Map<String, dynamic>?> fetchActiveTrip();
   Future<String?> acceptTrip(String tripId);
   Future<bool> rejectTrip(String tripId);

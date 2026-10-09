@@ -48,6 +48,8 @@ class AppBootstrap extends ConsumerStatefulWidget {
 
 class _AppBootstrapState extends ConsumerState<AppBootstrap>
     with WidgetsBindingObserver {
+  bool _isDriverCancelledDialogShowing = false;
+
   @override
   void initState() {
     super.initState();
@@ -105,13 +107,17 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
           _showGlobalRatingSheet();
         });
       }
-      if (next.showDriverCancelledDialog) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (!mounted) return;
-          ref.read(appStateProvider.notifier).clearDriverCancelledDialog();
+      if (next.showDriverCancelledDialog && !_isDriverCancelledDialogShowing) {
+        _isDriverCancelledDialogShowing = true;
+        ref.read(appStateProvider.notifier).clearDriverCancelledDialog();
+        WidgetsBinding.instance.addPostFrameCallback((_) async {
+          if (!mounted) {
+            _isDriverCancelledDialogShowing = false;
+            return;
+          }
           final navContext = rootNavigatorKey.currentContext;
           if (navContext != null) {
-            showDialog<void>(
+            await showDialog<void>(
               context: navContext,
               barrierDismissible: false,
               builder: (context) => AlertDialog(
@@ -126,6 +132,7 @@ class _AppBootstrapState extends ConsumerState<AppBootstrap>
               ),
             );
           }
+          _isDriverCancelledDialogShowing = false;
         });
       }
     });

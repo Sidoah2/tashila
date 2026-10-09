@@ -86,6 +86,16 @@ class FakeTripRepository implements TripRepository {
   }
 
   @override
+  Future<List<IncomingOffer>> fetchIncomingOffers() async {
+    return [
+      IncomingOffer(
+        request: _request,
+        expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 10)),
+      ),
+    ];
+  }
+
+  @override
   Future<Map<String, dynamic>?> fetchActiveTrip() async => null;
 
   @override

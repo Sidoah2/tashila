@@ -998,6 +998,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       _requestPollTimer?.cancel();
       _offerCountdownTimer?.cancel();
       await _driverSocket?.disconnect();
+      _locallyExpiredTripIds.clear();
       _setState(state.copyWith(clearIncomingOffers: true));
       _syncLocationTracking();
 
@@ -1126,6 +1127,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   void _clearActiveOffer({String? tripId}) {
     if (tripId == null) {
+      final active = state.activeOffer;
+      if (active != null) {
+        _clearActiveOffer(tripId: active.request.id);
+        return;
+      }
       for (final o in state.incomingOffers) {
         _locallyExpiredTripIds.add(o.request.id);
       }
@@ -1137,7 +1143,12 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     final next = state.incomingOffers
         .where((o) => o.request.id != tripId)
         .toList(growable: false);
-    _setState(state.copyWith(incomingOffers: next));
+    _setState(
+      state.copyWith(
+        incomingOffers: next,
+        clearIncomingOffers: next.isEmpty,
+      ),
+    );
     if (next.isEmpty) {
       _offerCountdownTimer?.cancel();
     } else {
@@ -1233,19 +1244,28 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         }
       } catch (_) {}
 
-      if (state.incomingOffers.isNotEmpty) {
-        final now = DateTime.now().toUtc();
-        final nonExpired = state.incomingOffers
-            .where((o) => o.expiresAt.isAfter(now))
-            .toList(growable: false);
-        if (nonExpired.length != state.incomingOffers.length) {
-          _setState(state.copyWith(incomingOffers: nonExpired));
-        }
-        return;
+      final now = DateTime.now().toUtc();
+      final nonExpired = state.incomingOffers
+          .where((o) => o.expiresAt.isAfter(now))
+          .toList(growable: false);
+      if (nonExpired.length != state.incomingOffers.length) {
+        _setState(
+          state.copyWith(
+            incomingOffers: nonExpired,
+            clearIncomingOffers: nonExpired.isEmpty,
+          ),
+        );
       }
-      final offer = await _tripRepository.fetchCurrentOffer();
-      if (offer != null) {
-        _applyIncomingOffer(offer);
+      try {
+        final offers = await _tripRepository.fetchIncomingOffers();
+        for (final offer in offers) {
+          _applyIncomingOffer(offer);
+        }
+      } catch (_) {
+        final offer = await _tripRepository.fetchCurrentOffer();
+        if (offer != null) {
+          _applyIncomingOffer(offer);
+        }
       }
     });
   }
@@ -1316,6 +1336,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     }
     if (state.currentRequest != null) return;
     try {
+      final offers = await _tripRepository.fetchIncomingOffers();
+      if (offers.isNotEmpty) {
+        for (final offer in offers) {
+          _applyIncomingOffer(offer);
+        }
+        return;
+      }
       final offer = await _tripRepository.fetchCurrentOffer();
       if (offer != null) {
         _applyIncomingOffer(offer);
@@ -1353,10 +1380,14 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _setState(state.copyWith(isBusy: true, clearError: true));
     final errorCode = await _tripRepository.acceptTrip(request.id);
     if (errorCode != null) {
-      _clearActiveOffer();
+      _clearActiveOffer(tripId: request.id);
       _setState(
         state.copyWith(error: _acceptErrorMessage(errorCode), isBusy: false),
       );
+      if (state.availability == AvailabilityStatus.online &&
+          state.currentRequest == null) {
+        unawaited(refreshNearbyRequests());
+      }
       if (errorCode == 'TRIP_NOT_AVAILABLE') {
         final ctx = rootNavigatorKey.currentContext;
         if (ctx != null) {
@@ -1379,7 +1410,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
               content: Text(msg),
               actions: [
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    if (state.availability == AvailabilityStatus.online &&
+                        state.currentRequest == null) {
+                      unawaited(refreshNearbyRequests());
+                    }
+                  },
                   child: const Text('OK'),
                 ),
               ],
@@ -1389,7 +1426,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       }
       return false;
     }
-    _clearActiveOffer();
+    _clearActiveOffer(tripId: request.id);
     _driverSocket?.joinTrip(request.id);
     _setState(
       state.copyWith(

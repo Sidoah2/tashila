@@ -320,6 +320,26 @@ class HttpTripRepository implements TripRepository {
   }
 
   @override
+  Future<List<IncomingOffer>> fetchIncomingOffers() async {
+    try {
+      final res = await _client.get<List<dynamic>>(
+        '/drivers/me/trip-requests',
+      );
+      final items = res.data ?? [];
+      final offers = <IncomingOffer>[];
+      for (final item in items) {
+        if (item is Map<String, dynamic>) {
+          final offer = IncomingOffer.fromSocketPayload(item);
+          if (offer != null) offers.add(offer);
+        }
+      }
+      return offers;
+    } catch (_) {
+      return [];
+    }
+  }
+
+  @override
   Future<Map<String, dynamic>?> fetchActiveTrip() async {
     try {
       final res = await _client.get<Map<String, dynamic>>(
