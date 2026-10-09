@@ -61,6 +61,25 @@ async def create_indexes(database: AsyncIOMotorDatabase) -> None:
         ],
     )
     await trips.create_index([("pickupLocation", GEOSPHERE)])
+    try:
+        await trips.create_index(
+            [("clientId", ASCENDING)],
+            unique=True,
+            partialFilterExpression={
+                "status": {
+                    "$in": [
+                        "requested",
+                        "accepted",
+                        "headingToPickup",
+                        "arrivedPickup",
+                        "inProgress",
+                    ]
+                }
+            },
+            name="uniq_active_client_trip",
+        )
+    except Exception as e:
+        logger.warning("Could not create uniq_active_client_trip index: %s", e)
 
     push_tokens = database["push_tokens"]
     await push_tokens.create_index(

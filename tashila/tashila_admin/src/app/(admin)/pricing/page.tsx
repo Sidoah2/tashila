@@ -16,7 +16,7 @@ import LocalShippingRoundedIcon from "@mui/icons-material/LocalShippingRounded";
 import { usePricingStore } from "@/lib/store/pricing";
 import { useToast } from "@/components/ToastProvider";
 import { getTruckTypeLabel } from "@/lib/labels";
-import { estimateFare, estimateFareFromApi, tashilaDynamicFare } from "@/lib/api/pricing";
+import { estimateFare, estimateFareFromApi } from "@/lib/api/pricing";
 import type { PricingRule } from "@/lib/types";
 import { brand } from "@/theme/colors";
 import { useTranslation } from "@/i18n/useTranslation";

@@ -13,14 +13,7 @@ DEFAULT_RADIUS_KM = 3000.0
 DEFAULT_COMMISSION_RATE = 0.10
 
 
-def tashila_dynamic_fare(distance_km: float, duration_minutes: float) -> int:
-    """Tashila dynamic fare with ceil-to-100 DZD rounding."""
-    raw = (
-        1000
-        + max(0.0, distance_km - 5.0) * 100.0
-        + max(0.0, duration_minutes - 60.0) * 20.0
-    )
-    return int(math.ceil(raw / 100.0) * 100)
+from app.services.pricing_service import tashila_dynamic_fare
 
 
 def _default_settings() -> dict[str, Any]:

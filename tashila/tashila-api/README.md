@@ -126,7 +126,7 @@ The report includes offer→accept latency, expired offers, and blocked accepts 
 
 ## API conventions
 
-- JSON error shape: `{"error": {"code": "...", "message": "...", "details": ...}}`
+- Standard error shape: `{"detail": "Error description", "code": "optional_error_code"}` (FastAPI standard)
 - Auth header: `Authorization: Bearer <token>`
 - Idempotency: `X-Idempotency-Key` header (via `get_idempotency_key` dep)
 

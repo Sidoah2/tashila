@@ -199,9 +199,9 @@ function mapDriver(d: ApiDriver): Driver {
   };
 }
 
-export async function listDrivers(): Promise<Driver[]> {
+export async function listDrivers(page: number = 1, limit: number = 20): Promise<Driver[]> {
   const data = await apiFetch<PaginatedDrivers>(
-    "/admin/drivers?limit=100&page=1",
+    `/admin/drivers?limit=${limit}&page=${page}`,
   );
   return data.items.map(mapDriver);
 }

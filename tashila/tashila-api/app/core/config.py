@@ -32,8 +32,7 @@ class Settings(BaseSettings):
     smssak_send_otp_url: str = "https://sendotp-47lvvvrp4a-uc.a.run.app"
     smssak_verify_otp_url: str = "https://verifyotp-47lvvvrp4a-uc.a.run.app"
     smssak_send_message_url: str = "https://sendmessage-47lvvvrp4a-uc.a.run.app"
-    simulation_otp_secret: str = ""
-    allowed_origins: str = "*"
+    allowed_origins: str = "http://localhost:3000,http://localhost:3001,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:3001,https://tashilaadmin-tau.vercel.app,https://admin.tashila.dz,https://tashila-admin.vercel.app"
     upload_dir: str = "/tmp/tashila_uploads"
     cloudinary_url: str = ""
     test_otp_enabled: bool = False
@@ -59,7 +58,14 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins(self) -> list[str]:
-        return [origin.strip() for origin in self.allowed_origins.split(",") if origin.strip()]
+        origins = []
+        for raw in self.allowed_origins.split(","):
+            cleaned = raw.strip().rstrip("/")
+            if cleaned:
+                origins.append(cleaned)
+                # Also allow with trailing slash for browser compatibility
+                origins.append(f"{cleaned}/")
+        return list(dict.fromkeys(origins))
 
 
 settings = Settings()

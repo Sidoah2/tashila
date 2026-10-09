@@ -140,10 +140,3 @@ export async function getDashboardStats(
     })),
   };
 }
-
-export async function getPendingApprovalCount(): Promise<number> {
-  const data = await apiFetch<{ pendingDrivers: number; pendingDocuments: number }>(
-    "/admin/stats/pending-approvals",
-  );
-  return data.pendingDrivers;
-}

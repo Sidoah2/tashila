@@ -29,8 +29,13 @@ def _blacklist_key(token: str) -> str:
 
 
 def get_redis() -> Redis:
+    global _redis
     if _redis is None:
-        raise RuntimeError("Redis is not initialized. Call connect_redis() first.")
+        if app_settings.is_production:
+            raise RuntimeError("Redis is not initialized. Call connect_redis() first.")
+        import fakeredis.aioredis
+
+        _redis = fakeredis.aioredis.FakeRedis(decode_responses=True)
     return _redis
 
 
@@ -47,7 +52,10 @@ async def connect_redis(settings: Settings | None = None) -> Redis:
         await _redis.ping()
         logger.info("Redis connected")
     except Exception as err:
-        logger.warning(f"Could not connect to Redis server ({err}). Using in-memory FakeRedis fallback.")
+        if cfg.is_production:
+            logger.critical(f"FATAL: Redis connection failed in production: {err}. Failing closed.")
+            raise RuntimeError(f"Redis connection required in production: {err}") from err
+        logger.warning(f"Could not connect to Redis server ({err}). Using in-memory FakeRedis fallback (dev only).")
         import fakeredis.aioredis
         _redis = fakeredis.aioredis.FakeRedis(decode_responses=True)
     return _redis
@@ -120,7 +128,14 @@ async def blacklist_token(token: str, ttl_seconds: int) -> None:
 
 async def is_token_blacklisted(token: str) -> bool:
     redis = get_redis()
-    return bool(await redis.exists(_blacklist_key(token)))
+    try:
+        return bool(await redis.exists(_blacklist_key(token)))
+    except Exception as err:
+        if app_settings.is_production:
+            logger.critical(f"Redis outage in is_token_blacklisted: {err}")
+            raise RuntimeError(f"Cannot verify token blacklist during Redis outage: {err}") from err
+        logger.warning(f"Redis outage in is_token_blacklisted (dev): {err}")
+        return False
 
 
 # --- Driver socket mapping ---
@@ -425,6 +440,57 @@ async def push_dispatch_wake(trip_id: str) -> None:
     key = _dispatch_wake_list_key(trip_id)
     await redis.lpush(key, "1")
     await redis.expire(key, 120)
+
+
+# --- Rate limiting & Lockout protections ---
+
+def _otp_fail_key(phone: str) -> str:
+    return f"fail:otp:{phone}"
+
+def _otp_lockout_key(phone: str) -> str:
+    return f"lockout:otp:{phone}"
+
+def _admin_fail_key(email: str) -> str:
+    return f"fail:admin:{email.lower().strip()}"
+
+def _admin_lockout_key(email: str) -> str:
+    return f"lockout:admin:{email.lower().strip()}"
+
+async def is_otp_verify_locked(phone: str) -> bool:
+    redis = get_redis()
+    return bool(await redis.exists(_otp_lockout_key(phone)))
+
+async def record_otp_verify_failure(phone: str, max_attempts: int = 5, lockout_seconds: int = 300) -> int:
+    redis = get_redis()
+    key = _otp_fail_key(phone)
+    attempts = await redis.incr(key)
+    if attempts == 1:
+        await redis.expire(key, lockout_seconds)
+    if attempts >= max_attempts:
+        await redis.set(_otp_lockout_key(phone), "1", ex=lockout_seconds)
+    return attempts
+
+async def reset_otp_verify_failures(phone: str) -> None:
+    redis = get_redis()
+    await redis.delete(_otp_fail_key(phone), _otp_lockout_key(phone))
+
+async def is_admin_login_locked(email: str) -> bool:
+    redis = get_redis()
+    return bool(await redis.exists(_admin_lockout_key(email)))
+
+async def record_admin_login_failure(email: str, max_attempts: int = 5, lockout_seconds: int = 900) -> int:
+    redis = get_redis()
+    key = _admin_fail_key(email)
+    attempts = await redis.incr(key)
+    if attempts == 1:
+        await redis.expire(key, lockout_seconds)
+    if attempts >= max_attempts:
+        await redis.set(_admin_lockout_key(email), "1", ex=lockout_seconds)
+    return attempts
+
+async def reset_admin_login_failures(email: str) -> None:
+    redis = get_redis()
+    await redis.delete(_admin_fail_key(email), _admin_lockout_key(email))
 
 
 # Backwards-compatible alias

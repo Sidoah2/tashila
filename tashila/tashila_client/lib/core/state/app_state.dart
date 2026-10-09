@@ -47,11 +47,16 @@ String formatRatingComment(
   return parts.join('\n');
 }
 
-/// Dynamic fare: base 1000 DZD (first 5 km), +100 DZD/km after 5 km, +20 DZD/min after 60 min, rounded up to 100 DZD.
-double estimateFareDzd(double distanceKm, {double tripMinutes = 0}) {
+/// Dynamic fare: base fare (first 5 km), +pricePerKm DZD/km after 5 km, +20 DZD/min after 60 min, rounded up to 100 DZD.
+double estimateFareDzd(
+  double distanceKm, {
+  double tripMinutes = 0,
+  double baseFare = 1000,
+  double pricePerKm = 100,
+}) {
   final raw =
-      1000 +
-      math.max(0, distanceKm - 5) * 100 +
+      baseFare +
+      math.max(0, distanceKm - 5) * pricePerKm +
       math.max(0, tripMinutes - 60) * 20;
   return (raw / 100).ceil() * 100;
 }
@@ -128,6 +133,8 @@ class AppState {
     this.dropoffInServiceArea = false,
     this.selectedTruck = TruckType.singleCabine,
     this.estimatedPrice = 0,
+    this.baseFareDzd = 1000.0,
+    this.pricePerKmDzd = 100.0,
     this.distanceKm = 0.0,
     this.tripStage = TripStage.idle,
     this.tripStartTime,
@@ -178,6 +185,8 @@ class AppState {
   final bool dropoffInServiceArea;
   final TruckType selectedTruck;
   final double estimatedPrice;
+  final double baseFareDzd;
+  final double pricePerKmDzd;
   final double distanceKm;
   final TripStage tripStage;
   final List<LatLng> routePoints;
@@ -240,6 +249,8 @@ class AppState {
     bool? dropoffInServiceArea,
     TruckType? selectedTruck,
     double? estimatedPrice,
+    double? baseFareDzd,
+    double? pricePerKmDzd,
     double? distanceKm,
     TripStage? tripStage,
     DateTime? tripStartTime,
@@ -288,6 +299,8 @@ class AppState {
       dropoffInServiceArea: dropoffInServiceArea ?? this.dropoffInServiceArea,
       selectedTruck: selectedTruck ?? this.selectedTruck,
       estimatedPrice: estimatedPrice ?? this.estimatedPrice,
+      baseFareDzd: baseFareDzd ?? this.baseFareDzd,
+      pricePerKmDzd: pricePerKmDzd ?? this.pricePerKmDzd,
       distanceKm: distanceKm ?? this.distanceKm,
       tripStage: tripStage ?? this.tripStage,
       tripStartTime: tripStartTimeNull
@@ -468,6 +481,34 @@ class AppStateNotifier extends Notifier<AppState> {
             serviceAreaCenter: LatLng(lat, lng),
             serviceAreaRadiusKm: radius,
           );
+        }
+      }
+    } catch (_) {}
+
+    try {
+      final res = await _apiClient.get<List<dynamic>>('/pricing');
+      final list = res.data;
+      if (list != null && list.isNotEmpty) {
+        final truckKey = state.selectedTruck == TruckType.singleCabine
+            ? 'single_cabine'
+            : 'double_cabine';
+        final match = list.firstWhere(
+          (item) =>
+              item is Map &&
+              (item['truckType'] == truckKey ||
+                  item['truckType'] == 'single_cabin' ||
+                  item['truckType'] == 'double_cabin'),
+          orElse: () => list.first,
+        );
+        if (match is Map) {
+          final base = (match['baseFareDzd'] as num?)?.toDouble();
+          final perKm = (match['pricePerKmDzd'] as num?)?.toDouble();
+          if (base != null && base > 0) {
+            state = state.copyWith(
+              baseFareDzd: base,
+              pricePerKmDzd: perKm ?? state.pricePerKmDzd,
+            );
+          }
         }
       }
     } catch (_) {}
@@ -911,7 +952,11 @@ class AppStateNotifier extends Notifier<AppState> {
       state.dropoffLng,
     );
     state = state.copyWith(
-      estimatedPrice: estimateFareDzd(km),
+      estimatedPrice: estimateFareDzd(
+        km,
+        baseFare: state.baseFareDzd,
+        pricePerKm: state.pricePerKmDzd,
+      ),
       distanceKm: km,
     );
   }
@@ -1111,14 +1156,11 @@ class AppStateNotifier extends Notifier<AppState> {
       _startTripPolling(tripId);
       try {
         await _ensureTripSocket(tripId);
-      } catch (e) {
-        debugPrint('[Tashila] resume trip socket failed: $e');
-      }
+      } catch (_) {}
       _applyTripData(data);
       unawaited(_refreshRoutePoints());
       return true;
-    } catch (e) {
-      debugPrint('[Tashila] resumeActiveTrip failed: $e');
+    } catch (_) {
       return false;
     }
   }
@@ -1151,7 +1193,6 @@ class AppStateNotifier extends Notifier<AppState> {
       );
       var tripId = _parseCreatedTripId(res.data);
       if (tripId == null) {
-        debugPrint('[Tashila] create trip missing id, body=${res.data}');
         return _resumeActiveTrip();
       }
 
@@ -1195,15 +1236,9 @@ class AppStateNotifier extends Notifier<AppState> {
       _startTripPolling(tripId);
       try {
         await _ensureTripSocket(tripId);
-      } catch (e) {
-        debugPrint('[Tashila] trip socket connect failed: $e');
-      }
+      } catch (_) {}
       return true;
     } on DioException catch (e) {
-      debugPrint(
-        '[Tashila] create trip HTTP error: '
-        'status=${e.response?.statusCode} data=${e.response?.data}',
-      );
       if (e.response?.statusCode == 401) {
         await logout();
         return false;
@@ -1281,22 +1316,10 @@ class AppStateNotifier extends Notifier<AppState> {
       if (topId != null) tripId = topId.toString();
     }
 
-    debugPrint(
-      '[Tashila] _applyTripData called: '
-      'payloadKeys=${data.keys.toList()}, '
-      'parsedTripId="$tripId", '
-      'state.currentTripId="${state.currentTripId}", '
-      'tripStage=${state.tripStage}, '
-      'status="${data['status']}"',
-    );
-
     if (state.tripStage == TripStage.idle ||
         (state.currentTripId != null &&
             state.currentTripId!.isNotEmpty &&
             state.currentTripId != tripId)) {
-      debugPrint(
-        '[Tashila] _applyTripData IGNORED: stage is idle or trip ID mismatch',
-      );
       return;
     }
     _applyTripLocationsFromPayload(data);
@@ -1423,9 +1446,7 @@ class AppStateNotifier extends Notifier<AppState> {
             looping: false,
             volume: 4.0,
           );
-        } catch (e) {
-          debugPrint('Failed to play ringtone: $e');
-        }
+        } catch (_) {}
     }
   }
 
@@ -1563,7 +1584,9 @@ class AppStateNotifier extends Notifier<AppState> {
         fare ??
         (data['finalFare'] as num?)?.toDouble() ??
         (data['fare'] as num?)?.toDouble() ??
-        (state.estimatedPrice > 0 ? state.estimatedPrice : kEstimatedTripPrice);
+        (state.estimatedPrice > 0
+            ? state.estimatedPrice
+            : (state.baseFareDzd > 0 ? state.baseFareDzd : kEstimatedTripPrice));
     final record = TripRecord(
       id: tripId,
       pickup: state.pickup,
@@ -1616,20 +1639,15 @@ class AppStateNotifier extends Notifier<AppState> {
           );
         } on DioException catch (e) {
           if (e.response?.statusCode != 409) {
-            debugPrint(
-              '[Tashila] rate driver failed: '
-              'status=${e.response?.statusCode} data=${e.response?.data}',
-            );
             return false;
           }
-        } catch (e) {
-          debugPrint('[Tashila] rate driver failed: $e');
+        } catch (_) {
           return false;
         }
       }
       final tripPrice = state.estimatedPrice > 0
           ? state.estimatedPrice
-          : kEstimatedTripPrice;
+          : (state.baseFareDzd > 0 ? state.baseFareDzd : kEstimatedTripPrice);
       final record = TripRecord(
         id: tripId,
         pickup: state.pickup,

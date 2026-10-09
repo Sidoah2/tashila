@@ -50,7 +50,9 @@ async def _safe_run(coro, label: str) -> None:
 
 async def main() -> None:
     admin_email    = os.environ.get("ADMIN_EMAIL", "admin@tashila.com")
-    admin_password = os.environ.get("ADMIN_PASSWORD", "Admin1234!")
+    admin_password = os.environ.get("ADMIN_PASSWORD", "")
+    if not admin_password:
+        logger.warning("ADMIN_PASSWORD env var not provided. Simulation will proceed without admin actions.")
 
     num_clients = config.NUM_CLIENTS
     num_drivers = config.NUM_DRIVERS

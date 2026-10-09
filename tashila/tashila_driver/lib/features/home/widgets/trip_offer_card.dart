@@ -111,7 +111,7 @@ class _TripOfferCardState extends State<TripOfferCard> {
     final seconds = offer.remainingSeconds;
     final ttl = offer.ttlSeconds;
     final progress = ttl > 0 ? (seconds / ttl).clamp(0.0, 1.0) : 0.0;
-    final isUrgent = seconds <= 10;
+    final isUrgent = seconds <= 8;
 
     return Container(
       decoration: BoxDecoration(

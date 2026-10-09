@@ -73,9 +73,16 @@ export default function TripsPage() {
       return;
     }
     let cancelled = false;
-    getTrip(selected.id).then((detail) => {
-      if (!cancelled) setSelectedDetail(detail);
-    });
+    getTrip(selected.id)
+      .then((detail) => {
+        if (!cancelled) setSelectedDetail(detail);
+      })
+      .catch((err) => {
+        if (!cancelled) {
+          console.error("Failed to fetch trip detail:", err);
+          setSelectedDetail(null);
+        }
+      });
     return () => {
       cancelled = true;
     };

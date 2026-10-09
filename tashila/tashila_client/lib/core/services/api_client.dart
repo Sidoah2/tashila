@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tashila_client/core/config/api_config.dart';
 import 'package:tashila_client/core/router/app_router.dart';
@@ -87,42 +90,93 @@ class ApiClient {
   late final Dio _dio;
   VoidCallback? onUnauthorized;
   VoidCallback? onAccountSuspended;
+  static const _secureStorage = FlutterSecureStorage(
+    aOptions: AndroidOptions(encryptedSharedPreferences: true),
+  );
+  Completer<bool>? _refreshCompleter;
 
   Future<String?> getAccessToken() async {
+    try {
+      final token = await _secureStorage.read(key: _kAccessToken);
+      if (token != null && token.isNotEmpty) return token;
+    } catch (_) {}
+    // Legacy migration from SharedPreferences
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString(_kAccessToken);
+    final legacyToken = prefs.getString(_kAccessToken);
+    if (legacyToken != null && legacyToken.isNotEmpty) {
+      try {
+        await _secureStorage.write(key: _kAccessToken, value: legacyToken);
+        final legacyRefresh = prefs.getString(_kRefreshToken);
+        if (legacyRefresh != null && legacyRefresh.isNotEmpty) {
+          await _secureStorage.write(key: _kRefreshToken, value: legacyRefresh);
+          await prefs.remove(_kRefreshToken);
+        }
+        await prefs.remove(_kAccessToken);
+      } catch (_) {}
+      return legacyToken;
+    }
+    return null;
   }
 
   Future<void> saveTokens(String accessToken, String refreshToken) async {
+    try {
+      await _secureStorage.write(key: _kAccessToken, value: accessToken);
+      await _secureStorage.write(key: _kRefreshToken, value: refreshToken);
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_kAccessToken, accessToken);
-    await prefs.setString(_kRefreshToken, refreshToken);
+    await prefs.remove(_kAccessToken);
+    await prefs.remove(_kRefreshToken);
   }
 
   Future<void> clearTokens() async {
+    try {
+      await _secureStorage.delete(key: _kAccessToken);
+      await _secureStorage.delete(key: _kRefreshToken);
+    } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kAccessToken);
     await prefs.remove(_kRefreshToken);
   }
 
   Future<bool> _tryRefresh() async {
+    if (_refreshCompleter != null) {
+      return _refreshCompleter!.future;
+    }
+    final completer = Completer<bool>();
+    _refreshCompleter = completer;
+
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final refresh = prefs.getString(_kRefreshToken);
-      if (refresh == null) return false;
+      String? refresh;
+      try {
+        refresh = await _secureStorage.read(key: _kRefreshToken);
+      } catch (_) {}
+      if (refresh == null || refresh.isEmpty) {
+        final prefs = await SharedPreferences.getInstance();
+        refresh = prefs.getString(_kRefreshToken);
+      }
+      if (refresh == null || refresh.isEmpty) {
+        completer.complete(false);
+        _refreshCompleter = null;
+        return false;
+      }
       final response = await Dio().post(
         '$kApiBaseUrl/auth/token/refresh',
         data: {'refreshToken': refresh},
       );
       final newAccess = response.data['accessToken'] as String?;
       final newRefresh = response.data['refreshToken'] as String?;
-      if (newAccess == null) return false;
-      await prefs.setString(_kAccessToken, newAccess);
-      if (newRefresh != null) {
-        await prefs.setString(_kRefreshToken, newRefresh);
+      if (newAccess == null) {
+        completer.complete(false);
+        _refreshCompleter = null;
+        return false;
       }
+      await saveTokens(newAccess, newRefresh ?? refresh);
+      completer.complete(true);
+      _refreshCompleter = null;
       return true;
     } catch (_) {
+      completer.complete(false);
+      _refreshCompleter = null;
       return false;
     }
   }

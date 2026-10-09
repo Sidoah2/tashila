@@ -254,7 +254,7 @@ async def send_sms(phone: str, message: str) -> None:
                 local_phone = cleaned.lstrip("+")
                 country_code = settings.smssak_country or "dz"
 
-            url = "https://sendmessage-47lvvvrp4a-uc.a.run.app"
+            url = settings.smssak_send_message_url or "https://sendmessage-47lvvvrp4a-uc.a.run.app"
             headers = {
                 "Content-Type": "application/json",
                 "key": settings.smssak_api_key

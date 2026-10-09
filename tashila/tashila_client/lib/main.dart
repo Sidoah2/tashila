@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:device_preview/device_preview.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:easy_logger/easy_logger.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -25,16 +24,13 @@ Future<void> main() async {
     LevelMessages.error,
   ];
   runApp(
-    DevicePreview(
-      enabled: false,
-      builder: (context) => EasyLocalization(
-        supportedLocales: _supportedLocales,
-        path: 'assets/translations',
-        fallbackLocale: const Locale('ar'),
-        startLocale: const Locale('ar'),
-        useOnlyLangCode: true,
-        child: const ProviderScope(child: AppBootstrap()),
-      ),
+    EasyLocalization(
+      supportedLocales: _supportedLocales,
+      path: 'assets/translations',
+      fallbackLocale: const Locale('ar'),
+      startLocale: const Locale('ar'),
+      useOnlyLangCode: true,
+      child: const ProviderScope(child: AppBootstrap()),
     ),
   );
 }

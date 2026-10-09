@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:ui' as ui;
 
+import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -79,11 +80,18 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     _startResendCountdown();
     try {
       await ref.read(driverAppStateProvider.notifier).requestOtp(widget.phone);
-    } catch (_) {}
-    if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('otp_resend_sent'.tr())),
-    );
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('otp_resend_sent'.tr())),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      String err = 'invalid_otp'.tr();
+      if (e is DioException && e.response?.statusCode == 429) {
+        err = 'otp_rate_limit_err'.tr();
+      }
+      _showError(err);
+    }
   }
 
   Future<void> _verifyAndContinue() async {
@@ -110,7 +118,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     } catch (e) {
       ApiOverlayManager.hide();
       if (!mounted) return;
-      _showError(e.toString());
+      String err = 'invalid_otp'.tr();
+      if (e is DioException && e.response?.statusCode == 429) {
+        err = 'otp_rate_limit_err'.tr();
+      }
+      _showError(err);
     } finally {
       if (mounted) {
         setState(() => _isVerifying = false);

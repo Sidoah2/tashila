@@ -1,13 +1,17 @@
-import urllib.request
-import urllib.error
 import json
+import os
+import urllib.error
+import urllib.request
+
 
 def test_sms():
     url = "https://www.traccar.org/sms/"
-    token = "cKmWHO4vTZmpfDhUWtKAQq:APA91bHaYCBZ1A3zsTbhjZEXFk09nFJCb5pIUbGUsoHZlQN-1Ic29ahq7FBrkMuJCIyKQ-k0ielwkvQpkyQ5eGYSzeqlyWSs1v4FgJfg1AXN2-05ZLqw2DQ"
+    token = os.getenv("TRACCAR_SMS_TOKEN", "")
+    if not token:
+        print("TRACCAR_SMS_TOKEN environment variable not set. Skipping test.")
+        return
     
-    # Standard format for Algerian numbers (country code +213)
-    phone_number = "+213666408661"
+    phone_number = os.getenv("TEST_PHONE_NUMBER", "+213666408661")
     message = "Tashila SMS OTP Verification Test Code: 998877"
 
     print("="*60)

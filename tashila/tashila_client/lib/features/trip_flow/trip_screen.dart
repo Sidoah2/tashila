@@ -1187,18 +1187,6 @@ class _TripScreenState extends ConsumerState<TripScreen> {
     );
   }
 
-  /// Formats elapsed seconds as HH:MM:SS (or MM:SS when under 1 hour) for the
-  /// live trip timer displayed during [TripStage.tripStarted].
-  String _formatElapsed(int totalSeconds) {
-    final h = totalSeconds ~/ 3600;
-    final m = (totalSeconds % 3600) ~/ 60;
-    final s = totalSeconds % 60;
-    if (h > 0) {
-      return '${h.toString().padLeft(2, '0')}:${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-    }
-    return '${m.toString().padLeft(2, '0')}:${s.toString().padLeft(2, '0')}';
-  }
-
   /*
   static LatLng _driverAlongRoute(LatLng a, LatLng b, TripStage stage) {
     final t = switch (stage) {

@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -497,9 +496,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       if (!isRunning) {
         await service.startService();
       }
-    } catch (e) {
-      debugPrint('Failed to start background service: $e');
-    }
+    } catch (_) {}
     if (!ref.mounted) return;
     _startRequestPolling();
   }
@@ -520,9 +517,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         vehicleColor: vehicleColor,
         vehiclePlate: vehiclePlate,
       );
-      try {
-        await _profileRepository.saveProfile(updatedProfile);
-      } catch (_) {}
+      await _profileRepository.saveProfile(updatedProfile);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(kProfile, jsonEncode(updatedProfile.toJson()));
       _setState(state.copyWith(profile: updatedProfile, isBusy: false));
@@ -893,12 +888,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   }
 
   Future<void> setProfilePhotoPath(String? localPath) async {
-    debugPrint('[AVATAR] setProfilePhotoPath called — localPath=$localPath');
     final current = state.profile ?? DriverProfile.empty();
-    debugPrint(
-      '[AVATAR] current.profilePhotoPath=${current.profilePhotoPath}  avatarUrl=${current.avatarUrl}',
-    );
-    debugPrint('[AVATAR] isReadyForDashboard=${current.isReadyForDashboard}');
     _setState(state.copyWith(isBusy: true, clearError: true));
 
     // Try to upload to the backend. Do NOT call saveProfile() which hits
@@ -907,30 +897,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     bool uploadFailed = false;
     if (localPath != null && localPath.isNotEmpty) {
       final httpRepo = _profileRepository;
-      debugPrint(
-        '[AVATAR] _profileRepository runtimeType=${httpRepo.runtimeType}',
-      );
       if (httpRepo is HttpProfileRepository) {
-        debugPrint(
-          '[AVATAR] Starting uploadAvatar to PUT /drivers/me/avatar ...',
-        );
         try {
           avatarUrl = await httpRepo.uploadAvatar(localPath);
-          debugPrint(
-            '[AVATAR] uploadAvatar SUCCESS — returned avatarUrl=$avatarUrl',
-          );
-        } catch (e, st) {
-          debugPrint('[AVATAR] uploadAvatar FAILED — error: $e');
-          debugPrint('[AVATAR] stack: $st');
+        } catch (_) {
           uploadFailed = true;
         }
-      } else {
-        debugPrint(
-          '[AVATAR] Repository is NOT HttpProfileRepository — skip backend upload',
-        );
       }
-    } else {
-      debugPrint('[AVATAR] localPath is null/empty — clearing avatar');
     }
 
     // Always persist the local path so the photo shows in the UI immediately,
@@ -941,11 +914,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       // Only update avatarUrl if backend upload succeeded.
       avatarUrl: avatarUrl ?? (localPath == null ? null : current.avatarUrl),
     );
-    debugPrint(
-      '[AVATAR] updated.profilePhotoPath=${updated.profilePhotoPath}  avatarUrl=${updated.avatarUrl}  uploadFailed=$uploadFailed',
-    );
     await _saveProfile(updated);
-    debugPrint('[AVATAR] local profile saved');
     _setState(
       state.copyWith(
         profile: updated,
@@ -954,7 +923,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         error: uploadFailed ? 'error_updating_profile'.tr() : null,
       ),
     );
-    debugPrint('[AVATAR] state updated — done');
   }
 
   Future<void> setAvailability(AvailabilityStatus status) async {
@@ -991,9 +959,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         if (!isRunning) {
           await service.startService();
         }
-      } catch (e) {
-        debugPrint('Failed to start background service: $e');
-      }
+      } catch (_) {}
     } else {
       _requestPollTimer?.cancel();
       _offerCountdownTimer?.cancel();
@@ -1004,9 +970,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
       try {
         FlutterBackgroundService().invoke('stopService');
-      } catch (e) {
-        debugPrint('Failed to stop background service: $e');
-      }
+      } catch (_) {}
     }
   }
 
@@ -1030,9 +994,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           looping: false,
           volume: 4.0,
         );
-      } catch (e) {
-        debugPrint('Failed to play ringtone: $e');
-      }
+      } catch (_) {}
     }
     list.sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
     _setState(
@@ -1104,9 +1066,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           looping: false,
           volume: 4.0,
         );
-      } catch (e) {
-        debugPrint('Failed to play ringtone: $e');
-      }
+      } catch (_) {}
     } else if (isIncomingOffer) {
       _setState(
         state.copyWith(
@@ -1119,9 +1079,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           looping: false,
           volume: 4.0,
         );
-      } catch (e) {
-        debugPrint('Failed to play ringtone: $e');
-      }
+      } catch (_) {}
     }
   }
 
@@ -1218,7 +1176,10 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     if (!state.isAuthenticated) return;
     if (state.availability != AvailabilityStatus.online) return;
 
-    _locationTimer = Timer.periodic(const Duration(seconds: 5), (_) async {
+    // Smart interval: 10s during active trip, 15s when waiting for offers to preserve battery
+    final intervalSeconds = state.hasActiveTrip ? 10 : 15;
+    _locationTimer =
+        Timer.periodic(Duration(seconds: intervalSeconds), (_) async {
       await refreshDriverLocation(sendToServer: true);
       final loc = state.driverLocation;
       if (loc != null) {
@@ -1297,10 +1258,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         );
       }
 
+      // Smart battery accuracy: high only on active trip, medium when idle
       final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-          timeLimit: Duration(seconds: 15),
+        locationSettings: LocationSettings(
+          accuracy: state.hasActiveTrip
+              ? LocationAccuracy.high
+              : LocationAccuracy.medium,
+          timeLimit: const Duration(seconds: 15),
         ),
       );
       final loc = LatLng(position.latitude, position.longitude);
@@ -1314,17 +1278,9 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
         } catch (_) {}
       }
     } catch (_) {
-      if (state.driverLocation != null) return;
-      // Simulator/debug fallback: Bab Ezzouar (supported service area).
-      const fallback = LatLng(36.722, 3.182);
-      _setState(state.copyWith(driverLocation: fallback));
-      if (sendToServer && kDebugMode) {
-        try {
-          await _apiClient.put<Map<String, dynamic>>(
-            '/drivers/me/location',
-            data: {'lat': fallback.latitude, 'lng': fallback.longitude},
-          );
-        } catch (_) {}
+      // Do not silently fallback to arbitrary coordinates (e.g. Bab Ezzouar)
+      if (state.driverLocation == null) {
+        _setState(state.copyWith(error: 'location_unavailable'.tr()));
       }
     }
   }
@@ -1596,14 +1552,18 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     if (tripId == null) return false;
 
     final fullComment = formatRatingComment(comment, goodTraits, badTraits);
-    final ok = await _tripRepository.rateClient(
-      tripId,
-      rating,
-      comment: fullComment.isEmpty ? null : fullComment,
-    );
-    if (!ok) {
-      _setState(state.copyWith(error: 'rating_submit_failed'.tr()));
-      return false;
+    try {
+      final ok = await _tripRepository.rateClient(
+        tripId,
+        rating,
+        comment: fullComment.isEmpty ? null : fullComment,
+      );
+      if (!ok) {
+        _setState(state.copyWith(error: 'rating_submit_failed'.tr()));
+        return false;
+      }
+    } on RatingConflictException {
+      // 409 Conflict: Already rated, advance without failure
     }
 
     await syncTripHistoryFromServer();

@@ -184,7 +184,9 @@ export default function LiveTruckMap({
       script = document.createElement("script");
       script.async = true;
       script.defer = true;
-      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key)}&libraries=places`;
+      // Note: Key must be restricted to HTTP referrers in Google Cloud Console (e.g., tashilaadmin-tau.vercel.app/*, localhost:3000/*)
+      script.crossOrigin = "anonymous";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${encodeURIComponent(key.trim())}&libraries=places&loading=async`;
       script.dataset.tashilaGoogleMaps = "1";
       document.head.appendChild(script);
     }

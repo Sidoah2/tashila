@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart'
     show TargetPlatform, defaultTargetPlatform, kIsWeb;
 
@@ -8,14 +7,11 @@ class MapConfig {
   static const _envAndroidKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
   static const _envIosKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY_IOS');
 
-  // Securely decode default fallback if not supplied via dart-define
-  static String get androidKey => _envAndroidKey.isNotEmpty
-      ? _envAndroidKey
-      : utf8.decode(base64.decode('QUl6YVN5Q0htQW5QRzA2Vm0yVjVYUERzUVltZnpIeTEzSUNDRHRN'));
+  // Keys must be supplied via --dart-define=GOOGLE_MAPS_API_KEY=... / env
+  static String get androidKey => _envAndroidKey;
 
-  static String get iosKey => _envIosKey.isNotEmpty
-      ? _envIosKey
-      : utf8.decode(base64.decode('QUl6YVN5RE94WGRoT2VqcmNpNmZFUnJ4ckE1TkUyQzBQNjBQbEpn'));
+  static String get iosKey =>
+      _envIosKey.isNotEmpty ? _envIosKey : _envAndroidKey;
 
   static String get mapApiKey {
     if (kIsWeb) return iosKey;

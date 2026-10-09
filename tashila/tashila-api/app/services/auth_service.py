@@ -16,8 +16,14 @@ from app.core.database import get_database
 from app.core.exceptions import ValidationError
 from app.core.redis import (
     blacklist_token,
+    is_admin_login_locked,
+    is_otp_verify_locked,
     is_token_blacklisted,
     otp_rate_limit,
+    record_admin_login_failure,
+    record_otp_verify_failure,
+    reset_admin_login_failures,
+    reset_otp_verify_failures,
     store_otp,
     verify_otp as redis_verify_otp,
 )
@@ -289,7 +295,7 @@ async def send_otp(phone: str, role: str) -> dict[str, int]:
                 local_phone = cleaned.lstrip("+")
                 country_code = settings.smssak_country or "dz"
 
-            url = "https://sendotp-47lvvvrp4a-uc.a.run.app"
+            url = settings.smssak_send_otp_url or "https://sendotp-47lvvvrp4a-uc.a.run.app"
             headers = {
                 "Content-Type": "application/json",
                 "key": settings.smssak_api_key
@@ -343,6 +349,13 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
     if role not in ("client", "driver"):
         raise ValidationError("Role must be 'client' or 'driver'")
 
+    # C5: Check brute-force lockout before checking OTP
+    if await is_otp_verify_locked(phone):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed verification attempts. Please wait 5 minutes before trying again.",
+        )
+
     otp_ok = False
     is_test = is_test_phone(phone)
 
@@ -374,7 +387,8 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
                 local_phone = cleaned.lstrip("+")
                 country_code = settings.smssak_country or "dz"
 
-            url = "https://verifyotp-47lvvvrp4a-uc.a.run.app"
+            # H3: Use configurable smssak_verify_otp_url
+            url = settings.smssak_verify_otp_url or "https://verifyotp-47lvvvrp4a-uc.a.run.app"
             headers = {
                 "Content-Type": "application/json",
                 "key": settings.smssak_api_key
@@ -398,10 +412,25 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
         otp_ok = await redis_verify_otp(phone, role, otp)
 
     if not otp_ok:
+        # C5: Record failed attempt and lock out if threshold reached
+        attempts = await record_otp_verify_failure(
+            phone,
+            max_attempts=settings.max_otp_attempts,
+            lockout_seconds=300,
+        )
+        remaining = max(0, settings.max_otp_attempts - attempts)
+        if remaining == 0:
+            raise HTTPException(
+                status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+                detail="Too many failed verification attempts. Account locked for 5 minutes.",
+            )
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid or expired OTP",
+            detail=f"Invalid or expired OTP. {remaining} attempt(s) remaining.",
         )
+
+    # Success: reset failed attempt counter
+    await reset_otp_verify_failures(phone)
 
     collection_name = USERS_COLLECTION if role == "client" else DRIVERS_COLLECTION
     collection = get_database()[collection_name]
@@ -606,8 +635,16 @@ async def logout(token: str, secret: str) -> None:
 
 
 async def admin_login(email: str, password: str) -> dict[str, Any]:
+    # C6: Check admin brute-force lockout
+    if await is_admin_login_locked(email):
+        raise HTTPException(
+            status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+            detail="Too many failed admin login attempts. Account temporarily locked for 15 minutes.",
+        )
+
     admin = await get_database()[ADMIN_USERS_COLLECTION].find_one({"email": email})
     if admin is None or not verify_password(password, admin.get("passwordHash", "")):
+        await record_admin_login_failure(email, max_attempts=5, lockout_seconds=900)
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
@@ -618,6 +655,9 @@ async def admin_login(email: str, password: str) -> dict[str, Any]:
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Account suspended",
         )
+
+    # Success: clear failure counter
+    await reset_admin_login_failures(email)
 
     admin_id = str(admin["_id"])
     return {

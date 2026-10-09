@@ -58,11 +58,28 @@ export default function SettingsPage() {
   };
 
   const handleSavePassword = async () => {
-    if (passwordForm.password.length < 6) {
-      showToast("Password must be at least 6 characters");
+    const pwd = passwordForm.password;
+    if (pwd.length < 8) {
+      showToast("Password must be at least 8 characters long");
       return;
     }
-    if (passwordForm.password !== passwordForm.confirm) {
+    if (!/[A-Z]/.test(pwd)) {
+      showToast("Password must contain at least one uppercase letter");
+      return;
+    }
+    if (!/[a-z]/.test(pwd)) {
+      showToast("Password must contain at least one lowercase letter");
+      return;
+    }
+    if (!/[0-9]/.test(pwd)) {
+      showToast("Password must contain at least one number");
+      return;
+    }
+    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(pwd)) {
+      showToast("Password must contain at least one special character");
+      return;
+    }
+    if (pwd !== passwordForm.confirm) {
       showToast("Passwords do not match");
       return;
     }

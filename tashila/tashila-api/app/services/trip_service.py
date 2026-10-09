@@ -249,33 +249,55 @@ async def _notify_client_status_push(trip: dict[str, Any], new_status: str) -> N
 
 async def _apply_trip_completion_earnings(driver_id: str, fare: float) -> None:
     commission_rate = await get_commission_rate()
-    commission = fare * commission_rate
+    commission = round(fare * commission_rate, 2)
     now = datetime.now(timezone.utc)
 
-    driver = await _find_driver(driver_id)
-    earnings = (driver or {}).get("earnings") or {}
-    current_due = float(earnings.get("platformDueDzd", 0.0))
-    current_credit = float(earnings.get("creditDzd", 0.0))
-
-    # Net balance: existing credit minus existing due, minus newly incurred commission
-    net_balance = (current_credit - current_due) - commission
-    if net_balance >= 0:
-        new_due = 0.0
-        new_credit = round(net_balance, 2)
-    else:
-        new_due = round(abs(net_balance), 2)
-        new_credit = 0.0
+    # Atomic server-side update pipeline to guarantee concurrency safety (no read-modify-write)
+    net_expr = {
+        "$subtract": [
+            {
+                "$subtract": [
+                    {"$ifNull": ["$earnings.creditDzd", 0.0]},
+                    {"$ifNull": ["$earnings.platformDueDzd", 0.0]},
+                ]
+            },
+            commission,
+        ]
+    }
 
     await get_database()[DRIVERS_COLLECTION].update_one(
         {"_id": ObjectId(driver_id)},
-        {
-            "$inc": {"earnings.totalEarnedDzd": fare},
-            "$set": {
-                "earnings.platformDueDzd": new_due,
-                "earnings.creditDzd": new_credit,
-                "updatedAt": now,
-            },
-        },
+        [
+            {
+                "$set": {
+                    "earnings.totalEarnedDzd": {
+                        "$round": [
+                            {"$add": [{"$ifNull": ["$earnings.totalEarnedDzd", 0.0]}, fare]},
+                            2,
+                        ]
+                    },
+                    "earnings.creditDzd": {
+                        "$round": [
+                            {"$cond": [{"$gte": [net_expr, 0.0]}, net_expr, 0.0]},
+                            2,
+                        ]
+                    },
+                    "earnings.platformDueDzd": {
+                        "$round": [
+                            {
+                                "$cond": [
+                                    {"$lt": [net_expr, 0.0]},
+                                    {"$abs": net_expr},
+                                    0.0,
+                                ]
+                            },
+                            2,
+                        ]
+                    },
+                    "updatedAt": now,
+                }
+            }
+        ],
     )
 
 
@@ -356,60 +378,74 @@ async def create_trip(
 
             return json.loads(cached)
 
-    collection = get_database()[TRIPS_COLLECTION]
-    active = await collection.find_one(
-        {
+    # Mutex lock to prevent TOCTOU race conditions on concurrent creation
+    lock_key = f"lock:create_trip:{client_id}"
+    lock_acquired = await redis.set(lock_key, "1", nx=True, ex=10)
+    if not lock_acquired:
+        raise ConflictError("A trip request is already being processed. Please wait.")
+
+    try:
+        collection = get_database()[TRIPS_COLLECTION]
+        active = await collection.find_one(
+            {
+                "clientId": client_id,
+                "status": {"$in": list(ACTIVE_CLIENT_STATUSES)},
+                "driverRating": None,
+            },
+        )
+        if active is not None:
+            raise ConflictError("You already have an active trip")
+
+        last_trip = await collection.find_one(
+            {"clientId": client_id},
+            sort=[("updatedAt", -1)],
+        )
+        if last_trip is not None:
+            status = last_trip.get("status")
+            has_rating = last_trip.get("driverRating") is not None
+            if status == "completed" and not has_rating:
+                raise ConflictError(
+                    "Please rate your last trip before booking a new one",
+                    code="rating_required",
+                )
+
+        _validate_truck_type(data.truckType)
+        estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType)
+        now = datetime.now(timezone.utc)
+        doc = {
+            "status": "requested",
             "clientId": client_id,
-            "status": {"$in": list(ACTIVE_CLIENT_STATUSES)},
+            "driverId": None,
+            "pickup": data.pickup.model_dump(),
+            "dropoff": data.dropoff.model_dump(),
+            "pickupLocation": _pickup_location(data.pickup),
+            "truckType": data.truckType,
+            "fare": float(estimate["fare"]),
+            "distanceKm": float(estimate["distanceKm"]),
+            "estimatedMinutes": int(estimate["estimatedMinutes"]),
+            "finalFare": None,
+            "paymentMethod": data.paymentMethod,
+            "notes": data.notes,
             "driverRating": None,
-        },
-    )
-    if active is not None:
-        raise ConflictError("You already have an active trip")
+            "clientRating": None,
+            "clientRatingComment": None,
+            "driverRatingComment": None,
+            "cancelledReason": None,
+            "createdAt": now,
+            "updatedAt": now,
+            "completedAt": None,
+        }
+        from pymongo.errors import DuplicateKeyError
+        try:
+            result = await collection.insert_one(doc)
+        except DuplicateKeyError:
+            raise ConflictError("You already have an active trip")
 
-    last_trip = await collection.find_one(
-        {"clientId": client_id},
-        sort=[("updatedAt", -1)],
-    )
-    if last_trip is not None:
-        status = last_trip.get("status")
-        has_rating = last_trip.get("driverRating") is not None
-        if status == "completed" and not has_rating:
-            raise ConflictError(
-                "Please rate your last trip before booking a new one",
-                code="rating_required",
-            )
-
-    _validate_truck_type(data.truckType)
-    estimate = await estimate_trip(data.pickup, data.dropoff, data.truckType)
-    now = datetime.now(timezone.utc)
-    doc = {
-        "status": "requested",
-        "clientId": client_id,
-        "driverId": None,
-        "pickup": data.pickup.model_dump(),
-        "dropoff": data.dropoff.model_dump(),
-        "pickupLocation": _pickup_location(data.pickup),
-        "truckType": data.truckType,
-        "fare": float(estimate["fare"]),
-        "distanceKm": float(estimate["distanceKm"]),
-        "estimatedMinutes": int(estimate["estimatedMinutes"]),
-        "finalFare": None,
-        "paymentMethod": data.paymentMethod,
-        "notes": data.notes,
-        "driverRating": None,
-        "clientRating": None,
-        "clientRatingComment": None,
-        "driverRatingComment": None,
-        "cancelledReason": None,
-        "createdAt": now,
-        "updatedAt": now,
-        "completedAt": None,
-    }
-    result = await collection.insert_one(doc)
-    trip_id = str(result.inserted_id)
-    doc["_id"] = trip_id
-    serialized = _serialize_doc(doc)
+        trip_id = str(result.inserted_id)
+        doc["_id"] = trip_id
+        serialized = _serialize_doc(doc)
+    finally:
+        await redis.delete(lock_key)
 
     client_info = await _get_client_info(client_id)
     trip_payload = {**serialized, "client": client_info}

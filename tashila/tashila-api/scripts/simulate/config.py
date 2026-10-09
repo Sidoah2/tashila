@@ -4,7 +4,7 @@ BASE_URL = os.environ.get("SIM_BASE_URL", "https://tashila-api-production.up.rai
 # Socket.IO is served at the default /socket.io path (wrapped ASGI app)
 WS_URL   = BASE_URL
 
-SIM_SECRET = os.environ.get("SIM_SECRET", "sim-secret-2024")
+SIM_SECRET = os.environ.get("SIM_SECRET", "")
 
 NUM_CLIENTS = int(os.environ.get("SIM_NUM_CLIENTS", "100"))
 NUM_DRIVERS = int(os.environ.get("SIM_NUM_DRIVERS", "30"))

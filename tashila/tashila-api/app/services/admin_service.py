@@ -82,6 +82,53 @@ async def _find_driver(driver_id: str) -> dict[str, Any] | None:
     return _serialize_doc(doc) if doc else None
 
 
+async def _find_users_by_ids(user_ids: list[str]) -> dict[str, dict[str, Any]]:
+    clean_ids = []
+    for uid in user_ids:
+        try:
+            clean_ids.append(ObjectId(uid))
+        except (InvalidId, TypeError):
+            continue
+    if not clean_ids:
+        return {}
+    cursor = get_database()[USERS_COLLECTION].find({"_id": {"$in": clean_ids}})
+    result: dict[str, dict[str, Any]] = {}
+    async for doc in cursor:
+        serialized = _serialize_doc(doc)
+        result[serialized["id"]] = serialized
+    return result
+
+
+async def _find_drivers_by_ids(driver_ids: list[str]) -> dict[str, dict[str, Any]]:
+    clean_ids = []
+    for did in driver_ids:
+        try:
+            clean_ids.append(ObjectId(did))
+        except (InvalidId, TypeError):
+            continue
+    if not clean_ids:
+        return {}
+    cursor = get_database()[DRIVERS_COLLECTION].find({"_id": {"$in": clean_ids}})
+    result: dict[str, dict[str, Any]] = {}
+    async for doc in cursor:
+        serialized = _serialize_doc(doc)
+        result[serialized["id"]] = serialized
+    return result
+
+
+async def _driver_completed_trips_counts(driver_ids: list[str]) -> dict[str, int]:
+    if not driver_ids:
+        return {}
+    pipeline = [
+        {"$match": {"driverId": {"$in": driver_ids}, "status": "completed"}},
+        {"$group": {"_id": "$driverId", "count": {"$sum": 1}}},
+    ]
+    counts: dict[str, int] = {}
+    async for row in get_database()[TRIPS_COLLECTION].aggregate(pipeline):
+        counts[row["_id"]] = row["count"]
+    return counts
+
+
 async def _trip_counts_for_clients(client_ids: list[str]) -> dict[str, int]:
     if not client_ids:
         return {}
@@ -242,9 +289,13 @@ async def _client_reviews_for_user(user_id: str, limit: int = 20) -> list[dict[s
         .sort("completedAt", -1)
         .limit(limit)
     )
+    trips = [trip async for trip in cursor]
+    driver_ids = [str(t.get("driverId")) for t in trips if t.get("driverId")]
+    drivers_map = await _find_drivers_by_ids(driver_ids)
+
     reviews: list[dict[str, Any]] = []
-    async for trip in cursor:
-        driver = await _find_driver(trip.get("driverId", ""))
+    for trip in trips:
+        driver = drivers_map.get(str(trip.get("driverId", "")))
         reviews.append({
             "tripId": str(trip["_id"]),
             "rating": trip.get("driverRating"),
@@ -280,9 +331,13 @@ async def _driver_customer_reviews(driver_id: str, limit: int = 20) -> list[dict
         .sort("completedAt", -1)
         .limit(limit)
     )
+    trips = [trip async for trip in cursor]
+    client_ids = [str(t.get("clientId")) for t in trips if t.get("clientId")]
+    users_map = await _find_users_by_ids(client_ids)
+
     reviews: list[dict[str, Any]] = []
-    async for trip in cursor:
-        client = await _find_user(trip.get("clientId", ""))
+    for trip in trips:
+        client = users_map.get(str(trip.get("clientId", "")))
         reviews.append({
             "tripId": str(trip["_id"]),
             "rating": trip.get("driverRating"),
@@ -409,12 +464,17 @@ async def admin_list_drivers(
         .limit(params["limit"])
     )
     items = [_serialize_doc(doc) async for doc in cursor]
+    driver_ids = [item["id"] for item in items]
+    completed_counts = await _driver_completed_trips_counts(driver_ids)
+
     enriched: list[dict[str, Any]] = []
     for item in items:
         driver_id = item["id"]
-        reviews = await _driver_customer_reviews(driver_id, limit=1)
-        completed_trips = await _driver_completed_trips_count(driver_id)
-        enriched.append({**item, "customerReviews": reviews, "completedTrips": completed_trips})
+        enriched.append({
+            **item,
+            "customerReviews": [],
+            "completedTrips": completed_counts.get(driver_id, 0),
+        })
     return paginated_response(enriched, total, params["page"], params["limit"])
 
 

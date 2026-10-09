@@ -23,19 +23,31 @@ async def upload_image(
     return await upload_service.save_upload(file, subfolder="images")
 
 
-@router.get("/{subfolder}/{filename}")
+@router.get("/{filepath:path}")
 async def get_upload(
-    subfolder: str,
-    filename: str,
+    filepath: str,
     _principal: dict = Depends(get_authenticated_principal),
 ) -> FileResponse:
-    if not _safe_path_part(subfolder) or not _safe_path_part(filename):
+    # Protect against path traversal
+    clean_parts = [p for p in filepath.replace("\\", "/").split("/") if p]
+    if any(p in (".", "..") for p in clean_parts):
         raise NotFoundError("File not found")
 
-    file_path = Path(settings.upload_dir) / subfolder / filename
+    base_dir = Path(settings.upload_dir).resolve()
+    file_path = (base_dir / Path(*clean_parts)).resolve()
+
+    try:
+        if not file_path.is_relative_to(base_dir):
+            raise NotFoundError("File not found")
+    except AttributeError:
+        # Fallback for older python Path compatibility
+        if not str(file_path).startswith(str(base_dir)):
+            raise NotFoundError("File not found")
+
     if not file_path.is_file():
         raise NotFoundError("File not found")
 
+    filename = file_path.name
     media_type = "application/octet-stream"
     if filename.lower().endswith((".jpg", ".jpeg")):
         media_type = "image/jpeg"

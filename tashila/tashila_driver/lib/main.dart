@@ -10,7 +10,6 @@ import 'core/models/models.dart';
 import 'core/router/app_router.dart';
 import 'core/state/driver_app_state.dart';
 import 'core/theme/app_theme.dart';
-import 'package:device_preview/device_preview.dart';
 import 'package:tashila_driver/core/widgets/connectivity_banner.dart';
 
 import 'core/services/background_service.dart';
@@ -25,16 +24,13 @@ Future<void> main() async {
     await initializeBackgroundService();
   } catch (_) {}
   runApp(
-    DevicePreview(
-      enabled: false,
-      builder: (context) => EasyLocalization(
-        supportedLocales: _supported,
-        path: 'assets/translations',
-        fallbackLocale: const Locale('ar'),
-        startLocale: const Locale('ar'),
-        useOnlyLangCode: true,
-        child: const ProviderScope(child: TashilaDriverApp()),
-      ),
+    EasyLocalization(
+      supportedLocales: _supported,
+      path: 'assets/translations',
+      fallbackLocale: const Locale('ar'),
+      startLocale: const Locale('ar'),
+      useOnlyLangCode: true,
+      child: const ProviderScope(child: TashilaDriverApp()),
     ),
   );
 }

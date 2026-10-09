@@ -85,18 +85,6 @@ export async function estimateFareFromApi(
   return data.fare;
 }
 
-/** Tashila dynamic pricing (DZD): base 5 km, distance + time surcharges, ceil to 100. */
-export function tashilaDynamicFare(
-  distanceKm: number,
-  durationMinutes: number,
-): number {
-  const raw =
-    1000 +
-    Math.max(0, distanceKm - 5) * 100 +
-    Math.max(0, durationMinutes - 60) * 20;
-  return Math.ceil(raw / 100) * 100;
-}
-
 /** fare = max(minFare, round((baseFare + perKm×distance + perMinute×duration) × surge)) */
 export function estimateFare(
   rule: PricingRule | undefined,

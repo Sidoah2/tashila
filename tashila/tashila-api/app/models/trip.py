@@ -6,8 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 class TripCoord(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
-    lat: float
-    lng: float
+    lat: float = Field(..., ge=-90.0, le=90.0, description="Latitude between -90 and 90")
+    lng: float = Field(..., ge=-180.0, le=180.0, description="Longitude between -180 and 180")
     address: str = ""
 
 

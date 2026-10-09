@@ -58,9 +58,9 @@ function mapUser(u: ApiUser): User {
   };
 }
 
-export async function listUsers(): Promise<User[]> {
+export async function listUsers(page: number = 1, limit: number = 20): Promise<User[]> {
   const data = await apiFetch<PaginatedUsers>(
-    "/admin/users?limit=100&page=1",
+    `/admin/users?limit=${limit}&page=${page}`,
   );
   return data.items.map(mapUser);
 }

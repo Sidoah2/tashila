@@ -8,6 +8,7 @@ import 'package:tashila_client/core/config/app_social_links.dart';
 import 'package:tashila_client/core/config/support_config.dart';
 import 'package:tashila_client/core/state/app_state.dart';
 import 'package:tashila_client/core/theme/app_colors.dart';
+import 'package:tashila_client/core/widgets/confirm_logout.dart';
 import 'package:tashila_client/core/widgets/upload_image_preview.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:image_picker/image_picker.dart';
@@ -18,7 +19,6 @@ class ProfileSettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final state = ref.watch(appStateProvider);
-    final notifier = ref.read(appStateProvider.notifier);
     final theme = Theme.of(context);
     final tripCount = state.history.length;
     final completedCount = state.history.where((t) => !t.cancelled).length;
@@ -580,7 +580,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                 sliver: SliverToBoxAdapter(
                   child: OutlinedButton(
                     onPressed: () async {
-                      await notifier.logout();
+                      await confirmClientLogout(context, ref);
                       if (context.mounted) context.go('/login');
                     },
                     style: OutlinedButton.styleFrom(
@@ -745,39 +745,6 @@ class ProfileSettingsScreen extends ConsumerWidget {
     } finally {
       loading.value = false;
     }
-  }
-
-  void _showAboutDialog(BuildContext context) {
-    final theme = Theme.of(context);
-    showDialog<void>(
-      context: context,
-      builder: (ctx) => AlertDialog(
-        backgroundColor: Colors.white,
-        surfaceTintColor: Colors.transparent,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
-        title: Text(
-          'profile_about'.tr(),
-          style: theme.textTheme.titleLarge?.copyWith(
-            fontWeight: FontWeight.w800,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        content: Text(
-          'profile_about_body'.tr(),
-          style: theme.textTheme.bodyMedium?.copyWith(height: 1.45),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(ctx),
-            style: TextButton.styleFrom(foregroundColor: AppColors.brandOrange),
-            child: Text(
-              MaterialLocalizations.of(ctx).closeButtonLabel,
-              style: const TextStyle(fontWeight: FontWeight.w700),
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   void _showDeleteAccountDialog(BuildContext context, WidgetRef ref) {

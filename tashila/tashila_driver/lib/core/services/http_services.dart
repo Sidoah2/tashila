@@ -1,6 +1,4 @@
 import 'package:dio/dio.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/rendering.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:tashila_driver/core/models/models.dart';
 import 'package:tashila_driver/core/services/api_client.dart';
@@ -8,7 +6,12 @@ import 'package:tashila_driver/core/services/repositories.dart';
 import 'package:tashila_driver/core/utils/geo.dart';
 import 'package:tashila_driver/core/utils/picked_image_io.dart';
 
-// ignore: unused_element (kept for exhaustive switch if TruckType enum is added later)
+class RatingConflictException implements Exception {
+  final String message;
+  const RatingConflictException(this.message);
+  @override
+  String toString() => message;
+}
 
 class HttpAuthRepository implements AuthRepository {
   HttpAuthRepository(this._client);
@@ -180,11 +183,8 @@ class HttpProfileRepository implements ProfileRepository {
   }
 
   Future<String?> uploadAvatar(String filePath) async {
-    debugPrint('[AVATAR][uploadAvatar] filePath=$filePath');
     final bytes = await readUploadBytes(filePath);
-    debugPrint('[AVATAR][uploadAvatar] bytes.length=${bytes.length}');
     final name = filePath.split('/').last;
-    debugPrint('[AVATAR][uploadAvatar] filename=$name');
     try {
       final res = await _client.uploadFile<Map<String, dynamic>>(
         '/drivers/me/avatar',
@@ -192,14 +192,9 @@ class HttpProfileRepository implements ProfileRepository {
         bytes,
         name,
       );
-      debugPrint('[AVATAR][uploadAvatar] HTTP status=${res.statusCode}');
-      debugPrint('[AVATAR][uploadAvatar] response data=${res.data}');
       final url = res.data?['avatarUrl'] as String?;
-      debugPrint('[AVATAR][uploadAvatar] parsed avatarUrl=$url');
       return url;
-    } catch (e, st) {
-      debugPrint('[AVATAR][uploadAvatar] EXCEPTION: $e');
-      debugPrint('[AVATAR][uploadAvatar] stacktrace: $st');
+    } catch (_) {
       rethrow;
     }
   }
@@ -413,7 +408,9 @@ class HttpTripRepository implements TripRepository {
       );
       return true;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 409) return true;
+      if (e.response?.statusCode == 409) {
+        throw const RatingConflictException('rating_already_submitted');
+      }
       return false;
     } catch (_) {
       return false;

@@ -76,9 +76,9 @@ function mapTrip(t: ApiTrip): Trip {
   };
 }
 
-export async function listTrips(): Promise<Trip[]> {
+export async function listTrips(page: number = 1, limit: number = 20): Promise<Trip[]> {
   const data = await apiFetch<PaginatedTrips>(
-    "/admin/trips?limit=100&page=1",
+    `/admin/trips?limit=${limit}&page=${page}`,
   );
   return data.items.map(mapTrip);
 }
@@ -92,7 +92,7 @@ export type TripDetail = Trip & {
   } | null;
 };
 
-export async function getTrip(id: string): Promise<TripDetail | null> {
+export async function getTrip(id: string): Promise<TripDetail> {
   try {
     const t = await apiFetch<ApiTrip>(`/admin/trips/${id}`);
     const base = mapTrip(t);
@@ -109,8 +109,9 @@ export async function getTrip(id: string): Promise<TripDetail | null> {
         generation: offer.generation,
       },
     };
-  } catch {
-    return null;
+  } catch (error) {
+    console.error(`Failed to fetch trip details for ${id}:`, error);
+    throw error;
   }
 }
 

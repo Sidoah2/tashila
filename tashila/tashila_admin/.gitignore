@@ -5,7 +5,12 @@ build
 .DS_Store
 *.tsbuildinfo
 next-env.d.ts
+.env
 .env*.local
+.env.local
+.env.development
+.env.test
+.env.production
 .vercel
 
 .vercel
