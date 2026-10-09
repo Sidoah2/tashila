@@ -1388,41 +1388,41 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           state.currentRequest == null) {
         unawaited(refreshNearbyRequests());
       }
-      if (errorCode == 'TRIP_NOT_AVAILABLE') {
-        final ctx = rootNavigatorKey.currentContext;
-        if (ctx != null) {
-          final locale = Localizations.localeOf(ctx);
-          final isAr = locale.languageCode == 'ar';
-          final isFr = locale.languageCode == 'fr';
-          
-          final String title = isAr ? 'عذراً' : (isFr ? 'Désolé' : 'Sorry');
-          final String msg = isAr 
-              ? 'هذه الرحلة تم قبولها بالفعل من قبل سائق آخر.' 
-              : (isFr 
-                  ? 'Ce trajet a déjà été pris par un autre chauffeur.' 
-                  : 'This trip has already been taken by another driver.');
-          
-          showDialog<void>(
-            context: ctx,
-            barrierDismissible: false,
-            builder: (context) => AlertDialog(
-              title: Text(title),
-              content: Text(msg),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    if (state.availability == AvailabilityStatus.online &&
-                        state.currentRequest == null) {
-                      unawaited(refreshNearbyRequests());
-                    }
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
-        }
+      final ctx = rootNavigatorKey.currentContext;
+      if (ctx != null) {
+        final locale = Localizations.localeOf(ctx);
+        final isAr = locale.languageCode == 'ar';
+        final isFr = locale.languageCode == 'fr';
+        
+        final String title = isAr ? 'عذراً' : (isFr ? 'Désolé' : 'Sorry');
+        final String msg = errorCode == 'TRIP_NOT_AVAILABLE'
+            ? (isAr 
+                ? 'هذه الرحلة تم قبولها بالفعل من قبل سائق آخر.' 
+                : (isFr 
+                    ? 'Ce trajet a déjà été pris par un autre chauffeur.' 
+                    : 'This trip has already been taken by another driver.'))
+            : _acceptErrorMessage(errorCode);
+        
+        showDialog<void>(
+          context: ctx,
+          barrierDismissible: false,
+          builder: (context) => AlertDialog(
+            title: Text(title),
+            content: Text(msg),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  if (state.availability == AvailabilityStatus.online &&
+                      state.currentRequest == null) {
+                    unawaited(refreshNearbyRequests());
+                  }
+                },
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
       }
       return false;
     }
@@ -1449,11 +1449,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
 
   Future<void> rejectRequest(TripRequest request) async {
     final ok = await _tripRepository.rejectTrip(request.id);
+    _clearActiveOffer(tripId: request.id);
     if (!ok) {
       _setState(state.copyWith(error: 'Could not reject offer.'));
       return;
     }
-    _clearActiveOffer(tripId: request.id);
     _setState(state.copyWith(clearError: true));
   }
 

@@ -274,16 +274,16 @@ def notify_dispatch_wake(trip_id: str) -> None:
 async def validate_reject(trip_id: str, driver_id: str) -> None:
     trip = await trip_service.get_trip_by_id(trip_id)
     if trip.get("status") != "requested":
-        raise ConflictError("Trip is no longer available", code="TRIP_NOT_AVAILABLE")
+        return
 
     offer = await get_trip_offer(trip_id)
     if offer is None:
-        raise ConflictError("No active offer for this trip", code="NOT_YOUR_OFFER")
+        return
     driver_ids = offer.get("driverIds", [])
     if not driver_ids and offer.get("driverId"):
         driver_ids = [offer["driverId"]]
-    if driver_id not in driver_ids:
-        raise ConflictError("This trip was offered to another driver", code="NOT_YOUR_OFFER")
+    if driver_ids and driver_id not in driver_ids:
+        return
 
 
 async def validate_accept(trip_id: str, driver_id: str) -> None:
@@ -291,30 +291,27 @@ async def validate_accept(trip_id: str, driver_id: str) -> None:
     if trip.get("status") != "requested":
         raise ConflictError("Trip already taken", code="TRIP_NOT_AVAILABLE")
 
-    if await is_driver_busy(driver_id):
+    # Check MongoDB: verify driver does NOT have an ongoing active trip
+    active_in_db = await get_database()[TRIPS_COLLECTION].find_one(
+        {"driverId": driver_id, "status": {"$in": list(trip_service.DRIVER_ACTIVE_TRIP_STATUSES)}},
+    )
+    if active_in_db is not None:
         raise ConflictError("You already have an active trip", code="DRIVER_BUSY")
+    else:
+        # Clear any stale redis busy flag if driver has no active trip in DB
+        await clear_driver_busy(driver_id)
 
-    active = await trip_service.get_active_trip_for_driver(driver_id)
-    if active is not None:
-        raise ConflictError("You already have an active trip", code="DRIVER_BUSY")
-
-    offer = await get_trip_offer(trip_id)
-    if offer is None:
-        raise ConflictError("No active offer for this trip", code="NOT_YOUR_OFFER")
-
-    driver_ids = offer.get("driverIds", [])
-    if not driver_ids and offer.get("driverId"):
-        driver_ids = [offer["driverId"]]
-    if driver_id not in driver_ids:
+    targeted = trip.get("targetedDriverId")
+    if targeted and str(targeted) != str(driver_id):
         raise ConflictError("This trip was offered to another driver", code="NOT_YOUR_OFFER")
 
-    expires_raw = offer.get("expiresAt")
-    if expires_raw:
-        expires_at = datetime.fromisoformat(str(expires_raw).replace("Z", "+00:00"))
-        if expires_at.tzinfo is None:
-            expires_at = expires_at.replace(tzinfo=timezone.utc)
-        if datetime.now(timezone.utc) >= expires_at:
-            raise ConflictError("Offer has expired", code="OFFER_EXPIRED")
+    offer = await get_trip_offer(trip_id)
+    if offer is not None:
+        driver_ids = offer.get("driverIds", [])
+        if not driver_ids and offer.get("driverId"):
+            driver_ids = [offer["driverId"]]
+        if driver_ids and driver_id not in driver_ids and targeted:
+            raise ConflictError("This trip was offered to another driver", code="NOT_YOUR_OFFER")
 
 
 async def on_trip_accepted(trip_id: str, driver_id: str) -> None:
