@@ -61,13 +61,19 @@ export default function LiveTruckMap({
         const pos = d.lastLocation
           ? { lat: d.lastLocation.lat, lng: d.lastLocation.lng }
           : center;
+        const isSelected = d.id === selectedDriverId;
         const marker = new g.Marker({
           map,
           position: pos,
           title: d.name,
-          icon: d.id === selectedDriverId
-            ? "https://maps.google.com/mapfiles/ms/icons/truck.png"
-            : undefined,
+          icon: {
+            path: g.SymbolPath.CIRCLE,
+            scale: isSelected ? 11 : 7,
+            fillColor: isSelected ? brand.orange : "#4A5568",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2.5,
+          },
         });
         marker.addListener("click", () => onSelectDriver(d.id));
         mapElements.push(marker);
@@ -81,7 +87,14 @@ export default function LiveTruckMap({
           position: pickup,
           title: "Pickup Point (Drag to adjust)",
           draggable: Boolean(onDragPickup),
-          icon: "https://maps.google.com/mapfiles/ms/icons/green-dot.png",
+          icon: {
+            path: g.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#16A34A",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2.5,
+          },
         });
         if (onDragPickup) {
           pickupMarker.addListener("dragend", () => {
@@ -100,7 +113,14 @@ export default function LiveTruckMap({
           position: dropOff,
           title: "Drop-off Point (Drag to adjust)",
           draggable: Boolean(onDragDropOff),
-          icon: "https://maps.google.com/mapfiles/ms/icons/red-dot.png",
+          icon: {
+            path: g.SymbolPath.CIRCLE,
+            scale: 9,
+            fillColor: "#DC2626",
+            fillOpacity: 1,
+            strokeColor: "#FFFFFF",
+            strokeWeight: 2.5,
+          },
         });
         if (onDragDropOff) {
           dropoffMarker.addListener("dragend", () => {

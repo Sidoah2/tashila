@@ -76,9 +76,33 @@ function mapTrip(t: ApiTrip): Trip {
   };
 }
 
-export async function listTrips(page: number = 1, limit: number = 20): Promise<Trip[]> {
+export interface TripFilters {
+  status?: string;
+  from?: string;
+  to?: string;
+}
+
+export async function listTrips(
+  page: number = 1,
+  limit: number = 100,
+  filters?: TripFilters
+): Promise<Trip[]> {
+  const params = new URLSearchParams();
+  params.set("limit", String(limit));
+  params.set("page", String(page));
+  if (filters?.status && filters.status !== "all") {
+    params.set("status", filters.status);
+  }
+  if (filters?.from) {
+    params.set("from", new Date(filters.from).toISOString());
+  }
+  if (filters?.to) {
+    const d = new Date(filters.to);
+    d.setHours(23, 59, 59, 999);
+    params.set("to", d.toISOString());
+  }
   const data = await apiFetch<PaginatedTrips>(
-    `/admin/trips?limit=${limit}&page=${page}`,
+    `/admin/trips?${params.toString()}`,
   );
   return data.items.map(mapTrip);
 }

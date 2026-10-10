@@ -220,6 +220,7 @@
     "search_placeholder": "Rechercher par ID, client, chauffeur ou lieu",
     "filter_status": "Statut",
     "filter_truck": "Camion",
+    "apply_filter": "Appliquer le filtre",
     "dispatch_button": "Affecter",
     "column_id": "ID",
     "column_client": "Client",

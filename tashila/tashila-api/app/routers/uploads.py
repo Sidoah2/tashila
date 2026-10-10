@@ -26,7 +26,6 @@ async def upload_image(
 @router.get("/{filepath:path}")
 async def get_upload(
     filepath: str,
-    _principal: dict = Depends(get_authenticated_principal),
 ) -> FileResponse:
     # Protect against path traversal
     clean_parts = [p for p in filepath.replace("\\", "/").split("/") if p]

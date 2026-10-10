@@ -220,6 +220,7 @@
     "search_placeholder": "بحث بالمعرّف أو العميل أو السائق أو الموقع",
     "filter_status": "الحالة",
     "filter_truck": "الشاحنة",
+    "apply_filter": "تطبيق الفلتر",
     "dispatch_button": "إرسال رحلة",
     "column_id": "المعرّف",
     "column_client": "العميل",

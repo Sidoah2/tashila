@@ -221,6 +221,7 @@
     "search_placeholder": "Search ID, client, driver or location",
     "filter_status": "Status",
     "filter_truck": "Truck",
+    "apply_filter": "Apply Filter",
     "dispatch_button": "Dispatch",
     "column_id": "ID",
     "column_client": "Client",

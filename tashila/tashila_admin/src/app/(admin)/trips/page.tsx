@@ -17,6 +17,7 @@ import Chip from "@mui/material/Chip";
 import SearchRoundedIcon from "@mui/icons-material/SearchRounded";
 import SendRoundedIcon from "@mui/icons-material/SendRounded";
 import CloseRoundedIcon from "@mui/icons-material/CloseRounded";
+import FilterAltRoundedIcon from "@mui/icons-material/FilterAltRounded";
 import Alert from "@mui/material/Alert";
 import {
   DataGrid,
@@ -192,8 +193,28 @@ export default function TripsPage() {
     },
   ];
 
+  const handleApplyFilter = () => {
+    load(true, {
+      status: status !== "all" ? status : undefined,
+      from: from || undefined,
+      to: to || undefined,
+    });
+  };
+
   return (
     <>
+      <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
+        <Button
+          component={Link}
+          href="/trips/dispatch"
+          variant="contained"
+          color="primary"
+          startIcon={<SendRoundedIcon />}
+        >
+          {t("trips.dispatch_button")}
+        </Button>
+      </Box>
+
       <Box sx={{ mb: 3 }}>
         <Alert severity="info" sx={{ borderRadius: 2, border: `1px solid ${brand.border}` }}>
           <Typography variant="subtitle2" sx={{ fontWeight: 800, mb: 0.5 }}>
@@ -206,7 +227,7 @@ export default function TripsPage() {
       </Box>
 
       <Card>
-        <Box sx={{ p: 2, display: "flex", flexWrap: "wrap", gap: 1.5 }}>
+        <Box sx={{ p: 2, display: "flex", flexWrap: "wrap", gap: 1.5, alignItems: "center" }}>
           <TextField
             placeholder={t("trips.search_placeholder")}
             value={search}
@@ -262,11 +283,13 @@ export default function TripsPage() {
             sx={{ minWidth: 150 }}
           />
           <Button
-            component={Link}
-            href="/trips/dispatch"
-            startIcon={<SendRoundedIcon />}
+            variant="contained"
+            color="primary"
+            startIcon={<FilterAltRoundedIcon />}
+            onClick={handleApplyFilter}
+            sx={{ height: 40 }}
           >
-            {t("trips.dispatch_button")}
+            {t("trips.apply_filter")}
           </Button>
         </Box>
         <Divider />

@@ -215,6 +215,7 @@ class DriverProfile {
     this.vehiclePlate = '',
     this.vehicleColor = '',
     this.vehicleModel = '',
+    this.rating = 0.0,
   });
 
   final String name;
@@ -231,6 +232,7 @@ class DriverProfile {
   final String vehiclePlate;
   final String vehicleColor;
   final String vehicleModel;
+  final double rating;
 
   bool get isComplete {
     if (name.trim().isEmpty ||
@@ -253,7 +255,8 @@ class DriverProfile {
     return true;
   }
 
-  bool get isReadyForDashboard => isComplete && documentsApproved;
+  bool get isReadyForDashboard =>
+      isComplete && documentsApproved && approvalStatus == 'approved';
 
   DriverProfile copyWith({
     String? name,
@@ -269,6 +272,7 @@ class DriverProfile {
     String? vehiclePlate,
     String? vehicleColor,
     String? vehicleModel,
+    double? rating,
     bool clearProfilePhoto = false,
   }) {
     final String? nextPhoto;
@@ -293,6 +297,7 @@ class DriverProfile {
       vehiclePlate: vehiclePlate ?? this.vehiclePlate,
       vehicleColor: vehicleColor ?? this.vehicleColor,
       vehicleModel: vehicleModel ?? this.vehicleModel,
+      rating: rating ?? this.rating,
     );
   }
 
@@ -310,6 +315,7 @@ class DriverProfile {
     'vehiclePlate': vehiclePlate,
     'vehicleColor': vehicleColor,
     'vehicleModel': vehicleModel,
+    'rating': rating,
   };
 
   static DriverProfile fromJson(Map<String, dynamic> json) {
@@ -327,6 +333,7 @@ class DriverProfile {
       vehiclePlate: json['vehiclePlate'] as String? ?? '',
       vehicleColor: json['vehicleColor'] as String? ?? '',
       vehicleModel: json['vehicleModel'] as String? ?? '',
+      rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
     );
   }
 
@@ -639,8 +646,13 @@ class TripRecord {
       estimatedDurationMinutes: (json['estimatedMinutes'] as num?)?.toInt(),
       startedAt: startedRaw != null ? DateTime.tryParse(startedRaw) : null,
       completedAt: completedAt,
-      rating: (json['clientRating'] as num?)?.toInt(),
-      comment: json['clientRatingComment'] as String? ?? '',
+      rating: (json['driverRating'] as num?)?.toInt() ??
+          (json['rating'] as num?)?.toInt() ??
+          (json['clientRating'] as num?)?.toInt(),
+      comment: json['driverRatingComment'] as String? ??
+          json['comment'] as String? ??
+          json['clientRatingComment'] as String? ??
+          '',
       cashConfirmed: status == 'completed' || status == 'awaitingCash',
       status: status,
     );

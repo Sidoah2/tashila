@@ -520,12 +520,17 @@ async def verify_otp(phone: str, otp: str, role: str) -> dict[str, Any]:
                 merged_docs.update(docs)
                 update_fields = {
                     "status": "active",
-                    "approvalStatus": "approved",
-                    "rejectionReason": None,
                     "profileComplete": True,
                     "documents": merged_docs,
                     "updatedAt": now,
                 }
+                if existing.get("approvalStatus") in ("approved", "rejected"):
+                    update_fields["approvalStatus"] = existing["approvalStatus"]
+                    if existing.get("rejectionReason"):
+                        update_fields["rejectionReason"] = existing["rejectionReason"]
+                else:
+                    update_fields["approvalStatus"] = "approved"
+                    update_fields["rejectionReason"] = None
                 if not existing.get("name"):
                     update_fields["name"] = "Test Driver"
                 if not existing.get("truckType"):

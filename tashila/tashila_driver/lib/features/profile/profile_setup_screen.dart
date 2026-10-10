@@ -1962,6 +1962,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
               child: _ProfileOverviewCard(
                 tripHistory: state.tripHistory,
                 platformEarnings: state.platformEarnings,
+                officialRating: state.profile?.rating,
               ),
             ),
           ),
@@ -2632,20 +2633,24 @@ class _ProfileOverviewCard extends StatelessWidget {
   const _ProfileOverviewCard({
     required this.tripHistory,
     this.platformEarnings,
+    this.officialRating,
   });
 
   final List<TripRecord> tripHistory;
   final DriverPlatformEarnings? platformEarnings;
+  final double? officialRating;
 
   @override
   Widget build(BuildContext context) {
     final trips = tripHistory.where((t) => t.isCompleted).toList();
-    final totalEarnings = trips.fold<double>(0, (s, t) => s + t.fare);
     final rated = trips.where((t) => t.rating != null).toList();
     final avgRating = rated.isEmpty
         ? 0.0
         : rated.map((t) => t.rating!.toDouble()).reduce((a, b) => a + b) /
               rated.length;
+    final ratingToShow = (officialRating != null && officialRating! > 0)
+        ? officialRating!
+        : avgRating;
     final money = dzdCurrency();
     final platform = platformEarnings ?? const DriverPlatformEarnings();
 
@@ -2692,7 +2697,7 @@ class _ProfileOverviewCard extends StatelessWidget {
             context,
             label: 'profile_stat_avg_rating'.tr(),
             value: westernDigits(
-              avgRating > 0 ? avgRating.toStringAsFixed(1) : '—',
+              ratingToShow > 0 ? ratingToShow.toStringAsFixed(1) : '—',
             ),
             icon: Icons.star_rounded,
             iconBg: Colors.amber.shade50,

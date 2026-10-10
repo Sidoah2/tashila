@@ -10,7 +10,7 @@ type TripsState = {
   loading: boolean;
   loaded: boolean;
   error: string | null;
-  load: (force?: boolean) => Promise<void>;
+  load: (force?: boolean, filters?: tripsApi.TripFilters) => Promise<void>;
   dispatch: (input: DispatchInput) => Promise<Trip>;
   setStatus: (id: string, status: TripStatus) => Promise<Trip>;
 };
@@ -20,11 +20,11 @@ export const useTripsStore = create<TripsState>((set, get) => ({
   loading: false,
   loaded: false,
   error: null,
-  load: async (force = false) => {
-    if (!force && get().loaded) return;
+  load: async (force = false, filters?: tripsApi.TripFilters) => {
+    if (!force && get().loaded && !filters) return;
     set({ loading: true, error: null });
     try {
-      const trips = await tripsApi.listTrips();
+      const trips = await tripsApi.listTrips(1, 100, filters);
       set({ trips, loading: false, loaded: true });
     } catch (e) {
       set({
