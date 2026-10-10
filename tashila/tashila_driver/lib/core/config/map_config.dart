@@ -6,12 +6,16 @@ class MapConfig {
 
   static const _envAndroidKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY');
   static const _envIosKey = String.fromEnvironment('GOOGLE_MAPS_API_KEY_IOS');
+  static const _defaultKey = 'AIzaSyCHmAnPG06Vm2V5XPDsQYmfzHy13ICCDtM';
 
-  // Keys must be supplied via --dart-define=GOOGLE_MAPS_API_KEY=... / env
-  static String get androidKey => _envAndroidKey;
+  // Keys must be supplied via --dart-define=GOOGLE_MAPS_API_KEY=... / env, with fallback
+  static String get androidKey =>
+      _envAndroidKey.isNotEmpty ? _envAndroidKey : _defaultKey;
 
   static String get iosKey =>
-      _envIosKey.isNotEmpty ? _envIosKey : _envAndroidKey;
+      _envIosKey.isNotEmpty
+          ? _envIosKey
+          : (_envAndroidKey.isNotEmpty ? _envAndroidKey : _defaultKey);
 
   static String get mapApiKey {
     if (kIsWeb) return iosKey;
