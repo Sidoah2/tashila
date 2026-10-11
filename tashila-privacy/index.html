@@ -6,7 +6,7 @@
   <title>تسهيلة | Tashila - منصة نقل البضائع والعفش الأولى في الجزائر</title>
   <meta name="description" content="تطبيق تسهيلة يربطك بأقرب سائق شاحنة نفعية معتمد (كابينة فردية أو مزدوجة) في كافة ولايات الجزائر. تتبع مباشر عبر GPS وأسعار واضحة وعادلة.">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
-  <link rel="stylesheet" href="assets/styles.css?v=2.0">
+  <link rel="stylesheet" href="assets/styles.css?v=3.5">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,6 +21,18 @@
     html, body {
       background-color: #F8FAFC !important;
       color: #0F172A !important;
+    }
+    .fleet-image-wrap {
+      background: #FFFFFF !important;
+      display: flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+    }
+    .fleet-image-wrap img {
+      background: #FFFFFF !important;
+      object-fit: contain !important;
+      width: 100% !important;
+      height: 100% !important;
     }
     .landing-title, .section-title, .feature-title, .fleet-name, .brand-title {
       color: #0F172A !important;
@@ -278,8 +290,8 @@
     <div class="fleet-grid">
       <!-- Single Cabin Card -->
       <div class="fleet-card">
-        <div class="fleet-image-wrap">
-          <img src="assets/singlecabin.jpeg" alt="Single Cabin Utility Truck">
+        <div class="fleet-image-wrap" style="background:#FFFFFF !important;">
+          <img src="assets/singlecabin.jpeg?v=3.5" alt="Single Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important;">
         </div>
         <div class="fleet-card-body" style="text-align: center; padding: 1.5rem 1rem;">
           <h3 class="fleet-name" data-i18n="single_cabin_title" style="margin-bottom: 0; font-size: 1.35rem;">شاحنة كابينة فردية</h3>
@@ -288,8 +300,8 @@
 
       <!-- Double Cabin Card -->
       <div class="fleet-card">
-        <div class="fleet-image-wrap">
-          <img src="assets/doublecabin.jpeg" alt="Double Cabin Utility Truck">
+        <div class="fleet-image-wrap" style="background:#FFFFFF !important;">
+          <img src="assets/doublecabin.jpeg?v=3.5" alt="Double Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important;">
         </div>
         <div class="fleet-card-body" style="text-align: center; padding: 1.5rem 1rem;">
           <h3 class="fleet-name" data-i18n="double_cabin_title" style="margin-bottom: 0; font-size: 1.35rem;">شاحنة كابينة مزدوجة</h3>
