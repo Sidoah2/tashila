@@ -190,4 +190,31 @@ class FcmService {
       ref.read(driverAppStateProvider.notifier).refreshIncomingOffers(),
     );
   }
+
+  Future<void> showTripOfferNotification({
+    required String title,
+    required String body,
+    required String tripId,
+  }) async {
+    try {
+      await _localNotifications.show(
+        tripId.hashCode,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            kTripOfferChannel.id,
+            kTripOfferChannel.name,
+            channelDescription: kTripOfferChannel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+          ),
+        ),
+        payload: tripId,
+      );
+    } catch (_) {}
+  }
 }

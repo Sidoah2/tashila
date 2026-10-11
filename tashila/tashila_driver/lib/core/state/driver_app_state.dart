@@ -999,6 +999,13 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           volume: 4.0,
         );
       } catch (_) {}
+      unawaited(
+        FcmService.instance.showTripOfferNotification(
+          title: 'new_trip_offer'.tr(),
+          body: '${offer.request.pickup} — ${offer.request.fare.toInt()} DZD',
+          tripId: offer.request.id,
+        ),
+      );
     }
     list.sort((a, b) => a.expiresAt.compareTo(b.expiresAt));
     _setState(
