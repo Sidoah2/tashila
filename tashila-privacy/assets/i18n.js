@@ -1,6 +1,14 @@
 // Trilingual i18n Dictionary for Tashila (AR, FR, EN)
 const i18nData = {
   ar: {
+    // Document Title & Brand
+    doc_title: "تسهيلة - المنصة الأولى لنقل البضائع والعفش في الجزائر",
+    brand_name: "تسهيلة",
+    legal_hub: "المنصة الرسمية",
+    legal_privacy: "سياسة الخصوصية",
+    legal_terms: "شروط الخدمة",
+    legal_delete: "حذف الحساب",
+
     // Navigation
     nav_home: "الرئيسية",
     nav_fleet: "أسطول الشاحنات",
@@ -11,12 +19,11 @@ const i18nData = {
     nav_terms: "الشروط والأحكام",
     nav_delete: "حذف الحساب",
     nav_download: "تحميل التطبيق",
-    legal_hub: "المنصة الرسمية",
 
     // Hero
     badge_algeria: "🇩🇿 المنصة الأولى لنقل البضائع والعفش في الجزائر • 58 ولاية",
     hero_title: "انقل بضائعك وعفشك بكل أمان وسهولة بضغطة زر واحدة",
-    hero_subtitle: "تطبيق تسهيلة يربطك مباشرة بأقرب سائق شاحنة نفعية معتمد في ولايتك. كابينة فردية أو مزدوجة مع تتبع حي عبر GPS وأسعار واضحة وعادلة بدون مساومة.",
+    hero_subtitle: "تطبيق تسهيلة يربطك مباشرة بأقرب سائق شاحنة نفعية معتمد في ولايتك. كابينة فردية أو مزدوجة مع تتبع حي ومباشر عبر الخريطة وأسعار واضحة وعادلة بدون مساومة.",
     btn_download_client: "تحميل تطبيق الزبون",
     btn_download_driver: "تحميل تطبيق السائق",
     tab_client: "تطبيق الزبائن",
@@ -29,40 +36,39 @@ const i18nData = {
     verified_badge: "سائقون معتمدون ومفحوصون 100%",
     speed_badge: "وصول خلال 10 دقائق في المتوسط",
 
+    // Hero Floating Badges
+    float_fast_resp: "استجابة سريعة",
+    float_instant_dispatch: "توجيه فوري ذكي",
+    float_safe_cargo: "حمولة آمنة ومضمونة",
+    float_live_tracking: "تتبع مباشر ولحظي",
+
     // Phone Mockup
     mockup_trip_type: "طلب شاحنة نفعية",
-    mockup_single: "كابينة فردية (1.5 طن)",
-    mockup_double: "كابينة مزدوجة (1.0 طن)",
+    mockup_single: "كابينة فردية",
+    mockup_double: "كابينة مزدوجة",
+    mockup_fare_label: "السعر التقديري الثابت",
     mockup_pickup: "حي النخيل، وهران",
-    mockup_dropoff: "وسط المدينة، سيدي بلعباس",
+    mockup_dropoff: "وسط المدينة، الجزائر العاصمة",
+    mockup_pin: "📍 الجزائر",
     mockup_price: "3,800 دج",
     mockup_driver_name: "أحمد ب. • ★ 4.9",
     mockup_status: "السائق في الطريق إليك (4 دقائق)",
+    mockup_avatar: "أ.ب",
 
-    // Stats
-    stat_wilayas: "ولاية مغطاة بالكامل",
-    stat_wilayas_num: "58",
-    stat_deliveries: "نقلة بضائع ناجحة",
-    stat_deliveries_num: "+15,000",
-    stat_drivers: "سائق شاحنة معتمد ومفحوص",
-    stat_drivers_num: "+1,200",
-    stat_rating: "معدل الرضا العام",
-    stat_rating_num: "4.9/5",
-
-    // Fleet Section
+    // Fleet Section (No tonnage & no passenger numbers)
     fleet_badge: "أسطولنا المتنوع",
     fleet_title: "شاحنات نفعية تناسب كافة احتياجاتك",
-    fleet_subtitle: "نوفر لك خيارات نقل مرنة بحمولات ومواصفات مختلفة تناسب الأفراد، التجار والمؤسسات.",
-    single_cabin_title: "شاحنة كابينة فردية (Single Cabin)",
-    single_cabin_desc: "الخيار الأمثل للأحمال الكبيرة والأثاث والبضائع التجارية بحمولة تصل إلى 1.5 طن ومساحة تحميل مفتوحة ورحبة.",
-    single_spec_1: "حمولة استيعابية حتى 1,500 كغ (1.5 طن)",
+    fleet_subtitle: "نوفر لك خيارات نقل مرنة بمواصفات متعددة تناسب الأفراد، التجار والمؤسسات.",
+    single_cabin_title: "شاحنة كابينة فردية",
+    single_cabin_desc: "الخيار الأمثل للأحمال الكبيرة والأثاث والبضائع التجارية بمساحة تحميل مفتوحة ورحبة.",
+    single_spec_1: "حوض تحميل متين ومفتوح للأحمال الكبيرة",
     single_spec_2: "حوض تحميل واسع (طول 2.4م × عرض 1.6م)",
-    single_spec_3: "مقعدان (السائق + مرافق واحد)",
+    single_spec_3: "مرونة وسهولة في التنقل والوصول إلى كافة الأحياء",
     single_spec_4: "مثالية لنقل الأثاث، الأجهزة، البضائع ومواد البناء",
-    double_cabin_title: "شاحنة كابينة مزدوجة (Double Cabin)",
-    double_cabin_desc: "المزيج المثالي بين نقل البضائع ونقل الركاب. تتسع لـ 5 أشخاص مع حوض تحميل متين لنقل فريق العمل والمساعدين مع العفش.",
-    double_spec_1: "حمولة استيعابية حتى 1,000 كغ (1.0 طن)",
-    double_spec_2: "مقصورة ركاب واسعة تتسع لـ 5 أشخاص",
+    double_cabin_title: "شاحنة كابينة مزدوجة",
+    double_cabin_desc: "المزيج المثالي بين نقل البضائع والمرافقة مع حوض تحميل متين لنقل فريق العمل والمساعدين مع العفش.",
+    double_spec_1: "حوض تحميل مخصص ومحمي لمختلف أنواع البضائع والعفش",
+    double_spec_2: "مقصورة مريحة وواسعة لمرافقة شحنتك",
     double_spec_3: "مثالية للترحيل المنزلي مع فرق التحميل والمرافقة",
     double_spec_4: "راحة وأمان تام على الطرق الطويلة بين الولايات",
 
@@ -76,10 +82,10 @@ const i18nData = {
     feat_2_desc: "السعر يُحسب تلقائياً بدقة قبل انطلاق الرحلة حسب الكيلومترات ونوع الشاحنة. لا مزيد من المساومة.",
     feat_3_title: "سائقون معتمدون ومرخصون",
     feat_3_desc: "كل سائق يخضع للتحقق الصارم من رخصة السياقة، البطاقة الرمادية، السوابق العدلية وحالة الشاحنة.",
-    feat_4_title: "تتبع مسار الحمولة بالـ GPS",
+    feat_4_title: "تتبع مسار الحمولة بالخريطة",
     feat_4_desc: "تابع حركة شاحنتك على الخريطة لحظة بلحظة مع إمكانية مشاركة رابط التتبع مع المستلم.",
     feat_5_title: "إشعارات فورية وتواصل مباشر",
-    feat_5_desc: "اتصال هاتفي مباشر ودردشة داخل التطبيق مع إشعارات Push تنبهك بكل مرحلة من مراحل النقل.",
+    feat_5_desc: "اتصال هاتفي مباشر ودردشة داخل التطبيق مع إشعارات تنبهك بكل مرحلة من مراحل النقل.",
     feat_6_title: "دعم فني جزائري 24/7",
     feat_6_desc: "فريق دعم محلي متواجد على مدار الساعة للرد على استفساراتك ومتابعة رحلاتك في أي وقت.",
 
@@ -106,26 +112,34 @@ const i18nData = {
     faq_badge: "الأسئلة الشائعة",
     faq_title: "كل ما تريد معرفته عن تسهيلة",
     faq_q1: "كيف يتم حساب تكلفة الرحلة في تسهيلة؟",
-    faq_a1: "يتم احتساب السعر تلقائياً عبر نظامنا الذكي بناءً على المسافة الفعلية بالكيلومتر ونوع الشاحنة المختارة (كابينة فردية أو مزدوجة)، ويكون السعر معلناً وواضحاً قبل تأكيد الطلب.",
+    faq_a1: "يتم احتساب السعر تلقائياً عبر نظامنا الذكي بناءً على المسافة الفعلية ونوع الشاحنة المختارة، ويكون السعر معلناً وواضحاً قبل تأكيد الطلب.",
     faq_q2: "هل الخدمة متوفرة في جميع ولايات الجزائر؟",
     faq_a2: "نعم، تغطي شبكة تسهيلة كافة ولايات الوطن الـ 58، وتتيح النقل داخل نفس المدينة أو بين الولايات المختلفة بكل سلاسة.",
     faq_q3: "كيف يمكنني التسجيل كسائق في تسهيلة؟",
-    faq_a3: "حمّل تطبيق 'تسهيلة سائق' من متجر Google Play، أنشئ حسابك برقم هاتفك، وارفع صور رخصة السياقة والبطاقة الرمادية. يقوم فريقنا بمراجعة وثائقك وتفعيل حسابك خلال دقائق.",
+    faq_a3: "حمّل تطبيق 'تسهيلة سائق' من متجر Google Play، أنشئ حسابك برقم هاتفك، وارفع وثائق الشاحنة ورخصة السياقة. يقوم فريقنا بتفعيل حسابك بسرعة.",
     faq_q4: "ما هي طرق الدفع المتاحة؟",
-    faq_a4: "طريقة الدفع المعتمدة حالياً هي الدفع نقداً (Cash) مباشرة للسائق عند الوصول، مع إمكانية توفير وسائل دفع إلكترونية مستقبلاً.",
+    faq_a4: "طريقة الدفع المعتمدة حالياً هي الدفع نقداً مباشرة للسائق عند الوصول.",
     faq_q5: "هل بضائعي في أمان مع سائقي تسهيلة؟",
-    faq_a5: "نعم، جميع سائقينا يخضعون للتحقق الأمني والميداني، ويمكنك تتبع الشاحنة مباشرة عبر الخريطة من بداية الرحلة حتى التسليم، مع وجود دعم فني مستمر.",
+    faq_a5: "نعم، جميع سائقينا يخضعون للتحقق الدقيق، ويمكنك تتبع الشاحنة مباشرة عبر الخريطة من بداية الرحلة حتى التسليم.",
 
     // Footer & Links
-    footer_desc: "تسهيلة هي المنصة الرقمية الرائدة في الجزائر لربط الزبائن وأصحاب البضائع بشاحنات النقل النفعية بذكاء وأمان.",
+    footer_desc: "تسهيلة هي المنصة الرقمية الأولى في الجزائر لربط الزبائن وأصحاب البضائع بشاحنات النقل النفعية بذكاء وأمان.",
     footer_quick_links: "روابط سريعة",
     footer_legal: "الشؤون القانونية",
     footer_contact: "تواصل معنا",
-    footer_rights: "© 2026 تسهيلة (Tashila Logistics). جميع الحقوق محفوظة.",
+    footer_rights: "© 2026 تسهيلة. جميع الحقوق محفوظة.",
     footer_algeria: "صنع بكل فخر في الجزائر 🇩🇿"
   },
 
   fr: {
+    // Document Title & Brand
+    doc_title: "Tashila - 1ère plateforme de transport de fret & déménagement en Algérie",
+    brand_name: "Tashila",
+    legal_hub: "Plateforme Officielle",
+    legal_privacy: "Politique de Confidentialité",
+    legal_terms: "Conditions Générales",
+    legal_delete: "Suppression de Compte",
+
     // Navigation
     nav_home: "Accueil",
     nav_fleet: "Flotte",
@@ -136,7 +150,6 @@ const i18nData = {
     nav_terms: "Conditions d'utilisation",
     nav_delete: "Supprimer le compte",
     nav_download: "Télécharger",
-    legal_hub: "Plateforme Officielle",
 
     // Hero
     badge_algeria: "🇩🇿 1ère plateforme de transport de fret & déménagement en Algérie • 58 Wilayas",
@@ -154,41 +167,40 @@ const i18nData = {
     verified_badge: "Chauffeurs vérifiés à 100%",
     speed_badge: "Prise en charge en 10 min",
 
+    // Hero Floating Badges
+    float_fast_resp: "Réponse Rapide",
+    float_instant_dispatch: "Attribution Immédiate",
+    float_safe_cargo: "Cargaison Sécurisée",
+    float_live_tracking: "Suivi Direct GPS",
+
     // Phone Mockup
     mockup_trip_type: "Demande de Camionnette",
-    mockup_single: "Simple Cabine (1.5 Tonne)",
-    mockup_double: "Double Cabine (1.0 Tonne)",
+    mockup_single: "Simple Cabine",
+    mockup_double: "Double Cabine",
+    mockup_fare_label: "Tarif Estimé Garanti",
     mockup_pickup: "Cité Les Palmiers, Oran",
-    mockup_dropoff: "Centre-Ville, Sidi Bel Abbès",
+    mockup_dropoff: "Centre-Ville, Alger",
+    mockup_pin: "📍 Alger",
     mockup_price: "3 800 DZD",
     mockup_driver_name: "Ahmed B. • ★ 4.9",
     mockup_status: "Chauffeur en route (4 min)",
+    mockup_avatar: "A.B",
 
-    // Stats
-    stat_wilayas: "Wilayas couvertes",
-    stat_wilayas_num: "58",
-    stat_deliveries: "Livraisons réussies",
-    stat_deliveries_num: "+15 000",
-    stat_drivers: "Chauffeurs partenaires vérifiés",
-    stat_drivers_num: "+1 200",
-    stat_rating: "Note moyenne de satisfaction",
-    stat_rating_num: "4.9/5",
-
-    // Fleet Section
+    // Fleet Section (No tonnage & no passenger numbers)
     fleet_badge: "Notre Flotte",
     fleet_title: "Des utilitaires adaptés à tous vos besoins",
     fleet_subtitle: "Nous offrons des véhicules utilitaires de capacités variées pour les particuliers, artisans et commerçants.",
     single_cabin_title: "Camionnette Simple Cabine",
-    single_cabin_desc: "Idéale pour les gros volumes, meubles et matériaux lourds. Charge utile jusqu'à 1,5 tonne avec plateau de chargement spacieux.",
-    single_spec_1: "Charge utile jusqu'à 1 500 kg (1,5 tonne)",
+    single_cabin_desc: "Idéale pour les gros volumes, meubles et matériaux lourds avec plateau de chargement spacieux.",
+    single_spec_1: "Plateau de chargement robuste et ouvert pour gros volumes",
     single_spec_2: "Plateau spacieux (Longueur 2.4m × Largeur 1.6m)",
-    single_spec_3: "2 places assises (Chauffeur + 1 passager)",
+    single_spec_3: "Maniabilité optimale dans toutes les ruelles et quartiers",
     single_spec_4: "Parfait pour meubles, électroménager et marchandises",
     double_cabin_title: "Camionnette Double Cabine",
-    double_cabin_desc: "La combinaison parfaite entre capacité de chargement et transport d'équipe. 5 places assises pour transporter vos aides et déménageurs.",
-    double_spec_1: "Charge utile jusqu'à 1 000 kg (1,0 tonne)",
-    double_spec_2: "Habitacle spacieux de 5 places assises",
-    double_spec_3: "Idéal pour les déménagements avec équipe de porteurs",
+    double_cabin_desc: "La combinaison parfaite entre capacité de chargement et accompagnement pour transporter votre équipe d'aide avec les biens.",
+    double_spec_1: "Espace de chargement dédié et sécurisé pour tous types de biens",
+    double_spec_2: "Habitacle spacieux et tout confort pour vous et vos accompagnateurs",
+    double_spec_3: "Idéal pour les déménagements avec équipe de manutention",
     double_spec_4: "Confort et sécurité sur les trajets inter-wilayas",
 
     // Features Section
@@ -231,11 +243,11 @@ const i18nData = {
     faq_badge: "FAQ",
     faq_title: "Questions fréquentes",
     faq_q1: "Comment est calculé le prix de la course ?",
-    faq_a1: "Le prix est calculé automatiquement selon la distance réelle parcourue et le type de camionnette choisi (simple ou double cabine), affiché avant confirmation.",
+    faq_a1: "Le prix est calculé automatiquement selon la distance réelle parcourue et le type de camionnette choisi, affiché avant confirmation.",
     faq_q2: "Le service est-il disponible dans toute l'Algérie ?",
     faq_a2: "Oui, Tashila est disponible à travers les 58 wilayas d'Algérie, que ce soit pour des trajets intra-muros ou inter-wilayas.",
     faq_q3: "Comment s'inscrire en tant que chauffeur ?",
-    faq_a3: "Téléchargez l'application 'Tashila Chauffeur' sur Google Play, inscrivez-vous avec votre numéro et soumettez vos documents. Validation en quelques minutes.",
+    faq_a3: "Téléchargez l'application 'Tashila Chauffeur' sur Google Play, inscrivez-vous avec votre numéro et soumettez vos documents.",
     faq_q4: "Quels sont les modes de paiement disponibles ?",
     faq_a4: "Le règlement s'effectue en espèces (Cash) directement auprès du chauffeur à l'arrivée.",
     faq_q5: "Mes marchandises sont-elles en sécurité ?",
@@ -246,11 +258,19 @@ const i18nData = {
     footer_quick_links: "Liens Rapides",
     footer_legal: "Légal & Sécurité",
     footer_contact: "Contactez-nous",
-    footer_rights: "© 2026 Tashila (Tashila Logistics). Tous droits réservés.",
+    footer_rights: "© 2026 Tashila. Tous droits réservés.",
     footer_algeria: "Conçu avec fierté en Algérie 🇩🇿"
   },
 
   en: {
+    // Document Title & Brand
+    doc_title: "Tashila - Algeria's #1 Utility Truck & Freight Transport Platform",
+    brand_name: "Tashila",
+    legal_hub: "Official Platform",
+    legal_privacy: "Privacy Policy",
+    legal_terms: "Terms of Service",
+    legal_delete: "Delete Account",
+
     // Navigation
     nav_home: "Home",
     nav_fleet: "Fleet",
@@ -261,7 +281,6 @@ const i18nData = {
     nav_terms: "Terms of Service",
     nav_delete: "Delete Account",
     nav_download: "Download App",
-    legal_hub: "Official Platform",
 
     // Hero
     badge_algeria: "🇩🇿 Algeria's #1 On-Demand Freight & Utility Truck App • 58 Wilayas Covered",
@@ -279,40 +298,39 @@ const i18nData = {
     verified_badge: "100% Verified Drivers",
     speed_badge: "Average 10 min dispatch",
 
+    // Hero Floating Badges
+    float_fast_resp: "Fast Response",
+    float_instant_dispatch: "Instant Smart Dispatch",
+    float_safe_cargo: "Safe & Insured Cargo",
+    float_live_tracking: "Live GPS Tracking",
+
     // Phone Mockup
     mockup_trip_type: "Utility Truck Request",
-    mockup_single: "Single Cabin (1.5 Ton)",
-    mockup_double: "Double Cabin (1.0 Ton)",
+    mockup_single: "Single Cabin",
+    mockup_double: "Double Cabin",
+    mockup_fare_label: "Upfront Fixed Fare",
     mockup_pickup: "Les Palmiers, Oran",
-    mockup_dropoff: "City Center, Sidi Bel Abbès",
+    mockup_dropoff: "City Center, Algiers",
+    mockup_pin: "📍 Algiers",
     mockup_price: "3,800 DZD",
     mockup_driver_name: "Ahmed B. • ★ 4.9",
     mockup_status: "Driver arriving in 4 min",
+    mockup_avatar: "A.B",
 
-    // Stats
-    stat_wilayas: "Wilayas Fully Covered",
-    stat_wilayas_num: "58",
-    stat_deliveries: "Successful Cargo Deliveries",
-    stat_deliveries_num: "+15,000",
-    stat_drivers: "Verified Partner Drivers",
-    stat_drivers_num: "+1,200",
-    stat_rating: "Average Satisfaction Rating",
-    stat_rating_num: "4.9/5",
-
-    // Fleet Section
+    // Fleet Section (No tonnage & no passenger numbers)
     fleet_badge: "Our Fleet",
     fleet_title: "Utility Trucks Tailored to Your Needs",
     fleet_subtitle: "Choose the perfect vehicle capacity for personal moving, commerce, or enterprise logistics.",
     single_cabin_title: "Single Cabin Utility Truck",
-    single_cabin_desc: "Engineered for maximum cargo volume and heavy loads. Up to 1.5 ton capacity with an open, spacious flatbed.",
-    single_spec_1: "Payload capacity up to 1,500 kg (1.5 ton)",
+    single_cabin_desc: "Engineered for maximum cargo volume and bulky goods with an open, spacious flatbed.",
+    single_spec_1: "Heavy-duty open cargo bed for bulky goods",
     single_spec_2: "Spacious cargo bed (2.4m length × 1.6m width)",
-    single_spec_3: "2 seats (Driver + 1 passenger)",
+    single_spec_3: "Agile navigation through city streets and all neighborhoods",
     single_spec_4: "Ideal for furniture, appliances, bulk goods & building materials",
     double_cabin_title: "Double Cabin Utility Truck",
-    double_cabin_desc: "The optimal mix of cargo space and passenger transport. Seats 5 people to transport your moving crew and helpers alongside your goods.",
-    double_spec_1: "Payload capacity up to 1,000 kg (1.0 ton)",
-    double_spec_2: "Spacious 5-passenger crew cabin",
+    double_cabin_desc: "The optimal mix of cargo space and crew transport to accompany your relocation crew alongside your goods.",
+    double_spec_1: "Dedicated secure loading area for household and business items",
+    double_spec_2: "Spacious and comfortable cabin for you and your helpers",
     double_spec_3: "Perfect for household relocations with helper teams",
     double_spec_4: "Maximum comfort and safety on long inter-wilaya routes",
 
@@ -356,11 +374,11 @@ const i18nData = {
     faq_badge: "FAQ",
     faq_title: "Frequently Asked Questions",
     faq_q1: "How is the trip price calculated?",
-    faq_a1: "Fares are calculated automatically based on exact distance in kilometers and selected truck type, shown upfront before you book.",
+    faq_a1: "Fares are calculated automatically based on exact distance and selected truck type, shown upfront before you book.",
     faq_q2: "Is Tashila available across all 58 Wilayas?",
     faq_a2: "Yes! Tashila covers all 58 wilayas across Algeria for both intra-city deliveries and long-distance inter-wilaya trips.",
     faq_q3: "How do I register as a driver?",
-    faq_a3: "Download the 'Tashila Driver' app on Google Play, enter your phone number, and upload your driver's license and vehicle documents. Approvals take minutes.",
+    faq_a3: "Download the 'Tashila Driver' app on Google Play, enter your phone number, and upload your documents. Approvals take minutes.",
     faq_q4: "What payment methods are supported?",
     faq_a4: "Payment is made in cash directly to the driver upon delivery. Additional electronic payment options are coming soon.",
     faq_q5: "Is my cargo safe with Tashila drivers?",
@@ -371,7 +389,7 @@ const i18nData = {
     footer_quick_links: "Quick Links",
     footer_legal: "Legal & Privacy",
     footer_contact: "Contact Us",
-    footer_rights: "© 2026 Tashila (Tashila Logistics). All rights reserved.",
+    footer_rights: "© 2026 Tashila. All rights reserved.",
     footer_algeria: "Proudly built in Algeria 🇩🇿"
   }
 };
@@ -396,6 +414,11 @@ const i18nData = {
         el.textContent = i18nData[lang][key];
       }
     });
+
+    // Update document title for landing page
+    if (i18nData[lang] && i18nData[lang].doc_title && (window.location.pathname.endsWith('index.html') || window.location.pathname === '/' || window.location.pathname === '')) {
+      document.title = i18nData[lang].doc_title;
+    }
 
     // Update active state in language selector pills/dropdown
     document.querySelectorAll('[data-lang-btn]').forEach(btn => {

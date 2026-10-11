@@ -25,7 +25,7 @@
       <a href="index.html" class="brand-wrapper">
         <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
         <div class="brand-title">
-          <span>تسهيلة <span style="font-weight:400; font-size:1.1rem; color:var(--text-muted)">Tashila</span></span>
+          <span data-i18n="brand_name">تسهيلة</span>
           <span class="sub" data-i18n="legal_hub">المنصة الرسمية</span>
         </div>
       </a>
@@ -166,16 +166,16 @@
       <div class="floating-glass-badge badge-top-left">
         <span style="font-size:1.2rem">⏱️</span>
         <div>
-          <div style="font-size:0.75rem; color:var(--text-muted)" data-i18n="speed_badge">وصول خلال 10 دقائق في المتوسط</div>
-          <div style="color:var(--primary); font-weight:700">توجيه فوري ذكي</div>
+          <div style="font-size:0.75rem; color:var(--text-muted)" data-i18n="float_fast_resp">استجابة سريعة</div>
+          <div style="color:var(--primary); font-weight:700" data-i18n="float_instant_dispatch">توجيه فوري ذكي</div>
         </div>
       </div>
 
       <div class="floating-glass-badge badge-bottom-right">
         <span style="font-size:1.2rem">🚚</span>
         <div>
-          <div style="font-size:0.75rem; color:var(--text-muted)">حمولة آمنة ومضمونة</div>
-          <div style="color:var(--success); font-weight:700">تتبع مباشر عبر GPS</div>
+          <div style="font-size:0.75rem; color:var(--text-muted)" data-i18n="float_safe_cargo">حمولة آمنة ومضمونة</div>
+          <div style="color:var(--success); font-weight:700" data-i18n="float_live_tracking">تتبع مباشر ولحظي</div>
         </div>
       </div>
 
@@ -186,10 +186,10 @@
           <!-- Mock Map -->
           <div class="phone-map-card">
             <div class="map-grid-bg"></div>
-            <div class="map-marker" style="top:40%; left:35%;">
-              📍 سيدي بلعباس
+            <div class="map-marker" style="top:40%; left:35%;" data-i18n="mockup_pin">
+              📍 الجزائر
             </div>
-            <div style="position:absolute; bottom:20px; right:30px; background:rgba(0,0,0,0.7); border-radius:50%; padding:6px;">
+            <div style="position:absolute; bottom:20px; right:30px; background:rgba(255,255,255,0.9); border:1px solid var(--border-subtle); border-radius:50%; padding:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
               🚚
             </div>
           </div>
@@ -200,53 +200,31 @@
             <div class="phone-ui-vehicle-row">
               <div class="vehicle-pill-item active">
                 <img src="assets/singlecabin_icon.png" alt="Single" style="height:22px; display:block; margin:0 auto 2px;">
-                <span>كابينة فردية</span>
+                <span data-i18n="mockup_single">كابينة فردية</span>
               </div>
               <div class="vehicle-pill-item">
                 <img src="assets/doublecabin_icon.png" alt="Double" style="height:22px; display:block; margin:0 auto 2px;">
-                <span>كابينة مزدوجة</span>
+                <span data-i18n="mockup_double">كابينة مزدوجة</span>
               </div>
             </div>
 
             <div class="phone-fare-row">
-              <div style="font-size:0.8rem; color:var(--text-muted)">السعر التقديري الثابت</div>
+              <div style="font-size:0.8rem; color:var(--text-muted)" data-i18n="mockup_fare_label">السعر التقديري الثابت</div>
               <div class="fare-amount" data-i18n="mockup_price">3,800 دج</div>
             </div>
           </div>
 
           <!-- Active Driver Card -->
           <div class="phone-ui-card" style="display:flex; align-items:center; gap:0.75rem;">
-            <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:bold;">
+            <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:bold;" data-i18n="mockup_avatar">
               أ.ب
             </div>
             <div style="flex:1;">
-              <div style="font-size:0.82rem; font-weight:700; color:#fff" data-i18n="mockup_driver_name">أحمد ب. • ★ 4.9</div>
+              <div style="font-size:0.82rem; font-weight:700; color:var(--text-main)" data-i18n="mockup_driver_name">أحمد ب. • ★ 4.9</div>
               <div style="font-size:0.7rem; color:var(--success)" data-i18n="mockup_status">السائق في الطريق إليك (4 دقائق)</div>
             </div>
           </div>
         </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Stats Counter Strip -->
-  <section class="stats-strip">
-    <div class="stats-grid">
-      <div class="stat-item">
-        <div class="stat-number" data-i18n="stat_wilayas_num">58</div>
-        <div class="stat-label" data-i18n="stat_wilayas">ولاية مغطاة بالكامل</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number" data-i18n="stat_deliveries_num">+15,000</div>
-        <div class="stat-label" data-i18n="stat_deliveries">نقلة بضائع ناجحة</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number" data-i18n="stat_drivers_num">+1,200</div>
-        <div class="stat-label" data-i18n="stat_drivers">سائق شاحنة معتمد ومفحوص</div>
-      </div>
-      <div class="stat-item">
-        <div class="stat-number" data-i18n="stat_rating_num">4.9/5</div>
-        <div class="stat-label" data-i18n="stat_rating">معدل الرضا العام</div>
       </div>
     </div>
   </section>
@@ -257,7 +235,7 @@
       <div class="badge-pill" data-i18n="fleet_badge">أسطولنا المتنوع</div>
       <h2 class="section-title" data-i18n="fleet_title">شاحنات نفعية تناسب كافة احتياجاتك</h2>
       <p class="section-subtitle" data-i18n="fleet_subtitle">
-        نوفر لك خيارات نقل مرنة بحمولات ومواصفات مختلفة تناسب الأفراد، التجار والمؤسسات.
+        نوفر لك خيارات نقل مرنة بمواصفات متعددة تناسب الأفراد، التجار والمؤسسات.
       </p>
     </div>
 
@@ -266,17 +244,16 @@
       <div class="fleet-card">
         <div class="fleet-image-wrap">
           <img src="assets/singlecabin.jpeg" alt="Single Cabin Utility Truck">
-          <div class="fleet-payload-tag">1.5 طن حمولة</div>
         </div>
         <div class="fleet-card-body">
-          <h3 class="fleet-name" data-i18n="single_cabin_title">شاحنة كابينة فردية (Single Cabin)</h3>
+          <h3 class="fleet-name" data-i18n="single_cabin_title">شاحنة كابينة فردية</h3>
           <p class="fleet-desc" data-i18n="single_cabin_desc">
-            الخيار الأمثل للأحمال الكبيرة والأثاث والبضائع التجارية بحمولة تصل إلى 1.5 طن ومساحة تحميل مفتوحة ورحبة.
+            الخيار الأمثل للأحمال الكبيرة والأثاث والبضائع التجارية بمساحة تحميل مفتوحة ورحبة.
           </p>
           <ul class="fleet-specs-list">
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
-              <span data-i18n="single_spec_1">حمولة استيعابية حتى 1,500 كغ (1.5 طن)</span>
+              <span data-i18n="single_spec_1">حوض تحميل متين ومفتوح للأحمال الكبيرة</span>
             </li>
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
@@ -284,7 +261,7 @@
             </li>
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
-              <span data-i18n="single_spec_3">مقعدان (السائق + مرافق واحد)</span>
+              <span data-i18n="single_spec_3">مرونة وسهولة في التنقل والوصول إلى كافة الأحياء</span>
             </li>
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
@@ -298,21 +275,20 @@
       <div class="fleet-card">
         <div class="fleet-image-wrap">
           <img src="assets/doublecabin.jpeg" alt="Double Cabin Utility Truck">
-          <div class="fleet-payload-tag">1.0 طن حمولة • 5 ركاب</div>
         </div>
         <div class="fleet-card-body">
-          <h3 class="fleet-name" data-i18n="double_cabin_title">شاحنة كابينة مزدوجة (Double Cabin)</h3>
+          <h3 class="fleet-name" data-i18n="double_cabin_title">شاحنة كابينة مزدوجة</h3>
           <p class="fleet-desc" data-i18n="double_cabin_desc">
-            المزيج المثالي بين نقل البضائع ونقل الركاب. تتسع لـ 5 أشخاص مع حوض تحميل متين لنقل فريق العمل والمساعدين مع العفش.
+            المزيج المثالي بين نقل البضائع والمرافقة مع حوض تحميل متين لنقل فريق العمل والمساعدين مع العفش.
           </p>
           <ul class="fleet-specs-list">
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
-              <span data-i18n="double_spec_1">حمولة استيعابية حتى 1,000 كغ (1.0 طن)</span>
+              <span data-i18n="double_spec_1">حوض تحميل مخصص ومحمي لمختلف أنواع البضائع والعفش</span>
             </li>
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
-              <span data-i18n="double_spec_2">مقصورة ركاب واسعة تتسع لـ 5 أشخاص</span>
+              <span data-i18n="double_spec_2">مقصورة مريحة وواسعة لمرافقة شحنتك</span>
             </li>
             <li class="fleet-spec-item">
               <span class="fleet-spec-icon">✓</span>
