@@ -1285,6 +1285,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     }
   }
 
+  Future<void> refreshIncomingOffers() => refreshNearbyRequests();
+
   Future<void> refreshNearbyRequests() async {
     if (state.availability == AvailabilityStatus.offline) {
       _setState(state.copyWith(error: 'driver_offline_requests_hint'.tr()));

@@ -105,6 +105,40 @@ void onStart(ServiceInstance service) async {
             ),
           );
         }
+
+        // Check for current incoming trip offer while running in background
+        try {
+          final offerRes = await dio.get<Map<String, dynamic>>(
+            '/drivers/me/current-offer',
+            options: Options(
+              headers: {'Authorization': 'Bearer $token'},
+            ),
+          );
+          final offerData = offerRes.data;
+          if (offerData != null && offerData['tripId'] != null) {
+            final tripId = offerData['tripId'].toString();
+            final lastAlertedTripId = prefs.getString('last_alerted_trip_id') ?? '';
+            if (lastAlertedTripId != tripId) {
+              await prefs.setString('last_alerted_trip_id', tripId);
+              const AndroidNotificationDetails androidDetails =
+                  AndroidNotificationDetails(
+                'driver_service_channel',
+                'Tashila Driver Background Service',
+                importance: Importance.max,
+                priority: Priority.high,
+                playSound: true,
+                enableVibration: true,
+              );
+              await flutterLocalNotificationsPlugin.show(
+                999,
+                'طلب رحلة جديد!',
+                'لديك عرض رحلة جديد بانتظارك. اضغط لعرض التفاصيل.',
+                const NotificationDetails(android: androidDetails),
+                payload: tripId,
+              );
+            }
+          }
+        } catch (_) {}
       } catch (_) {}
     } else {
       cleanup();

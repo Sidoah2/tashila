@@ -27,6 +27,40 @@ async def _delete_push_token(owner_id: str, role: str) -> None:
     )
 
 
+def _send_via_firebase_admin(
+    token: str,
+    title: str,
+    body: str,
+    data: dict[str, str],
+) -> bool:
+    try:
+        from app.services.auth_service import _get_firebase_app
+        from firebase_admin import messaging
+        app = _get_firebase_app()
+        if not app:
+            return False
+
+        message = messaging.Message(
+            token=token,
+            notification=messaging.Notification(title=title, body=body),
+            data=data,
+            android=messaging.AndroidConfig(
+                priority="high",
+                notification=messaging.AndroidNotification(
+                    channel_id="driver_trip_offers",
+                    priority="high",
+                    default_sound=True,
+                    click_action="FLUTTER_NOTIFICATION_CLICK",
+                ),
+            ),
+        )
+        messaging.send(message, app=app)
+        return True
+    except Exception as exc:
+        logger.warning("Firebase Admin messaging send failed: %s", exc)
+        return False
+
+
 async def _send_fcm(
     token: str,
     title: str,
@@ -35,8 +69,15 @@ async def _send_fcm(
     owner_id: str,
     role: str,
 ) -> bool:
+    clean_data = _fcm_data_payload(data)
+    # 1. Try modern Firebase Admin SDK first (HTTP v1)
+    if _send_via_firebase_admin(token, title, body, clean_data):
+        logger.info("FCM push sent via Firebase Admin SDK to %s/%s", role, owner_id)
+        return True
+
+    # 2. Fallback to legacy FCM server key if configured
     if not settings.fcm_server_key:
-        logger.warning("FCM server key not configured; push skipped for %s/%s", role, owner_id)
+        logger.warning("FCM push skipped for %s/%s (no server key / admin failed)", role, owner_id)
         return False
 
     headers = {
@@ -180,14 +221,26 @@ async def push_trip_cancelled_by_driver(
     )
 
 
-async def push_trip_request(driver_id: str, pickup_address: str, fare: float) -> bool:
+async def push_trip_request(
+    driver_id: str,
+    pickup_address: str,
+    fare: float,
+    trip_id: str | None = None,
+) -> bool:
     fare_str = f"{fare:.0f}" if fare == int(fare) else f"{fare:.2f}"
+    payload: dict[str, Any] = {
+        "type": "trip_request",
+        "pickupAddress": pickup_address,
+        "fare": fare_str,
+    }
+    if trip_id:
+        payload["tripId"] = trip_id
     return await send_push(
         driver_id,
         "driver",
         "New trip request",
         f"Pickup: {pickup_address} — {fare_str} DZD",
-        {"type": "trip_request", "pickupAddress": pickup_address, "fare": fare_str},
+        payload,
     )
 
 

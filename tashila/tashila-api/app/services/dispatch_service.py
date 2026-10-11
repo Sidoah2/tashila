@@ -229,7 +229,12 @@ async def offer_to_driver(
 
     pickup = trip.get("pickup") or {}
     pickup_address = pickup.get("address") or "Pickup location"
-    await push_trip_request(driver_id, pickup_address, float(trip.get("fare") or 0))
+    await push_trip_request(
+        driver_id,
+        pickup_address,
+        float(trip.get("fare") or 0),
+        trip_id=trip_id,
+    )
     return expires_at
 
 
@@ -469,7 +474,12 @@ async def _dispatch_worker(trip: dict[str, Any], lock_token: str) -> None:
                         )
                     pickup = trip.get("pickup") or {}
                     pickup_address = pickup.get("address") or "Pickup location"
-                    await push_trip_request(driver_id, pickup_address, float(trip.get("fare") or 0))
+                    await push_trip_request(
+                        driver_id,
+                        pickup_address,
+                        float(trip.get("fare") or 0),
+                        trip_id=trip_id,
+                    )
                 except Exception:
                     logger.exception("Failed offering trip %s to driver %s", trip_id, driver.get("id"))
 

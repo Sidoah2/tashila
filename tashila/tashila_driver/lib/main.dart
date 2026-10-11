@@ -13,6 +13,7 @@ import 'core/theme/app_theme.dart';
 import 'package:tashila_driver/core/widgets/connectivity_banner.dart';
 
 import 'core/services/background_service.dart';
+import 'core/services/fcm_service.dart';
 
 const _supported = [Locale('en'), Locale('ar'), Locale('fr')];
 
@@ -48,6 +49,9 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      FcmService.instance.initialize(ref);
+    });
   }
 
   @override
@@ -64,6 +68,7 @@ class _TashilaDriverAppState extends ConsumerState<TashilaDriverApp>
     unawaited(
       ref.read(driverAppStateProvider.notifier).resumeSessionOnForeground(),
     );
+    unawaited(FcmService.instance.syncPushToken(ref));
   }
 
   // Future<void> _showClientRatingSheet() async {

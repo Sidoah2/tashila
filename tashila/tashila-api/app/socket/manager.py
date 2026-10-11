@@ -75,23 +75,9 @@ async def disconnect(sid: str) -> None:
         except (InvalidId, TypeError):
             driver_oid = None
 
-        if driver_oid is not None:
-            from app.services.trip_service import get_active_trip_for_driver
-
-            active_trip = await get_active_trip_for_driver(user_id)
-            if active_trip is None:
-                driver = await get_database()[DRIVERS_COLLECTION].find_one({"_id": driver_oid})
-                if driver and driver.get("availability") == "online":
-                    now = datetime.now(timezone.utc)
-                    await get_database()[DRIVERS_COLLECTION].update_one(
-                        {"_id": driver_oid},
-                        {"$set": {"availability": "offline", "updatedAt": now}},
-                    )
-        await sio.emit(
-            "admin:driver_went_offline",
-            {"driverId": user_id},
-            room=ADMIN_MAP_ROOM,
-        )
+        # Do NOT force driver availability to offline in DB when socket disconnects,
+        # because mobile apps disconnect/sleep sockets when entering background.
+        # Driver remains online until they explicitly toggle offline in the app.
 
     print(f"[Socket] {sid} disconnected")
 
