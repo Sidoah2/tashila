@@ -113,39 +113,43 @@
 
     <!-- Sticky Table of Contents Sidebar -->
     <aside class="toc-sidebar">
-      <div class="toc-title">
-        <span data-i18n="toc_heading">Contents</span>
-        <span>📑</span>
-      </div>
-      <nav class="toc-nav">
-        <ul>
-          <li><a href="#overview" data-i18n="toc_1">1. Overview &amp; Scope</a></li>
-          <li><a href="#data-collection" data-i18n="toc_2">2. Information We Collect</a></li>
-          <li><a href="#location-disclosure" data-i18n="toc_3">3. Location Data &amp; Background Use</a></li>
-          <li><a href="#camera-storage" data-i18n="toc_4">4. Camera &amp; Storage Permissions</a></li>
-          <li><a href="#how-we-use" data-i18n="toc_5">5. How We Use Data</a></li>
-          <li><a href="#third-parties" data-i18n="toc_6">6. Third-Party Services</a></li>
-          <li><a href="#data-retention" data-i18n="toc_7">7. Retention &amp; Security</a></li>
-          <li><a href="#account-deletion" data-i18n="toc_8">8. Account &amp; Data Deletion</a></li>
-          <li><a href="#children-privacy" data-i18n="toc_9">9. Children's Privacy</a></li>
-          <li><a href="#user-rights" data-i18n="toc_10">10. Your Rights &amp; Choices</a></li>
-          <li><a href="#contact" data-i18n="toc_11">11. Contact Information</a></li>
-        </ul>
-      </nav>
-      <div class="toc-actions">
-        <a href="delete-account.html" class="btn-action btn-primary" data-i18n="btn_delete_page">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-          </svg>
-          <span>Account Deletion Page</span>
-        </a>
-        <button onclick="window.print()" class="btn-action btn-secondary" data-i18n="btn_print">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
-          </svg>
-          <span>Print / PDF Copy</span>
-        </button>
-      </div>
+      <details class="toc-collapsible" open>
+        <summary class="toc-summary" style="cursor: pointer; list-style: none; user-select: none;">
+          <div class="toc-title" style="margin-bottom:0;">
+            <span data-i18n="toc_heading">Contents</span>
+            <span>📑</span>
+          </div>
+        </summary>
+        <nav class="toc-nav" style="margin-top: 1rem;">
+          <ul>
+            <li><a href="#overview" data-i18n="toc_1">1. Overview &amp; Scope</a></li>
+            <li><a href="#data-collection" data-i18n="toc_2">2. Information We Collect</a></li>
+            <li><a href="#location-disclosure" data-i18n="toc_3">3. Location Data &amp; Background Use</a></li>
+            <li><a href="#camera-storage" data-i18n="toc_4">4. Camera &amp; Storage Permissions</a></li>
+            <li><a href="#how-we-use" data-i18n="toc_5">5. How We Use Data</a></li>
+            <li><a href="#third-parties" data-i18n="toc_6">6. Third-Party Services</a></li>
+            <li><a href="#data-retention" data-i18n="toc_7">7. Retention &amp; Security</a></li>
+            <li><a href="#account-deletion" data-i18n="toc_8">8. Account &amp; Data Deletion</a></li>
+            <li><a href="#children-privacy" data-i18n="toc_9">9. Children's Privacy</a></li>
+            <li><a href="#user-rights" data-i18n="toc_10">10. Your Rights &amp; Choices</a></li>
+            <li><a href="#contact" data-i18n="toc_11">11. Contact Information</a></li>
+          </ul>
+        </nav>
+        <div class="toc-actions">
+          <a href="delete-account.html" class="btn-action btn-primary" data-i18n="btn_delete_page">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+            </svg>
+            <span>Account Deletion Page</span>
+          </a>
+          <button onclick="window.print()" class="btn-action btn-secondary" data-i18n="btn_print">
+            <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
+            </svg>
+            <span>Print / PDF Copy</span>
+          </button>
+        </div>
+      </details>
     </aside>
 
     <!-- Policy Text Article -->
@@ -614,11 +618,23 @@
           current = section.getAttribute('id');
         }
       });
-
       navLinks.forEach(link => {
         link.classList.remove('active');
         if (link.getAttribute('href') === `#${current}`) {
           link.classList.add('active');
+        }
+      });
+    });
+
+    // Mobile responsive TOC auto-collapse
+    const tocDetails = document.querySelector('.toc-collapsible');
+    if (tocDetails && window.innerWidth <= 1024) {
+      tocDetails.removeAttribute('open');
+    }
+    document.querySelectorAll('.toc-nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        if (tocDetails && window.innerWidth <= 1024) {
+          tocDetails.removeAttribute('open');
         }
       });
     });
