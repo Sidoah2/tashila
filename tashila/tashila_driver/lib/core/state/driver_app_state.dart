@@ -17,6 +17,7 @@ import '../services/api_client.dart';
 import '../services/http_services.dart';
 import '../services/repositories.dart';
 import '../services/driver_socket_service.dart';
+import '../services/fcm_service.dart';
 import '../router/app_router.dart';
 
 const kSession = 'driver_session';
@@ -299,6 +300,8 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await syncTripHistoryFromServer();
       if (!ref.mounted) return;
       await syncPlatformEarningsFromServer();
+      if (!ref.mounted) return;
+      unawaited(FcmService.instance.syncPushToken(ref));
     }
 
     _setState(state.copyWith(bootstrapped: true));
@@ -307,6 +310,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   /// Refetch active trip and reconnect socket/poll after app foreground or cold start.
   Future<void> resumeSessionOnForeground() async {
     if (!state.isAuthenticated) return;
+    unawaited(FcmService.instance.syncPushToken(ref));
     if (state.availability == AvailabilityStatus.online) {
       await _restoreOnlineSession();
     }

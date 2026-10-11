@@ -102,7 +102,7 @@ class FcmService {
     }
   }
 
-  Future<void> syncPushToken(WidgetRef ref) async {
+  Future<void> syncPushToken(dynamic ref) async {
     try {
       final token = await FirebaseMessaging.instance.getToken();
       if (token != null && token.isNotEmpty) {
@@ -111,14 +111,17 @@ class FcmService {
     } catch (_) {}
   }
 
-  Future<void> _sendTokenToBackend(WidgetRef ref, String token) async {
+  Future<void> _sendTokenToBackend(dynamic ref, String token) async {
     try {
       final apiClient = ref.read(apiClientProvider);
-      await apiClient.post(
+      final res = await apiClient.post(
         '/drivers/me/push-token',
         data: {'token': token, 'platform': 'fcm'},
       );
-    } catch (_) {}
+      print('FCM Token registered with backend successfully: ${res.statusCode}');
+    } catch (e) {
+      print('Failed to register FCM token with backend: $e');
+    }
   }
 
   void _handleIncomingMessage(
