@@ -19,10 +19,21 @@ Future<void> initializeBackgroundService() async {
     importance: Importance.high,
   );
 
-  await flutterLocalNotificationsPlugin
+  const AndroidNotificationChannel alertChannel = AndroidNotificationChannel(
+    'driver_offer_alerts_v2',
+    'Trip Offer Alerts',
+    description: 'Heads-up visual notifications for incoming trip requests.',
+    importance: Importance.max,
+    playSound: true,
+    enableVibration: true,
+  );
+
+  final androidPlugin = flutterLocalNotificationsPlugin
       .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin>()
-      ?.createNotificationChannel(channel);
+          AndroidFlutterLocalNotificationsPlugin>();
+  await androidPlugin?.createNotificationChannel(channel);
+  await androidPlugin?.createNotificationChannel(alertChannel);
+  await androidPlugin?.requestNotificationsPermission();
 
   const AndroidInitializationSettings initializationSettingsAndroid =
       AndroidInitializationSettings('@mipmap/ic_launcher');
@@ -31,7 +42,12 @@ Future<void> initializeBackgroundService() async {
     android: initializationSettingsAndroid,
   );
 
-  await flutterLocalNotificationsPlugin.initialize(initializationSettings);
+  await flutterLocalNotificationsPlugin.initialize(
+    initializationSettings,
+    onDidReceiveNotificationResponse: (response) {
+      // Tap handler for background local notifications
+    },
+  );
 
   await service.configure(
     androidConfiguration: AndroidConfiguration(
@@ -122,12 +138,16 @@ void onStart(ServiceInstance service) async {
               await prefs.setString('last_alerted_trip_id', tripId);
               const AndroidNotificationDetails androidDetails =
                   AndroidNotificationDetails(
-                'driver_service_channel',
-                'Tashila Driver Background Service',
+                'driver_offer_alerts_v2',
+                'Trip Offer Alerts',
+                channelDescription: 'Heads-up visual notifications for incoming trip requests.',
                 importance: Importance.max,
-                priority: Priority.high,
+                priority: Priority.max,
+                fullScreenIntent: true,
                 playSound: true,
                 enableVibration: true,
+                visibility: NotificationVisibility.public,
+                ticker: 'طلب رحلة جديد',
               );
               await flutterLocalNotificationsPlugin.show(
                 999,
