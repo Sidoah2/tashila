@@ -47,7 +47,7 @@ TARGET_PHONE_ALT = "0611223344"
 
 def print_step(title: str):
     print("\n" + "=" * 65)
-    print(f"👉 {title}")
+    print(f"--> {title}")
     print("=" * 65)
 
 
@@ -58,7 +58,7 @@ def check_driver_status(db):
     })
 
     if not driver:
-        print(f"❌ Driver with phone {TARGET_PHONE} not found in database!")
+        print(f"[FAIL] Driver with phone {TARGET_PHONE} not found in database!")
         sys.exit(1)
 
     driver_id = str(driver["_id"])
@@ -162,77 +162,102 @@ def send_direct_fcm_test(token):
 
 
 def test_live_dispatch_flow(db, driver):
-    print_step("4. Testing Live Ride Offer Dispatch to Driver")
+    import requests
+    base_url = os.getenv("API_URL", "https://web-production-da6bc.up.railway.app").rstrip("/")
+    print_step(f"4. Testing Live Ride Offer Dispatch via {base_url}/trips")
     driver_id = str(driver["_id"])
     loc = driver.get("location") or {}
     coords = loc.get("coordinates", [3.0588, 36.7538])
     lng, lat = coords[0], coords[1]
+    truck_type = driver.get("truckType", "single_cabin")
 
-    # Create a test trip in MongoDB
-    client_user = db.users.find_one({"role": "client"})
-    if not client_user:
-        client_id = str(ObjectId())
-        client_name = "Test Client"
-        client_phone = "+213555000111"
-    else:
-        client_id = str(client_user["_id"])
-        client_name = client_user.get("name", "Test Client")
-        client_phone = client_user.get("phone", "+213555000111")
+    # 1. Log in a virtual client via test OTP
+    client_phone = "+213555999888"
+    print(f"   Logging in test client ({client_phone})...")
+    try:
+        requests.post(f"{base_url}/auth/otp/send", json={"phone": client_phone, "role": "client"}, timeout=10)
+        verify_res = requests.post(
+            f"{base_url}/auth/otp/verify",
+            json={"phone": client_phone, "otp": "1111", "role": "client"},
+            timeout=10,
+        )
+        if verify_res.status_code != 200:
+            print(f"   [FAIL] Could not authenticate test client: {verify_res.status_code} {verify_res.text}")
+            return
+        client_token = verify_res.json().get("accessToken")
+    except Exception as e:
+        print(f"   [FAIL] Client login error: {e}")
+        return
 
-    now = datetime.now(timezone.utc)
-    test_trip = {
-        "clientId": client_id,
-        "clientName": client_name,
-        "clientPhone": client_phone,
-        "status": "requested",
-        "truckType": driver.get("truckType", "small"),
-        "targetedDriverId": driver_id,
+    # 2. Call POST /trips to trigger the real dispatch worker
+    trip_payload = {
         "pickup": {
+            "lat": lat,
+            "lng": lng,
             "address": "123 Rue Didouche Mourad, Alger",
-            "location": {"type": "Point", "coordinates": [lng, lat]},
         },
         "dropoff": {
+            "lat": lat + 0.02,
+            "lng": lng + 0.02,
             "address": "Bab Ezzouar, Alger",
-            "location": {"type": "Point", "coordinates": [lng + 0.05, lat + 0.05]},
         },
-        "fare": 1800.0,
-        "distanceKm": 12.5,
-        "durationMinutes": 25,
-        "createdAt": now,
-        "updatedAt": now,
+        "truckType": truck_type,
+        "paymentMethod": "cash",
+        "notes": "Live test dispatch to driver 0611223344",
     }
 
-    res = db.trips.insert_one(test_trip)
-    trip_id = str(res.inserted_id)
-    print(f"   ✅ Created Test Trip in DB: ID = {trip_id}")
-    print(f"      Pickup:  {test_trip['pickup']['address']}")
-    print(f"      Fare:    {test_trip['fare']} DZD")
-    print(f"      Target:  Driver {driver.get('name')} ({driver_id})")
+    print(f"   Requesting trip via POST /trips at coordinates ({lat}, {lng}) for truckType '{truck_type}'...")
+    try:
+        trip_res = requests.post(
+            f"{base_url}/trips",
+            json=trip_payload,
+            headers={"Authorization": f"Bearer {client_token}"},
+            timeout=15,
+        )
+        if trip_res.status_code not in (200, 201):
+            print(f"   [FAIL] Failed creating trip: {trip_res.status_code} {trip_res.text}")
+            return
 
-    # If push token exists, send the trip offer push notification
-    token_doc = db.push_tokens.find_one({"ownerId": driver_id, "role": "driver"})
-    if token_doc and token_doc.get("token"):
-        print("\n   📲 Dispatching FCM Push Notification for Trip Offer...")
-        send_direct_fcm_test(token_doc["token"])
+        trip_data = trip_res.json()
+        trip_obj = trip_data.get("trip") if isinstance(trip_data.get("trip"), dict) else trip_data
+        trip_id = trip_obj.get("id") or trip_obj.get("_id")
+        fare = trip_obj.get("fare")
+        print(f"   [OK] Trip created on backend! ID: {trip_id} (Fare: {fare} DZD)")
+        print("   >>> THE BACKEND DISPATCH ENGINE HAS BROADCASTED THE OFFER TO YOUR PHONE! <<<")
+    except Exception as e:
+        print(f"   [FAIL] Request exception: {e}")
+        return
 
-    print("\n   ⏳ Waiting up to 30 seconds for driver response in mobile app...")
-    for i in range(30):
+    # 3. Wait for driver response (Accept/Reject) on their real phone
+    print("\n   Watching your phone for response (Accept or Reject)...")
+    trip_accepted = False
+    for i in range(35):
         time.sleep(1)
         trip_state = db.trips.find_one({"_id": ObjectId(trip_id)})
         current_status = trip_state.get("status") if trip_state else "unknown"
         if current_status == "accepted":
-            print(f"\n   🎉 SUCCESS: Driver accepted the trip! (Trip Status: {current_status})")
+            print(f"\n   [SUCCESS] Driver ACCEPTED the trip on their phone! (Status: {current_status})")
+            trip_accepted = True
             break
-        elif current_status == "rejected" or current_status == "cancelled":
+        elif current_status in ("rejected", "cancelled"):
             print(f"\n   Driver response: {current_status}")
             break
-        sys.stdout.write(f"\r   [{i+1}/30s] Trip Status: {current_status}...")
+        sys.stdout.write(f"\r   [{i+1}/35s] Trip Status on Server: {current_status}...")
         sys.stdout.flush()
 
-    # Clean up test trip
-    print("\n\n   🧹 Cleaning up test trip...")
+    # 4. Clean up test trip
+    print("\n\n   Cleaning up test trip...")
+    try:
+        requests.post(
+            f"{base_url}/trips/{trip_id}/cancel",
+            params={"reason": "test_cleanup"},
+            headers={"Authorization": f"Bearer {client_token}"},
+            timeout=10,
+        )
+    except Exception:
+        pass
     db.trips.delete_one({"_id": ObjectId(trip_id)})
-    print("   ✅ Test trip cleaned up from database.")
+    print("   [OK] Test trip cleaned up.")
 
 
 def main():
