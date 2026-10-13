@@ -1,19 +1,21 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Privacy Policy | Tashila & Tashila Driver</title>
-  <meta name="description" content="Official Privacy Policy for Tashila Client and Tashila Driver mobile applications, detailing data protection, location access, permissions, and account deletion.">
+  <title data-i18n="doc_title">سياسة الخصوصية | تسهيلة وتسهيلة سائق</title>
+  <meta name="description" content="سياسة الخصوصية الرسمية لتطبيقي تسهيلة وتسهيلة سائق في تمنراست، توضح حماية البيانات، الموقع الجغرافي، الأذونات، وحذف الحساب.">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
-  <link rel="stylesheet" href="assets/styles.css?v=3.5">
+  <link rel="stylesheet" href="assets/styles.css?v=4.1">
   <style>
     .coverage-cards {
       display: grid !important;
-      grid-template-columns: repeat(3, 1fr) !important;
+      grid-template-columns: repeat(2, 1fr) !important;
       gap: 1.25rem !important;
+      max-width: 860px !important;
+      margin: 0 auto !important;
     }
-    @media (max-width: 900px) {
+    @media (max-width: 768px) {
       .coverage-cards {
         grid-template-columns: 1fr !important;
       }
@@ -34,11 +36,46 @@
       padding: 0.55rem 0.85rem !important;
       border-radius: 6px !important;
       line-height: 1.45 !important;
+      transition: all 0.2s ease !important;
     }
     .toc-nav a:hover, .toc-nav a.active {
       color: var(--primary) !important;
       background: rgba(245, 138, 12, 0.12) !important;
       font-weight: 700 !important;
+    }
+    html, body {
+      overflow-x: clip !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    .ambient-bg {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow: hidden !important;
+      pointer-events: none !important;
+    }
+    .main-layout {
+      min-width: 0 !important;
+      width: 100% !important;
+      max-width: 1240px !important;
+      box-sizing: border-box !important;
+    }
+    article.policy-content {
+      min-width: 0 !important;
+      max-width: 100% !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
+    }
+    html[dir="rtl"] .policy-section {
+      text-align: right !important;
+      direction: rtl !important;
+    }
+    .policy-section p, .policy-section li, .policy-section h2, .policy-section h3 {
+      word-break: break-word !important;
+      overflow-wrap: break-word !important;
     }
     @media (max-width: 1024px) {
       .main-layout {
@@ -50,15 +87,94 @@
         top: 0 !important;
         max-height: none !important;
         width: 100% !important;
+        box-sizing: border-box !important;
       }
     }
     @media (max-width: 768px) {
+      .nav-links {
+        display: none !important;
+      }
+      .lang-toggle-btn {
+        display: none !important;
+      }
+      .nav-container {
+        padding: 0.65rem 1rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .hero-banner {
+        padding: 2.5rem 1rem 1.5rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
       .hero-title {
-        font-size: 2rem !important;
+        font-size: 1.85rem !important;
+        line-height: 1.3 !important;
+      }
+      .meta-bar {
+        flex-direction: column !important;
+        gap: 0.5rem !important;
+      }
+      .coverage-banner {
+        padding: 0 1rem 1.5rem !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
+      }
+      .coverage-cards {
+        grid-template-columns: 1fr !important;
+        width: 100% !important;
+      }
+      .main-layout {
+        padding: 0 1rem 4rem !important;
+        gap: 1.25rem !important;
+        width: 100% !important;
       }
       article.policy-content {
         padding: 1.5rem 1rem !important;
+        width: 100% !important;
       }
+    }
+    .policy-section h2 {
+      font-size: 1.45rem;
+      color: #0f172a;
+      margin-bottom: 1rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid rgba(245, 138, 12, 0.2);
+    }
+    .policy-section ul, .policy-section ol {
+      padding-inline-start: 1.5rem;
+      margin: 1rem 0;
+      line-height: 1.8;
+      color: #334155;
+    }
+    .policy-section li {
+      margin-bottom: 0.75rem;
+    }
+    .policy-section p {
+      line-height: 1.8;
+      color: #334155;
+      margin-bottom: 1rem;
+    }
+    .data-table-wrapper {
+      overflow-x: auto;
+      margin: 1.5rem 0;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: start;
+      font-size: 0.9rem;
+    }
+    .data-table th, .data-table td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .data-table th {
+      background: #f8fafc;
+      color: #1e293b;
+      font-weight: 700;
     }
   </style>
 </head>
@@ -105,58 +221,51 @@
       <svg width="14" height="14" fill="currentColor" viewBox="0 0 20 20">
         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
       </svg>
-      <span>Google Play Store Compliant Privacy Document</span>
+      <span>وثيقة خصوصية متوافقة بالكامل مع متطلبات Google Play</span>
     </div>
     <h1 class="hero-title" data-i18n="hero_title">
-      Privacy Policy for <span class="highlight">Tashila</span>
+      سياسة الخصوصية لتطبيق <span class="highlight">تسهيلة</span>
     </h1>
     <p class="hero-subtitle" data-i18n="hero_desc">
-      This Privacy Policy describes how Tashila collects, uses, protects, and discloses information gathered through the Tashila Client and Tashila Driver mobile applications and services.
+      توضح سياسة الخصوصية هذه كيفية قيام منصة تسهيلة بجمع واستخدام وحماية ومشاركة بياناتك الشخصية من خلال تطبيقي تسهيلة للعميل وتسهيلة للسائق في تمنراست.
     </p>
     <div class="meta-bar">
       <div class="meta-item">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
         </svg>
-        <span data-i18n="meta_effective">Effective Date: September 19, 2026</span>
+        <span data-i18n="meta_effective">تاريخ السريان: 19 سبتمبر 2026</span>
       </div>
       <div class="meta-item">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
         </svg>
-        <span data-i18n="meta_updated">Last Updated: September 19, 2026</span>
+        <span data-i18n="meta_updated">آخر تحديث: 19 سبتمبر 2026</span>
       </div>
       <div class="meta-item">
         <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
         </svg>
-        <span data-i18n="meta_status">Status: Active &amp; Verified</span>
+        <span data-i18n="meta_status">الحالة: موثقة ونشطة</span>
       </div>
     </div>
   </section>
 
-  <!-- Covered Apps Grid -->
+  <!-- Covered Apps Grid (Package names removed, Admin card removed) -->
   <section class="coverage-banner">
     <div class="coverage-cards">
       <div class="coverage-card">
         <div class="app-icon-badge">📦</div>
         <div class="coverage-info">
-          <h4 data-i18n="app_client_title">Tashila (Client App)</h4>
-          <p>Package: com.tashila.tashilaclient</p>
+          <h4 data-i18n="app_client_title">تسهيلة (تطبيق الزبائن)</h4>
+          <p data-i18n="app_client_desc">تطبيق طلب وتتبع شاحنات نقل البضائع</p>
         </div>
       </div>
       <div class="coverage-card">
         <div class="app-icon-badge">🚚</div>
         <div class="coverage-info">
-          <h4 data-i18n="app_driver_title">Tashila Driver (Driver App)</h4>
-          <p>Package: com.tashila.tashiladriver</p>
-        </div>
-      </div>
-      <div class="coverage-card">
-        <div class="app-icon-badge">🛡️</div>
-        <div class="coverage-info">
-          <h4 data-i18n="app_admin_title">Tashila Dispatch &amp; Admin</h4>
-          <p>Infrastructure: tashila-production.up.railway.app</p>
+          <h4 data-i18n="app_driver_title">تسهيلة سائق (تطبيق السائقين)</h4>
+          <p data-i18n="app_driver_desc">تطبيق السائقين وأصحاب الشاحنات النفعية</p>
         </div>
       </div>
     </div>
@@ -170,23 +279,23 @@
       <details class="toc-collapsible" open>
         <summary class="toc-summary" style="cursor: pointer; list-style: none; user-select: none;">
           <div class="toc-title" style="margin-bottom:0;">
-            <span data-i18n="toc_heading">Contents</span>
+            <span data-i18n="toc_heading">الفهرس والمحتويات</span>
             <span>📑</span>
           </div>
         </summary>
         <nav class="toc-nav" style="margin-top: 1rem;">
           <ul>
-            <li><a href="#overview" data-i18n="toc_1">1. Overview &amp; Scope</a></li>
-            <li><a href="#data-collection" data-i18n="toc_2">2. Information We Collect</a></li>
-            <li><a href="#location-disclosure" data-i18n="toc_3">3. Location Data &amp; Background Use</a></li>
-            <li><a href="#camera-storage" data-i18n="toc_4">4. Camera &amp; Storage Permissions</a></li>
-            <li><a href="#how-we-use" data-i18n="toc_5">5. How We Use Data</a></li>
-            <li><a href="#third-parties" data-i18n="toc_6">6. Third-Party Services</a></li>
-            <li><a href="#data-retention" data-i18n="toc_7">7. Retention &amp; Security</a></li>
-            <li><a href="#account-deletion" data-i18n="toc_8">8. Account &amp; Data Deletion</a></li>
-            <li><a href="#children-privacy" data-i18n="toc_9">9. Children's Privacy</a></li>
-            <li><a href="#user-rights" data-i18n="toc_10">10. Your Rights &amp; Choices</a></li>
-            <li><a href="#contact" data-i18n="toc_11">11. Contact Information</a></li>
+            <li><a href="#overview" data-i18n="toc_1">1. النظرة العامة والنطاق</a></li>
+            <li><a href="#data-collection" data-i18n="toc_2">2. المعلومات التي نجمعها</a></li>
+            <li><a href="#location-disclosure" data-i18n="toc_3">3. بيانات الموقع الجغرافي واستخدامه</a></li>
+            <li><a href="#camera-storage" data-i18n="toc_4">4. أذونات الكاميرا ومساحة التخزين</a></li>
+            <li><a href="#how-we-use" data-i18n="toc_5">5. كيف نستخدم معلوماتك</a></li>
+            <li><a href="#third-parties" data-i18n="toc_6">6. الأطراف الثالثة ومقدمو الخدمات</a></li>
+            <li><a href="#data-retention" data-i18n="toc_7">7. الاحتفاظ بالبيانات ومعايير الأمان</a></li>
+            <li><a href="#account-deletion" data-i18n="toc_8">8. طلب حذف الحساب والبيانات</a></li>
+            <li><a href="#children-privacy" data-i18n="toc_9">9. حماية خصوصية الأطفال</a></li>
+            <li><a href="#user-rights" data-i18n="toc_10">10. حقوقك وخياراتك القانونية</a></li>
+            <li><a href="#contact" data-i18n="toc_11">11. معلومات الاتصال بالمسؤول</a></li>
           </ul>
         </nav>
         <div class="toc-actions">
@@ -194,13 +303,13 @@
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
             </svg>
-            <span>Account Deletion Page</span>
+            <span>صفحة حذف الحساب</span>
           </a>
           <button onclick="window.print()" class="btn-action btn-secondary" data-i18n="btn_print">
             <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path>
             </svg>
-            <span>Print / PDF Copy</span>
+            <span>طباعة / حفظ كملف PDF</span>
           </button>
         </div>
       </details>
@@ -209,84 +318,70 @@
     <!-- Policy Text Article -->
     <article class="policy-content" id="policyContent">
 
-      <!-- Section 1 -->
+      <!-- Section 1 (Duplicate 01 removed) -->
       <section class="policy-section" id="overview">
-        <div class="section-header">
-          <span class="section-num">01</span>
-          <h2 data-i18n="s1_title">Overview &amp; Scope</h2>
-        </div>
+        <h2 data-i18n="s1_title">01. النظرة العامة والنطاق</h2>
         <p data-i18n="s1_p1">
-          Welcome to <strong>Tashila</strong> ("we", "us", or "our"). Tashila operates an on-demand freight and logistics transportation technology platform that connects customers needing cargo transportation ("Clients") with independent transport providers operating single-cabin and double-cabin utility trucks ("Drivers").
+          مرحباً بكم في <strong>تسهيلة</strong> ("نحن" أو "المنصة"). تدير تسهيلة منصة تقنية لنقل وشحن البضائع عند الطلب في تمنراست تربط بين الزبائن الراغبين في نقل البضائع ("الزبائن") وسائقي الشاحنات الصغيرة النفعية بمقصورة فردية أو مزدوجة ("السائقون").
         </p>
         <p data-i18n="s1_p2">
-          This Privacy Policy applies to the <strong>Tashila Client</strong> mobile application (<code>com.tashila.tashilaclient</code>), the <strong>Tashila Driver</strong> mobile application (<code>com.tashila.tashiladriver</code>), our website, APIs, and associated online services (collectively, the "Services").
+          تنطبق سياسة الخصوصية هذه على تطبيق <strong>تسهيلة للزبائن</strong> وتطبيق <strong>تسهيلة للسائقين</strong> وبوابتنا وخدماتنا الرقمية المرتبطة بها.
         </p>
         <p data-i18n="s1_p3">
-          By downloading, accessing, or using any of our applications, you acknowledge that you have read and understood this Privacy Policy. If you do not agree with our policies and practices, please do not use our Services.
+          عبر تنزيل أو استخدام أي من تطبيقاتنا، فإنك تقر بأنك قد قرأت وفهمت سياسة الخصوصية هذه وتوافق على بنودها بالكامل.
         </p>
       </section>
 
       <!-- Section 2 -->
       <section class="policy-section" id="data-collection">
-        <div class="section-header">
-          <span class="section-num">02</span>
-          <h2 data-i18n="s2_title">Information We Collect</h2>
-        </div>
+        <h2 data-i18n="s2_title">02. المعلومات التي نجمعها</h2>
         <p data-i18n="s2_p1">
-          To provide safe, reliable, and efficient logistics services, we collect information directly provided by you, automatically generated during app usage, and gathered from third-party partners.
+          لتقديم خدمة نقل آمنة وسريعة وموثوقة، نجمع المعلومات التي تزودنا بها مباشرة، والمعلومات الناتجة تلقائياً أثناء تشغيل التطبيق.
         </p>
 
-        <h3 data-i18n="s2_sub1">A. Information You Provide to Us</h3>
+        <h3 data-i18n="s2_sub1">أ. معلومات تقدمها لنا مباشرة</h3>
         <ul>
-          <li><strong data-i18n="s2_li1_t">Account Registration Details:</strong> When you register as a Client or Driver, we collect your mobile phone number for One-Time Password (OTP) verification, full name, profile picture, and language preference.</li>
-          <li><strong data-i18n="s2_li2_t">Driver Verification Documents (KYC):</strong> For Tashila Driver accounts, we collect and verify statutory identification documents including government-issued driver's license, vehicle registration papers ("Carte Grise"), vehicle insurance certificates, vehicle type classification (Single Cabin or Double Cabin pickup truck), and vehicle license plate number.</li>
-          <li><strong data-i18n="s2_li3_t">Communications &amp; Support:</strong> Records of inquiries, dispute reports, customer service chats, and ratings or feedback provided after completing trips.</li>
+          <li><strong data-i18n="s2_li1_t">بيانات التسجيل والحساب:</strong> <span data-i18n="s2_li1_d">عند التسجيل كزبون أو سائق، نجمع رقم هاتفك المحمول للتحقق عبر رمز التحقق لمرة واحدة (OTP)، والاسم الكامل، وصورة الملف الشخصي، واللغة المفضلة.</span></li>
+          <li><strong data-i18n="s2_li2_t">وثائق إثبات هوية السائق (KYC):</strong> <span data-i18n="s2_li2_d">بالنسبة لحسابات سائقي تسهيلة، نجمع ونتحقق من الوثائق الرسمية بما فيها رخصة السياقة الصادرة عن السلطات المختصة، والبطاقة الرمادية للمركبة، والتأمين، وتصنيف الشاحنة (كابينة مفردة أو كابينة مزدوجة)، ورقم لوحة الترقيم.</span></li>
+          <li><strong data-i18n="s2_li3_t">المراسلات والدعم:</strong> <span data-i18n="s2_li3_d">سجلات الاستفسارات وبلاغات النزاعات والتقييمات والملاحظات المقدمة بعد إتمام الرحلات.</span></li>
         </ul>
 
-        <h3 data-i18n="s2_sub2">B. Information Automatically Collected</h3>
+        <h3 data-i18n="s2_sub2">ب. المعلومات التي تُجمع تلقائياً</h3>
         <ul>
-          <li><strong data-i18n="s2_li4_t">Precise &amp; Coarse Location Data:</strong> Real-time GPS coordinates collected from your mobile device (see Section 3 for detailed disclosure).</li>
-          <li><strong data-i18n="s2_li5_t">Device &amp; Hardware Identifiers:</strong> Device model, operating system version, unique device identifier (Android ID), network carrier, IP address, and Firebase Cloud Messaging (FCM) push tokens used to send order alerts.</li>
-          <li><strong data-i18n="s2_li6_t">Transaction &amp; Order History:</strong> Pickup coordinates, delivery destination, timestamp of request, completion time, truck category chosen, calculated distance, and agreed fare.</li>
+          <li><strong data-i18n="s2_li4_t">بيانات الموقع الدقيقة والتقريبية:</strong> <span data-i18n="s2_li4_d">إحداثيات GPS في الوقت الفعلي من جهازك المحمول (انظر القسم 3 لمزيد من التفاصيل).</span></li>
+          <li><strong data-i18n="s2_li5_t">معلومات الجهاز ومعرفات النظام:</strong> <span data-i18n="s2_li5_d">طراز الجهاز وإصدار نظام التشغيل والمعرف الفريد للجهاز وشبكة الاتصال وعنوان IP ورموز Firebase لإرسال تنبيهات الطلبات.</span></li>
+          <li><strong data-i18n="s2_li6_t">سجل المعاملات والرحلات:</strong> <span data-i18n="s2_li6_d">إحداثيات الانطلاق والوصول، ووقت تقديم الطلب، ونوع الشاحنة، والمسافة المحسوبة، والسعر المتفق عليه.</span></li>
         </ul>
       </section>
 
       <!-- Section 3 -->
       <section class="policy-section" id="location-disclosure">
-        <div class="section-header">
-          <span class="section-num">03</span>
-          <h2 data-i18n="s3_title">Location Data &amp; Background Use Disclosure</h2>
-        </div>
+        <h2 data-i18n="s3_title">03. بيانات الموقع الجغرافي واستخدامه</h2>
 
         <div class="callout callout-warning">
           <div class="callout-title">
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
             </svg>
-            <span data-i18n="s3_alert_t">Prominent Disclosure: Location Access in Tashila &amp; Tashila Driver</span>
+            <span data-i18n="s3_alert_t">إفصاح صريح: الوصول للموقع في تطبيقي تسهيلة وتسهيلة سائق</span>
           </div>
           <p data-i18n="s3_alert_p">
-            Location access is essential to the core functionality of Tashila freight transportation. Below we explicitly detail how location is gathered for both apps, including background location tracking.
+            يعد الوصول إلى الموقع الجغرافي وظيفة جوهرية وأساسية لتشغيل منصة نقل البضائع تسهيلة. فيما يلي نفصل بدقة استخدام الموقع بما في ذلك التتبع في الخلفية.
           </p>
         </div>
 
-        <h3 data-i18n="s3_client_t">1. Tashila Client App (Foreground Location)</h3>
+        <h3 data-i18n="s3_client_t">1. تطبيق الزبون (الموقع أثناء الاستخدام فقط)</h3>
         <p data-i18n="s3_client_p">
-          The Client app uses <code>ACCESS_FINE_LOCATION</code> and <code>ACCESS_COARSE_LOCATION</code> exclusively while the application is active on screen (foreground) to:
+          يستخدم تطبيق الزبون إذن الموقع في الواجهة الأمامية فقط أثناء تشغيل التطبيق لتحديد نقطة انطلاق البضاعة، وعرض أقرب الشاحنات المتوفرة، وتقدير المسافة والتكلفة.
         </p>
-        <ul>
-          <li>Automatically set your current cargo pickup pin on the interactive map.</li>
-          <li>Display nearby active drivers and available truck types (Single Cabin / Double Cabin).</li>
-          <li>Estimate travel route distances and trip pricing through Google Maps API.</li>
-        </ul>
 
-        <h3 data-i18n="s3_driver_t">2. Tashila Driver App (Foreground &amp; Background Location)</h3>
+        <h3 data-i18n="s3_driver_t">2. تطبيق السائق (الموقع في الواجهة الأمامية والخلفية)</h3>
         <p data-i18n="s3_driver_p1">
-          The Tashila Driver app collects precise location data via the <code>BackgroundService</code> <strong>even when the application is running in the background or when the screen is closed</strong>, under the following strict conditions:
+          يجمع تطبيق سائق تسهيلة بيانات الموقع الدقيقة حتى عندما يكون التطبيق مغلقاً أو يعمل في الخلفية وذلك للأسباب الصريحة التالية:
         </p>
         <ul>
-          <li><strong>Dispatch &amp; Order Matching:</strong> While a driver has turned their status to <em>"Online"</em>, continuous background location enables our server algorithm to match nearby customer shipment requests with the most optimal driver, preventing wasted fuel and lengthy wait times.</li>
-          <li><strong>Real-Time Transit &amp; Safety Tracking:</strong> During an accepted and ongoing delivery mission, background location tracking transmits accurate transit telemetry to the customer and dispatch console. This ensures cargo safety, transparency, accurate arrival estimates, and verification of pickup and drop-off milestones.</li>
+          <li><strong data-i18n="s3_d_reason1_t">توزيع الطلبات والتوجيه الذكي:</strong> <span data-i18n="s3_d_reason1_d">عندما يكون السائق في وضع "متصل"، يتيح تتبع الموقع في الخلفية إرسال طلبات النقل القريبة إليه بدقة، مما يقلل استهلاك الوقود وأوقات الانتظار.</span></li>
+          <li><strong data-i18n="s3_d_reason2_t">السلامة ومتابعة مسار الحمولة:</strong> <span data-i18n="s3_d_reason2_d">أثناء الرحلة الجارية، يتيح الموقع تأكيد مسار الحمولة وضمان أمان الشحنة وتقدير موعد الوصول بدقة.</span></li>
         </ul>
 
         <div class="callout callout-info">
@@ -294,102 +389,93 @@
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
             </svg>
-            <span data-i18n="s3_driver_ctrl_t">Driver Control Over Location</span>
+            <span data-i18n="s3_driver_ctrl_t">تحكم كامل للسائق في تتبع الموقع</span>
           </div>
           <p data-i18n="s3_driver_ctrl_p">
-            Drivers maintain full control over background location tracking. When a driver toggles the status switch to <strong>"Offline"</strong>, background location reporting immediately ceases completely.
+            يملك السائق التحكم التام، فبمجرد تحويل حالته داخل التطبيق إلى "غير متصل" (Offline)، يتوقف إرسال وتتبع الموقع في الخلفية فوراً وبشكل كلي.
           </p>
         </div>
       </section>
 
       <!-- Section 4 -->
       <section class="policy-section" id="camera-storage">
-        <div class="section-header">
-          <span class="section-num">04</span>
-          <h2 data-i18n="s4_title">Camera &amp; Device Storage Permissions</h2>
-        </div>
+        <h2 data-i18n="s4_title">04. أذونات الكاميرا ومساحة التخزين</h2>
         <p data-i18n="s4_p1">
-          Our applications request access to the device camera (<code>android.permission.CAMERA</code>) and media storage under explicit user confirmation for the following exclusive purposes:
+          يطلب التطبيق إذن الكاميرا ومساحة التخزين بموافقة المستخدم الصريحة للأغراض الحصرية التالية:
         </p>
         <div class="feature-grid">
           <div class="feature-box">
             <div class="feature-box-icon">📷</div>
-            <h4 data-i18n="s4_f1_t">Driver KYC Verification</h4>
-            <p data-i18n="s4_f1_p">Drivers photograph their valid driver's license and vehicle registration document during onboarding so administrators can review and approve roadworthiness.</p>
+            <h4 data-i18n="s4_f1_t">التحقق من ملفات السائق</h4>
+            <p data-i18n="s4_f1_p">يقوم السائق بتصوير رخصة السياقة والبطاقة الرمادية لمراجعتها واعتمادها من الإدارة قبل قبول الحساب.</p>
           </div>
           <div class="feature-box">
             <div class="feature-box-icon">👤</div>
-            <h4 data-i18n="s4_f2_t">Profile Avatar Upload</h4>
-            <p data-i18n="s4_f2_p">Users may upload a profile picture from their gallery or camera to identify themselves to drivers and clients for seamless order handoff.</p>
+            <h4 data-i18n="s4_f2_t">الصورة الشخصية</h4>
+            <p data-i18n="s4_f2_p">إمكانية رفع صورة للملف الشخصي للتعرف على السائق أو العميل أثناء تسليم الشحنة.</p>
           </div>
           <div class="feature-box">
             <div class="feature-box-icon">🔒</div>
-            <h4 data-i18n="s4_f3_t">Secure Cloud Storage</h4>
-            <p data-i18n="s4_f3_p">Uploaded photos are transmitted over encrypted TLS connections to secured cloud buckets (Cloudinary) and are never used for marketing purposes.</p>
+            <h4 data-i18n="s4_f3_t">تخزين سحابي مشفر</h4>
+            <p data-i18n="s4_f3_p">يتم نقل الصور عبر بروتوكول مشفر وتخزينها بأمان تام عبر سيرفرات Cloudinary دون أي استخدام إعلاني.</p>
           </div>
         </div>
       </section>
 
       <!-- Section 5 -->
       <section class="policy-section" id="how-we-use">
-        <div class="section-header">
-          <span class="section-num">05</span>
-          <h2 data-i18n="s5_title">How We Use Your Information</h2>
-        </div>
-        <p data-i18n="s5_p1">We utilize collected data solely for legitimate business operations, specifically:</p>
+        <h2 data-i18n="s5_title">05. كيف نستخدم معلوماتك</h2>
+        <p data-i18n="s5_p1">نستخدم البيانات المجمعة لتشغيل الخدمة بكفاءة، وتحديداً من أجل:</p>
         <ul>
-          <li>Matching freight requests with suitable drivers in the vicinity based on truck size (single vs. double cabin).</li>
-          <li>Facilitating direct in-app or phone dialer communication between assigned Driver and Client to coordinate loading and unloading.</li>
-          <li>Generating transparent fare estimates, trip receipts, and trip route logs.</li>
-          <li>Investigating customer disputes, vehicle breakdowns, or safety concerns.</li>
-          <li>Sending critical push alerts regarding ride acceptance, driver arrival, or security notifications via Firebase Cloud Messaging.</li>
-          <li>Complying with applicable legal, fiscal, and transportation regulatory requirements.</li>
+          <li data-i18n="s5_item1">ربط طلبات الشحن بأقرب السائقين المتاحين في تمنراست حسب نوع الشاحنة (كابينة مفردة أو كابينة مزدوجة).</li>
+          <li data-i18n="s5_item2">تمكين الاتصال الهاتفي المباشر بين السائق والزبون لتنسيق تفاصيل التحميل والتفريغ.</li>
+          <li data-i18n="s5_item3">حساب الأسعار الشفافة بدقة وتوفير سجلات وسندات الرحلات.</li>
+          <li data-i18n="s5_item4">التحقيق في النزاعات وأعطال الشاحنات ومسائل السلامة.</li>
+          <li data-i18n="s5_item5">إرسال التنبيهات والإشعارات الفورية بخصوص حالة الرحلة وقبول الطلب عبر Firebase.</li>
+          <li data-i18n="s5_item6">الامتثال للمتطلبات القانونية والتنظيمية المعمول بها محلياً.</li>
         </ul>
       </section>
 
       <!-- Section 6 -->
       <section class="policy-section" id="third-parties">
-        <div class="section-header">
-          <span class="section-num">06</span>
-          <h2 data-i18n="s6_title">Third-Party Service Providers</h2>
-        </div>
+        <h2 data-i18n="s6_title">06. الأطراف الثالثة ومقدمو الخدمات</h2>
         <p data-i18n="s6_p1">
-          We do not sell, rent, or trade your personal information. We partner with vetted third-party service providers who adhere to rigorous data privacy standards:
+          نحن لا نبيع أو نؤجر بياناتك لأي معلنين أو أطراف خارجية. نتعامل فقط مع خدمات موثوقة وعالمية للأمان والخرائط:
         </p>
 
         <div class="data-table-wrapper">
           <table class="data-table">
             <thead>
               <tr>
-                <th data-i18n="th_provider">Provider</th>
-                <th data-i18n="th_purpose">Purpose</th>
-                <th data-i18n="th_data">Data Processed</th>
-                <th data-i18n="th_policy">Privacy Link</th>
+                <th data-i18n="th_provider">مقدم الخدمة</th>
+                <th data-i18n="th_purpose">الغرض من الاستخدام</th>
+                <th data-i18n="th_data">نوع البيانات</th>
+                <th data-i18n="th_policy">سياسة الخصوصية</th>
               </tr>
             </thead>
             <tbody>
               <tr>
                 <td><strong>Google Maps Platform</strong></td>
-                <td>Geocoding, route mapping &amp; distance calculation</td>
-                <td>GPS coordinates, destination addresses</td>
+                <td data-i18n="tbl_gmaps_p">تحديد الموقع على الخريطة وحساب المسافات بدقة</td>
+                <td data-i18n="tbl_gmaps_d">إحداثيات GPS وعناوين الانطلاق والوصول</td>
                 <td><a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google Privacy</a></td>
               </tr>
               <tr>
                 <td><strong>Firebase (Google LLC)</strong></td>
-                <td>Push notifications for real-time dispatch</td>
-                <td>Device tokens, OS metadata, app instance IDs</td>
+                <td data-i18n="tbl_fb_p">إرسال الإشعارات والتنبيهات الفورية بخصوص الطلبات</td>
+                <td data-i18n="tbl_fb_d">معرفات الجهاز ورموز التنبيهات وبيانات النظام</td>
                 <td><a href="https://firebase.google.com/support/privacy" target="_blank" rel="noopener">Firebase Privacy</a></td>
               </tr>
               <tr>
                 <td><strong>Cloudinary Inc.</strong></td>
-                <td>Encrypted storage of KYC verification photos &amp; avatars</td>
-                <td>Uploaded image files</td>
+                <td data-i18n="tbl_cloud_p">تخزين سحابي مشفر لصور توثيق السائق والملف الشخصي</td>
+                <td data-i18n="tbl_cloud_d">الصور والوثائق المرفوعة</td>
                 <td><a href="https://cloudinary.com/privacy" target="_blank" rel="noopener">Cloudinary Privacy</a></td>
               </tr>
               <tr>
-                <td><strong>Railway &amp; MongoDB Atlas</strong></td>
-                <td>Secure cloud database &amp; API infrastructure</td>
-                <td>Encrypted backend database records</td>
+                <td><strong>MongoDB Atlas</strong></td>
+                <td data-i18n="tbl_mongo_p">قواعد بيانات سحابية مشفرة لحفظ سجلات الخدمة بأمان</td>
+                <td data-i18n="tbl_mongo_d">سجلات الحسابات المشفرة وتفاصيل الرحلات</td>
                 <td><a href="https://www.mongodb.com/legal/privacy-policy" target="_blank" rel="noopener">MongoDB Privacy</a></td>
               </tr>
             </tbody>
@@ -399,33 +485,26 @@
 
       <!-- Section 7 -->
       <section class="policy-section" id="data-retention">
-        <div class="section-header">
-          <span class="section-num">07</span>
-          <h2 data-i18n="s7_title">Data Retention &amp; Security Standards</h2>
-        </div>
+        <h2 data-i18n="s7_title">07. الاحتفاظ بالبيانات ومعايير الأمان</h2>
         <p data-i18n="s7_p1">
-          <strong>Security:</strong> All communication between Tashila mobile apps and our backend servers occurs over modern Transport Layer Security (HTTPS / TLS 1.3). Sensitive credentials and access tokens are hashed and securely stored.
+          <strong>الأمان:</strong> تستخدم منصة تسهيلة تشفيراً حديثاً (TLS 1.3 / HTTPS) لجميع الاتصالات، مع قواعد بيانات مؤمنة ومحمية وفق أعلى المعايير.
         </p>
         <p data-i18n="s7_p2">
-          <strong>Retention:</strong> We retain user personal data for as long as the account remains active. If you request account deletion, we immediately deactivate the account and delete personal identifiers, location logs, and profile assets within 30 business days, retaining only anonymized telemetry or statutory fiscal invoice records required by local commercial law.
+          <strong>مدة الاحتفاظ:</strong> نحتفظ بالبيانات طالما كان الحساب نشطاً، وعند طلب حذف الحساب يتم مسح البيانات الشخصية خلال 30 يوماً كحد أقصى، مع الاحتفاظ فقط بالفواتير القانونية إن وجدت وفقاً للمتطلبات التجارية.
         </p>
       </section>
 
-      <!-- Section 8 -->
+      <!-- Section 8 (Simplified: in-app Profile steps, direct email/phone, no web form) -->
       <section class="policy-section" id="account-deletion">
-        <div class="section-header">
-          <span class="section-num">08</span>
-          <h2 data-i18n="s8_title">Account &amp; Data Deletion Policy</h2>
-        </div>
+        <h2 data-i18n="s8_title">08. طلب حذف الحساب والبيانات</h2>
         <p data-i18n="s8_p1">
-          In strict adherence to Google Play Store requirements, users have the unconditional right to request the permanent deletion of their account and all associated personal data.
+          وفقاً لسياسات متجر Google Play، يحق لكل مستخدم تقديم طلب فوري لحذف حسابه وكافة البيانات المرتبطة به نهائياً.
         </p>
 
-        <h3 data-i18n="s8_methods_t">How to Request Account Deletion</h3>
+        <h3 data-i18n="s8_methods_t">طرق حذف الحساب المتاحة:</h3>
         <ol>
-          <li><strong data-i18n="s8_m1_t">Method 1 (In-App):</strong> Navigate to <em>Profile &gt; Settings &gt; Delete Account</em> inside either the Tashila Client or Tashila Driver app and confirm the verification prompt.</li>
-          <li><strong data-i18n="s8_m2_t">Method 2 (Web Form):</strong> Visit our dedicated <a href="delete-account.html">Account Deletion Web Page</a> to submit an automated deletion request with your registered phone number.</li>
-          <li><strong data-i18n="s8_m3_t">Method 3 (Direct Email):</strong> Send an email from your registered email address or citing your phone number to <code>support@tashila.com</code> with the subject <em>"Account Deletion Request"</em>.</li>
+          <li><strong data-i18n="s8_m1_t">الطريقة 1 (من داخل التطبيق):</strong> <span data-i18n="s8_m1_d">افتح تطبيق تسهيلة أو تسهيلة سائق &gt; انتقل إلى الملف الشخصي (Profile) &gt; اضغط على "حذف الحساب" (Delete Account) وأكد العملية.</span></li>
+          <li><strong data-i18n="s8_m2_t">الطريقة 2 (عبر البريد الإلكتروني أو الهاتف):</strong> <span data-i18n="s8_m2_d">راسلنا مباشرة عبر البريد الإلكتروني <a href="mailto:tashilaapp@gmail.com" style="color:var(--primary); font-weight:600;">tashilaapp@gmail.com</a> أو اتصل بنا هاتفياً على <a href="tel:0791453050" style="color:var(--primary); font-weight:600; direction:ltr; unicode-bidi:embed;">0791453050</a> لطلب حذف حسابك وبياناتك فوراً.</span></li>
         </ol>
 
         <div class="callout callout-danger">
@@ -433,66 +512,57 @@
             <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
               <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"></path>
             </svg>
-            <span data-i18n="s8_warning_t">What Happens Upon Deletion</span>
+            <span data-i18n="s8_warning_t">ماذا يترتب على عملية الحذف</span>
           </div>
           <p data-i18n="s8_warning_p">
-            Account deletion is permanent. Your phone profile, avatar, driver licensing documents, vehicle records, rating history, and location logs will be purged permanently from our active production databases.
+            الحذف نهائي ولا يمكن التراجع عنه. يتم مسح رقم الهاتف والصور الشخصية ووثائق السائق وسجلات الموقع نهائياً من قواعد بياناتنا النشطة.
           </p>
         </div>
       </section>
 
       <!-- Section 9 -->
       <section class="policy-section" id="children-privacy">
-        <div class="section-header">
-          <span class="section-num">09</span>
-          <h2 data-i18n="s9_title">Children's Privacy Protection</h2>
-        </div>
+        <h2 data-i18n="s9_title">09. حماية خصوصية الأطفال</h2>
         <p data-i18n="s9_p1">
-          Our Services are strictly directed toward adults and business operators capable of entering legally binding commercial transport contracts. We do not knowingly collect personal identifiable information from children under the age of 18 (and specifically under 13). If we become aware that a child under 13 has provided us with personal data, we will immediately delete that information from our records.
+          خدماتنا موجهة فقط للبالغين المؤهلين قانونياً (18 سنة فما فوق). نحن لا نجمع إطلاقاً أي بيانات من أطفال تحت سن 13 عاماً، ونقوم بحذف أي بيانات غير مقصودة فور العلم بها.
         </p>
       </section>
 
       <!-- Section 10 -->
       <section class="policy-section" id="user-rights">
-        <div class="section-header">
-          <span class="section-num">10</span>
-          <h2 data-i18n="s10_title">Your Legal Rights &amp; Choices</h2>
-        </div>
-        <p data-i18n="s10_p1">Depending on your jurisdiction, you possess the following rights regarding your personal information:</p>
+        <h2 data-i18n="s10_title">10. حقوقك وخياراتك القانونية</h2>
+        <p data-i18n="s10_p1">يحق لك في أي وقت ممارسة الحقوق التالية بشأن بياناتك الشخصية:</p>
         <ul>
-          <li><strong>Right of Access:</strong> Request a copy of the personal data we maintain about you.</li>
-          <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete profile or vehicle information.</li>
-          <li><strong>Right to Erasure:</strong> Request permanent removal of your data as outlined in Section 8.</li>
-          <li><strong>Revocation of Permissions:</strong> Revoke Location or Camera permissions at any time via your Android device OS settings (<code>Settings &gt; Apps &gt; Tashila &gt; Permissions</code>).</li>
+          <li><strong data-i18n="s10_r1_t">حق الوصول:</strong> <span data-i18n="s10_r1_d">طلب نسخة من البيانات الشخصية المحفوظة لديك في التطبيق.</span></li>
+          <li><strong data-i18n="s10_r2_t">حق التصحيح:</strong> <span data-i18n="s10_r2_d">تعديل أو تحديث أي معلومات غير دقيقة في ملفك الشخصي أو وثائق الشاحنة.</span></li>
+          <li><strong data-i18n="s10_r3_t">حق المسح والإلغاء:</strong> <span data-i18n="s10_r3_d">طلب الحذف النهائي لحسابك وبياناتك كما هو موضح في القسم 8.</span></li>
+          <li><strong data-i18n="s10_r4_t">إيقاف الأذونات:</strong> <span data-i18n="s10_r4_d">إلغاء إذن الموقع أو الكاميرا في أي وقت عبر إعدادات هاتفك الذكي (الإعدادات &gt; التطبيقات &gt; تسهيلة &gt; الأذونات).</span></li>
         </ul>
       </section>
 
-      <!-- Section 11 -->
+      <!-- Section 11 (Admin part removed, Tamanrasset address, tashilaapp@gmail.com, 0791453050) -->
       <section class="policy-section" id="contact">
-        <div class="section-header">
-          <span class="section-num">11</span>
-          <h2 data-i18n="s11_title">Contact Information &amp; Data Controller</h2>
-        </div>
+        <h2 data-i18n="s11_title">11. معلومات الاتصال بالمسؤول</h2>
         <p data-i18n="s11_p1">
-          If you have questions, inquiries, complaints, or feedback regarding this Privacy Policy or our privacy practices, please contact our Data Protection Officer:
+          إذا كان لديك أي استفسار أو شكوى بخصوص سياسة الخصوصية، يمكنك التواصل مع مسؤول حماية البيانات عبر الوسائل التالية:
         </p>
         <div class="feature-grid">
           <div class="feature-box">
             <div class="feature-box-icon">📧</div>
-            <h4>Support Email</h4>
-            <p><a href="mailto:support@tashila.com" style="color: var(--primary);">support@tashila.com</a></p>
-            <p><a href="mailto:admin@tashila.com" style="color: var(--primary);">admin@tashila.com</a></p>
+            <h4 data-i18n="s11_email_t">البريد الإلكتروني للدعم</h4>
+            <p><a href="mailto:tashilaapp@gmail.com" style="color: var(--primary); font-weight: 600;">tashilaapp@gmail.com</a></p>
           </div>
           <div class="feature-box">
             <div class="feature-box-icon">🏢</div>
-            <h4>Platform Operator</h4>
-            <p><strong>Tashila Logistics &amp; Transport</strong></p>
-            <p>Algiers, Algeria</p>
+            <h4 data-i18n="s11_operator_t">الجهة المشغلة</h4>
+            <p><strong data-i18n="s11_operator_name">تسهيلة لنقل البضائع واللوجستيات</strong></p>
+            <p data-i18n="s11_operator_loc">تمنراست، الجزائر</p>
+            <p style="margin-top:0.35rem;"><span data-i18n="s11_phone_t">هاتف:</span> <a href="tel:0791453050" style="color:var(--primary); text-decoration:none; direction:ltr; unicode-bidi:embed; font-weight:600;">0791453050</a></p>
           </div>
           <div class="feature-box">
             <div class="feature-box-icon">⏱️</div>
-            <h4>Response Time</h4>
-            <p>We review and respond to formal privacy inquiries within 48 to 72 business hours.</p>
+            <h4 data-i18n="s11_response_t">وقت الاستجابة</h4>
+            <p data-i18n="s11_response_d">نراجع ونرد على كافة استفسارات وطلبات الخصوصية خلال 24 إلى 48 ساعة عمل.</p>
           </div>
         </div>
       </section>
@@ -500,54 +570,85 @@
     </article>
   </main>
 
-  <!-- Footer -->
+  <!-- Modern 4-Column Footer Matching Main Landing Page -->
   <footer class="site-footer">
     <div class="footer-container">
-      <div class="footer-top">
+      <div class="footer-col">
         <div class="brand-wrapper">
-          <img src="assets/logo.jpeg" alt="Tashila Logo" class="brand-logo">
+          <img src="assets/logo.jpeg" alt="Tashila" class="brand-logo">
           <div class="brand-title">
-            <span>Tashila</span>
-            <span class="sub">Logistics &amp; Transport</span>
+            <span>تسهيلة <span style="font-weight:400; font-size:1.1rem; color:var(--text-muted)">Tashila</span></span>
           </div>
         </div>
-        <div class="footer-nav">
-          <a href="index.html" data-i18n="nav_privacy">Privacy Policy</a>
-          <a href="delete-account.html" data-i18n="nav_delete">Delete Account</a>
-          <a href="terms.html" data-i18n="nav_terms">Terms of Service</a>
-          <a href="mailto:support@tashila.com" data-i18n="nav_contact">Contact Support</a>
-        </div>
+        <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.7;" data-i18n="footer_desc">
+          تسهيلة هي المنصة الرقمية الاولى في تمنراست لربط الزبائن و اصحاب البضائع بشاحنات صغيرة نفعية بذكاء و أمان
+        </p>
       </div>
-      <div class="footer-bottom">
-        <p>&copy; 2026 Tashila Platform. All rights reserved.</p>
-        <p data-i18n="footer_compliance">Compliant with Google Play Developer Policy &amp; Global Privacy Standards.</p>
+
+      <div class="footer-col">
+        <h4 class="footer-title" data-i18n="footer_quick_links">روابط سريعة</h4>
+        <ul class="footer-links">
+          <li><a href="index.html#home" class="footer-link" data-i18n="nav_home">الرئيسية</a></li>
+          <li><a href="index.html#fleet" class="footer-link" data-i18n="nav_fleet">أسطول الشاحنات</a></li>
+          <li><a href="index.html#features" class="footer-link" data-i18n="nav_features">المميزات</a></li>
+          <li><a href="index.html#drivers" class="footer-link" data-i18n="nav_drivers">انضم كسائق</a></li>
+        </ul>
       </div>
+
+      <div class="footer-col">
+        <h4 class="footer-title" data-i18n="footer_legal">الشؤون القانونية</h4>
+        <ul class="footer-links">
+          <li><a href="privacy.html" class="footer-link" data-i18n="nav_privacy">سياسة الخصوصية</a></li>
+          <li><a href="terms.html" class="footer-link" data-i18n="nav_terms">شروط الخدمة</a></li>
+          <li><a href="delete-account.html" class="footer-link" data-i18n="nav_delete">طلب حذف الحساب</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4 class="footer-title" data-i18n="footer_contact">تواصل معنا</h4>
+        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+          تمنراست، الجزائر<br>
+          <a href="mailto:tashilaapp@gmail.com" style="color:var(--primary); text-decoration:none; font-weight:600;">tashilaapp@gmail.com</a><br>
+          هاتف: <a href="tel:0791453050" style="color:inherit; text-decoration:none; direction:ltr; unicode-bidi:embed;">0791453050</a>
+        </p>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div data-i18n="footer_rights">© 2026 تسهيلة. جميع الحقوق محفوظة.</div>
+      <div data-i18n="footer_algeria">صنع بكل فخر في الجزائر 🇩🇿</div>
     </div>
   </footer>
 
-  <!-- Bilingual Translations & Script -->
+  <!-- Complete Trilingual Translations Dictionary (AR, FR, EN) -->
   <script>
     const translations = {
       ar: {
+        doc_title: "سياسة الخصوصية | تسهيلة وتسهيلة سائق",
         brand_name: "تسهيلة",
         legal_hub: "سياسة الخصوصية",
+        nav_home: "الرئيسية",
+        nav_fleet: "أسطول الشاحنات",
+        nav_features: "المميزات",
+        nav_drivers: "انضم كسائق",
         nav_privacy: "سياسة الخصوصية",
         nav_delete: "حذف الحساب",
         nav_terms: "شروط الخدمة",
-        nav_contact: "الاتصال بالدعم",
+        nav_download: "تحميل التطبيق",
         badge_compliance: "وثيقة خصوصية متوافقة بالكامل مع متطلبات Google Play",
         hero_title: "سياسة الخصوصية لتطبيق <span class=\"highlight\">تسهيلة</span>",
-        hero_desc: "توضح سياسة الخصوصية هذه كيفية قيام منصة تسهيلة بجمع واستخدام وحماية ومشاركة بياناتك الشخصية من خلال تطبيقي تسهيلة للعميل وتسهيلة للسائق.",
+        hero_desc: "توضح سياسة الخصوصية هذه كيفية قيام منصة تسهيلة بجمع واستخدام وحماية ومشاركة بياناتك الشخصية من خلال تطبيقي تسهيلة للعميل وتسهيلة للسائق في تمنراست.",
         meta_effective: "تاريخ السريان: 19 سبتمبر 2026",
         meta_updated: "آخر تحديث: 19 سبتمبر 2026",
         meta_status: "الحالة: موثقة ونشطة",
         app_client_title: "تسهيلة (تطبيق الزبائن)",
+        app_client_desc: "تطبيق طلب وتتبع شاحنات نقل البضائع",
         app_driver_title: "تسهيلة سائق (تطبيق السائقين)",
-        app_admin_title: "نظام التوزيع والإدارة",
+        app_driver_desc: "تطبيق السائقين وأصحاب الشاحنات النفعية",
         toc_heading: "الفهرس والمحتويات",
         toc_1: "1. النظرة العامة والنطاق",
         toc_2: "2. المعلومات التي نجمعها",
-        toc_3: "3. بيانات الموقع الجغرافي واستخدامه في الخلفية",
+        toc_3: "3. بيانات الموقع الجغرافي واستخدامه",
         toc_4: "4. أذونات الكاميرا ومساحة التخزين",
         toc_5: "5. كيف نستخدم معلوماتك",
         toc_6: "6. الأطراف الثالثة ومقدمو الخدمات",
@@ -556,69 +657,393 @@
         toc_9: "9. حماية خصوصية الأطفال",
         toc_10: "10. حقوقك وخياراتك القانونية",
         toc_11: "11. معلومات الاتصال بالمسؤول",
-        btn_delete_page: "صفحة حذف الحساب والبيانات",
+        btn_delete_page: "صفحة حذف الحساب",
         btn_print: "طباعة / حفظ كملف PDF",
         s1_title: "01. النظرة العامة والنطاق",
-        s1_p1: "مرحباً بكم في <strong>تسهيلة</strong> (\"نحن\" أو \"المنصة\"). تدير تسهيلة منصة تقنية لنقل وشحن البضائع عند الطلب تربط بين الزبائن الراغبين في نقل الحمولات (\"الزبائن\") وسائقي الشاحنات النفعية بمقصورة فردية أو مزدوجة (\"السائقون\").",
-        s1_p2: "تنطبق سياسة الخصوصية هذه على تطبيق <strong>تسهيلة للزبائن</strong> (<code>com.tashila.tashilaclient</code>) وتطبيق <strong>تسهيلة للسائقين</strong> (<code>com.tashila.tashiladriver</code>) وبوابتنا وخدماتنا الرقمية المرتبطة بها.",
-        s1_p3: "عبر تنزيل أو استخدام أي من تطبيقاتنا، فإنك تقر بأنك قد قرأت وفهمت سياسة الخصوصية هذه وتوافق على بنودها.",
+        s1_p1: "مرحباً بكم في <strong>تسهيلة</strong> (\"نحن\" أو \"المنصة\"). تدير تسهيلة منصة تقنية لنقل وشحن البضائع عند الطلب في تمنراست تربط بين الزبائن الراغبين في نقل البضائع (\"الزبائن\") وسائقي الشاحنات الصغيرة النفعية بمقصورة فردية أو مزدوجة (\"السائقون\").",
+        s1_p2: "تنطبق سياسة الخصوصية هذه على تطبيق <strong>تسهيلة للزبائن</strong> وتطبيق <strong>تسهيلة للسائقين</strong> وبوابتنا وخدماتنا الرقمية المرتبطة بها.",
+        s1_p3: "عبر تنزيل أو استخدام أي من تطبيقاتنا، فإنك تقر بأنك قد قرأت وفهمت سياسة الخصوصية هذه وتوافق على بنودها بالكامل.",
         s2_title: "02. المعلومات التي نجمعها",
         s2_p1: "لتقديم خدمة نقل آمنة وسريعة وموثوقة، نجمع المعلومات التي تزودنا بها مباشرة، والمعلومات الناتجة تلقائياً أثناء تشغيل التطبيق.",
         s2_sub1: "أ. معلومات تقدمها لنا مباشرة",
         s2_li1_t: "بيانات التسجيل والحساب:",
+        s2_li1_d: "عند التسجيل كزبون أو سائق، نجمع رقم هاتفك المحمول للتحقق عبر رمز التحقق لمرة واحدة (OTP)، والاسم الكامل، وصورة الملف الشخصي، واللغة المفضلة.",
         s2_li2_t: "وثائق إثبات هوية السائق (KYC):",
-        s2_li3_t: "المراسلات والتقييمات:",
+        s2_li2_d: "بالنسبة لحسابات سائقي تسهيلة، نجمع ونتحقق من الوثائق الرسمية بما فيها رخصة السياقة الصادرة عن السلطات المختصة، والبطاقة الرمادية للمركبة، والتأمين، وتصنيف الشاحنة (كابينة مفردة أو كابينة مزدوجة)، ورقم لوحة الترقيم.",
+        s2_li3_t: "المراسلات والدعم:",
+        s2_li3_d: "سجلات الاستفسارات وبلاغات النزاعات والتقييمات والملاحظات المقدمة بعد إتمام الرحلات.",
         s2_sub2: "ب. المعلومات التي تُجمع تلقائياً",
         s2_li4_t: "بيانات الموقع الدقيقة والتقريبية:",
+        s2_li4_d: "إحداثيات GPS في الوقت الفعلي من جهازك المحمول (انظر القسم 3 لمزيد من التفاصيل).",
         s2_li5_t: "معلومات الجهاز ومعرفات النظام:",
-        s2_li6_t: "سجل العمليات والشحنات:",
-        s3_title: "03. بيانات الموقع الجغرافي واستخدامه في الخلفية",
-        s3_alert_t: "إفصاح صريح ومهم: الوصول إلى الموقع في تطبيقي تسهيلة وتسهيلة سائق",
-        s3_alert_p: "يعد الوصول إلى الموقع الجغرافي وظيفة جوهرية وأساسية لتشغيل منصة شحن تسهيلة. فيما يلي نفصل بدقة استخدام الموقع بما في ذلك التتبع في الخلفية.",
+        s2_li5_d: "طراز الجهاز وإصدار نظام التشغيل والمعرف الفريد للجهاز وشبكة الاتصال وعنوان IP ورموز Firebase لإرسال تنبيهات الطلبات.",
+        s2_li6_t: "سجل المعاملات والرحلات:",
+        s2_li6_d: "إحداثيات الانطلاق والوصول، ووقت تقديم الطلب، ونوع الشاحنة، والمسافة المحسوبة، والسعر المتفق عليه.",
+        s3_title: "03. بيانات الموقع الجغرافي واستخدامه",
+        s3_alert_t: "إفصاح صريح: الوصول للموقع في تطبيقي تسهيلة وتسهيلة سائق",
+        s3_alert_p: "يعد الوصول إلى الموقع الجغرافي وظيفة جوهرية وأساسية لتشغيل منصة نقل البضائع تسهيلة. فيما يلي نفصل بدقة استخدام الموقع بما في ذلك التتبع في الخلفية.",
         s3_client_t: "1. تطبيق الزبون (الموقع أثناء الاستخدام فقط)",
-        s3_client_p: "يستخدم تطبيق الزبون إذن الموقع في الواجهة الأمامية فقط لتحديد نقطة انطلاق البضاعة وعرض أقرب الشاحنات المتوفرة وتقدير المسافة وتكلفة الرحلة.",
+        s3_client_p: "يستخدم تطبيق الزبون إذن الموقع في الواجهة الأمامية فقط أثناء تشغيل التطبيق لتحديد نقطة انطلاق البضاعة، وعرض أقرب الشاحنات المتوفرة، وتقدير المسافة والتكلفة.",
         s3_driver_t: "2. تطبيق السائق (الموقع في الواجهة الأمامية والخلفية)",
-        s3_driver_p1: "يجمع تطبيق سائق تسهيلة بيانات الموقع الدقيقة حتى عندما يكون التطبيق مغلقاً أو يعمل في الخلفية والشاشة مقفلة عبر خدمة BackgroundService وذلك للأسباب الصريحة التالية:",
+        s3_driver_p1: "يجمع تطبيق سائق تسهيلة بيانات الموقع الدقيقة حتى عندما يكون التطبيق مغلقاً أو يعمل في الخلفية وذلك للأسباب الصريحة التالية:",
+        s3_d_reason1_t: "توزيع الطلبات والتوجيه الذكي:",
+        s3_d_reason1_d: "عندما يكون السائق في وضع \"متصل\"، يتيح تتبع الموقع في الخلفية إرسال طلبات النقل القريبة إليه بدقة، مما يقلل استهلاك الوقود وأوقات الانتظار.",
+        s3_d_reason2_t: "السلامة ومتابعة مسار الحمولة:",
+        s3_d_reason2_d: "أثناء الرحلة الجارية، يتيح الموقع تأكيد مسار الحمولة وضمان أمان الشحنة وتقدير موعد الوصول بدقة.",
         s3_driver_ctrl_t: "تحكم كامل للسائق في تتبع الموقع",
-        s3_driver_ctrl_p: "يملك السائق التحكم الكامل، فبمجرد تحويل حالته داخل التطبيق إلى \"غير متصل\" (Offline)، يتوقف إرسال وتتبع الموقع في الخلفية فوراً وبشكل كلي.",
+        s3_driver_ctrl_p: "يملك السائق التحكم التام، فبمجرد تحويل حالته داخل التطبيق إلى \"غير متصل\" (Offline)، يتوقف إرسال وتتبع الموقع في الخلفية فوراً وبشكل كلي.",
         s4_title: "04. أذونات الكاميرا ومساحة التخزين",
-        s4_p1: "يطلب التطبيق إذن الكاميرا ومساحة التخزين بموافقة المستخدم للأغراض التالية فقط:",
+        s4_p1: "يطلب التطبيق إذن الكاميرا ومساحة التخزين بموافقة المستخدم الصريحة للأغراض الحصرية التالية:",
         s4_f1_t: "التحقق من ملفات السائق",
-        s4_f1_p: "يقوم السائق بتصوير رخصة السياقة وبطاقة ترقيم المركبة (البطاقة الرمادية) لمراجعتها واعتمادها من الإدارة.",
+        s4_f1_p: "يقوم السائق بتصوير رخصة السياقة والبطاقة الرمادية لمراجعتها واعتمادها من الإدارة قبل قبول الحساب.",
         s4_f2_t: "الصورة الشخصية",
         s4_f2_p: "إمكانية رفع صورة للملف الشخصي للتعرف على السائق أو العميل أثناء تسليم الشحنة.",
         s4_f3_t: "تخزين سحابي مشفر",
-        s4_f3_p: "يتم نقل الصور عبر بروتوكول TLS مشفر وتخزينها بأمان تام عبر سيرفرات Cloudinary دون أي استخدام إعلاني.",
+        s4_f3_p: "يتم نقل الصور عبر بروتوكول مشفر وتخزينها بأمان تام عبر سيرفرات Cloudinary دون أي استخدام إعلاني.",
         s5_title: "05. كيف نستخدم معلوماتك",
-        s5_p1: "نستخدم البيانات المجمعة لتشغيل الخدمة وتوزيع طلبات الشحن بدقة، وإصدار الفواتير، وحل النزاعات، وإرسال إشعارات التنبيهات الفورية عبر Firebase.",
+        s5_p1: "نستخدم البيانات المجمعة لتشغيل الخدمة بكفاءة، وتحديداً من أجل:",
+        s5_item1: "ربط طلبات الشحن بأقرب السائقين المتاحين في تمنراست حسب نوع الشاحنة (كابينة مفردة أو كابينة مزدوجة).",
+        s5_item2: "تمكين الاتصال الهاتفي المباشر بين السائق والزبون لتنسيق تفاصيل التحميل والتفريغ.",
+        s5_item3: "حساب الأسعار الشفافة بدقة وتوفير سجلات وسندات الرحلات.",
+        s5_item4: "التحقيق في النزاعات وأعطال الشاحنات ومسائل السلامة.",
+        s5_item5: "إرسال التنبيهات والإشعارات الفورية بخصوص حالة الرحلة وقبول الطلب عبر Firebase.",
+        s5_item6: "الامتثال للمتطلبات القانونية والتنظيمية المعمول بها محلياً.",
         s6_title: "06. الأطراف الثالثة ومقدمو الخدمات",
-        s6_p1: "نحن لا نبيع أو نؤجر بياناتك لأي معلنين أو أطراف خارجية. نتعامل فقط مع خدمات موثوقة وعالمية للأمان والخرائط.",
+        s6_p1: "نحن لا نبيع أو نؤجر بياناتك لأي معلنين أو أطراف خارجية. نتعامل فقط مع خدمات موثوقة وعالمية للأمان والخرائط:",
         th_provider: "مقدم الخدمة",
         th_purpose: "الغرض من الاستخدام",
         th_data: "نوع البيانات",
         th_policy: "سياسة الخصوصية",
+        tbl_gmaps_p: "تحديد الموقع على الخريطة وحساب المسافات بدقة",
+        tbl_gmaps_d: "إحداثيات GPS وعناوين الانطلاق والوصول",
+        tbl_fb_p: "إرسال الإشعارات والتنبيهات الفورية بخصوص الطلبات",
+        tbl_fb_d: "معرفات الجهاز ورموز التنبيهات وبيانات النظام",
+        tbl_cloud_p: "تخزين سحابي مشفر لصور توثيق السائق والملف الشخصي",
+        tbl_cloud_d: "الصور والوثائق المرفوعة",
+        tbl_mongo_p: "قواعد بيانات سحابية مشفرة لحفظ سجلات الخدمة بأمان",
+        tbl_mongo_d: "سجلات الحسابات المشفرة وتفاصيل الرحلات",
         s7_title: "07. الاحتفاظ بالبيانات ومعايير الأمان",
-        s7_p1: "تستخدم منصة تسهيلة تشفيراً حديثاً (TLS 1.3 / HTTPS) لجميع الاتصالات، مع قواعد بيانات مؤمنة وفق أعلى المعايير.",
-        s7_p2: "نحتفظ بالبيانات طالما كان الحساب نشطاً، وعند طلب حذف الحساب يتم مسح البيانات الشخصية خلال 30 يوماً عمل.",
+        s7_p1: "<strong>الأمان:</strong> تستخدم منصة تسهيلة تشفيراً حديثاً (TLS 1.3 / HTTPS) لجميع الاتصالات، مع قواعد بيانات مؤمنة ومحمية وفق أعلى المعايير.",
+        s7_p2: "<strong>مدة الاحتفاظ:</strong> نحتفظ بالبيانات طالما كان الحساب نشطاً، وعند طلب حذف الحساب يتم مسح البيانات الشخصية خلال 30 يوماً كحد أقصى، مع الاحتفاظ فقط بالفواتير القانونية إن وجدت وفقاً للمتطلبات التجارية.",
         s8_title: "08. طلب حذف الحساب والبيانات",
         s8_p1: "وفقاً لسياسات متجر Google Play، يحق لكل مستخدم تقديم طلب فوري لحذف حسابه وكافة البيانات المرتبطة به نهائياً.",
         s8_methods_t: "طرق حذف الحساب المتاحة:",
         s8_m1_t: "الطريقة 1 (من داخل التطبيق):",
-        s8_m2_t: "الطريقة 2 (نموذج الويب المباشر):",
-        s8_m3_t: "الطريقة 3 (عبر البريد الإلكتروني):",
+        s8_m1_d: "افتح تطبيق تسهيلة أو تسهيلة سائق > انتقل إلى الملف الشخصي (Profile) > اضغط على \"حذف الحساب\" (Delete Account) وأكد العملية.",
+        s8_m2_t: "الطريقة 2 (عبر البريد الإلكتروني أو الهاتف):",
+        s8_m2_d: "راسلنا مباشرة عبر البريد الإلكتروني tashilaapp@gmail.com أو اتصل بنا هاتفياً على 0791453050 لطلب حذف حسابك وبياناتك فوراً.",
         s8_warning_t: "ماذا يترتب على عملية الحذف",
         s8_warning_p: "الحذف نهائي ولا يمكن التراجع عنه. يتم مسح رقم الهاتف والصور الشخصية ووثائق السائق وسجلات الموقع نهائياً من قواعد بياناتنا النشطة.",
         s9_title: "09. حماية خصوصية الأطفال",
-        s9_p1: "خدماتنا موجهة فقط للبالغين المؤهلين قانونياً (18 سنة فما فوق). نحن لا نجمع إطلاقاً أي بيانات من أطفال تحت سن 13 عاماً.",
+        s9_p1: "خدماتنا موجهة فقط للبالغين المؤهلين قانونياً (18 سنة فما فوق). نحن لا نجمع إطلاقاً أي بيانات من أطفال تحت سن 13 عاماً، ونقوم بحذف أي بيانات غير مقصودة فور العلم بها.",
         s10_title: "10. حقوقك وخياراتك القانونية",
-        s10_p1: "يحق لك في أي وقت طلب الوصول لبياناتك، أو تصحيحها، أو إيقاف إذن الموقع والكاميرا من إعدادات هاتفك الذكي، أو طلب الحذف الكامل.",
+        s10_p1: "يحق لك في أي وقت ممارسة الحقوق التالية بشأن بياناتك الشخصية:",
+        s10_r1_t: "حق الوصول:",
+        s10_r1_d: "طلب نسخة من البيانات الشخصية المحفوظة لديك في التطبيق.",
+        s10_r2_t: "حق التصحيح:",
+        s10_r2_d: "تعديل أو تحديث أي معلومات غير دقيقة في ملفك الشخصي أو وثائق الشاحنة.",
+        s10_r3_t: "حق المسح والإلغاء:",
+        s10_r3_d: "طلب الحذف النهائي لحسابك وبياناتك كما هو موضح في القسم 8.",
+        s10_r4_t: "إيقاف الأذونات:",
+        s10_r4_d: "إلغاء إذن الموقع أو الكاميرا في أي وقت عبر إعدادات هاتفك الذكي (الإعدادات > التطبيقات > تسهيلة > الأذونات).",
         s11_title: "11. معلومات الاتصال بالمسؤول",
-        s11_p1: "إذا كان لديك أي استفسار أو شكوى بخصوص سياسة الخصوصية، يمكنك التواصل مع مسؤول حماية البيانات عبر البريد التالي:",
-        footer_compliance: "متوافق بالكامل مع معايير Google Play Developer وشروط الخصوصية العالمية."
+        s11_p1: "إذا كان لديك أي استفسار أو شكوى بخصوص سياسة الخصوصية، يمكنك التواصل مع مسؤول حماية البيانات عبر الوسائل التالية:",
+        s11_email_t: "البريد الإلكتروني للدعم",
+        s11_operator_t: "الجهة المشغلة",
+        s11_operator_name: "تسهيلة لنقل البضائع واللوجستيات",
+        s11_operator_loc: "تمنراست، الجزائر",
+        s11_phone_t: "هاتف:",
+        s11_response_t: "وقت الاستجابة",
+        s11_response_d: "نراجع ونرد على كافة استفسارات وطلبات الخصوصية خلال 24 إلى 48 ساعة عمل.",
+        footer_desc: "تسهيلة هي المنصة الرقمية الاولى في تمنراست لربط الزبائن و اصحاب البضائع بشاحنات صغيرة نفعية بذكاء و أمان",
+        footer_quick_links: "روابط سريعة",
+        footer_legal: "الشؤون القانونية",
+        footer_contact: "تواصل معنا",
+        footer_rights: "© 2026 تسهيلة. جميع الحقوق محفوظة.",
+        footer_algeria: "صنع بكل فخر في الجزائر 🇩🇿"
+      },
+
+      fr: {
+        doc_title: "Politique de Confidentialité | Tashila & Tashila Chauffeur",
+        brand_name: "Tashila",
+        legal_hub: "Confidentialité",
+        nav_home: "Accueil",
+        nav_fleet: "Flotte",
+        nav_features: "Fonctionnalités",
+        nav_drivers: "Devenir Chauffeur",
+        nav_privacy: "Confidentialité",
+        nav_delete: "Supprimer le compte",
+        nav_terms: "Conditions d'utilisation",
+        nav_download: "Télécharger",
+        badge_compliance: "Document de confidentialité conforme aux normes Google Play",
+        hero_title: "Politique de Confidentialité pour <span class=\"highlight\">Tashila</span>",
+        hero_desc: "Cette politique décrit comment Tashila collecte, utilise, protège et partage vos données via les applications Tashila Client et Tashila Chauffeur à Tamanrasset.",
+        meta_effective: "Date d'effet : 19 septembre 2026",
+        meta_updated: "Dernière mise à jour : 19 septembre 2026",
+        meta_status: "Statut : Vérifié & Actif",
+        app_client_title: "Tashila (Application Client)",
+        app_client_desc: "Application de commande et suivi de fret",
+        app_driver_title: "Tashila Chauffeur (Application Chauffeur)",
+        app_driver_desc: "Application des transporteurs partenaires",
+        toc_heading: "Sommaire",
+        toc_1: "1. Aperçu & Champ d'application",
+        toc_2: "2. Données collectées",
+        toc_3: "3. Données de localisation",
+        toc_4: "4. Autorisations caméra & stockage",
+        toc_5: "5. Utilisation des données",
+        toc_6: "6. Fournisseurs tiers",
+        toc_7: "7. Conservation & Sécurité",
+        toc_8: "8. Suppression du compte",
+        toc_9: "9. Protection des mineurs",
+        toc_10: "10. Vos droits légaux",
+        toc_11: "11. Contact & Responsable",
+        btn_delete_page: "Page de suppression de compte",
+        btn_print: "Imprimer / Exporter en PDF",
+        s1_title: "01. Aperçu & Champ d'application",
+        s1_p1: "Bienvenue sur <strong>Tashila</strong> (\"nous\" ou \"la Plateforme\"). Tashila exploite une plateforme technologique de transport de marchandises à la demande à Tamanrasset reliant les clients aux transporteurs de petites camionnettes utilitaires (simple ou double cabine).",
+        s1_p2: "Cette politique s'applique à l'application <strong>Tashila Client</strong>, l'application <strong>Tashila Chauffeur</strong>, ainsi qu'à nos services associés.",
+        s1_p3: "En téléchargeant ou utilisant nos applications, vous confirmez avoir lu, compris et accepté l'ensemble des présentes conditions.",
+        s2_title: "02. Informations collectées",
+        s2_p1: "Pour assurer un service logistique fiable et sécurisé, nous collectons des données fournies directement par vous et des données techniques automatisées.",
+        s2_sub1: "A. Données que vous nous fournissez",
+        s2_li1_t: "Données de compte :",
+        s2_li1_d: "Numéro de téléphone mobile pour la vérification OTP, nom complet, photo de profil et langue préférée.",
+        s2_li2_t: "Documents chauffeur (KYC) :",
+        s2_li2_d: "Permis de conduire officiel, carte grise du véhicule, assurance, type de camionnette (simple ou double cabine) et numéro d'immatriculation.",
+        s2_li3_t: "Communications & Support :",
+        s2_li3_d: "Historique des requêtes, rapports de litiges, notes et commentaires laissés après chaque course.",
+        s2_sub2: "B. Données collectées automatiquement",
+        s2_li4_t: "Données de géolocalisation :",
+        s2_li4_d: "Coordonnées GPS en temps réel collectées depuis votre appareil (voir Section 3).",
+        s2_li5_t: "Identifiants d'appareil :",
+        s2_li5_d: "Modèle de téléphone, version de l'OS, identifiant unique, opérateur, adresse IP et tokens push Firebase.",
+        s2_li6_t: "Historique des courses :",
+        s2_li6_d: "Lieux de départ et d'arrivée, horodatage, catégorie de camionnette, distance et tarif convenu.",
+        s3_title: "03. Données de localisation & Arrière-plan",
+        s3_alert_t: "Divulgation explicite : Accès à la position dans Tashila",
+        s3_alert_p: "L'accès à la localisation est essentiel au bon fonctionnement du service. Voici les détails de son utilisation en premier plan et en arrière-plan.",
+        s3_client_t: "1. Application Client (Premier plan uniquement)",
+        s3_client_p: "L'application Client utilise la localisation uniquement pendant l'utilisation active de l'écran pour définir le point de départ, afficher les camionnettes proches et calculer l'itinéraire.",
+        s3_driver_t: "2. Application Chauffeur (Premier plan et Arrière-plan)",
+        s3_driver_p1: "L'application Tashila Chauffeur collecte la position GPS précise même lorsque l'application est fermée ou fonctionne en arrière-plan pour les motifs suivants :",
+        s3_d_reason1_t: "Attribution intelligente des courses :",
+        s3_d_reason1_d: "Lorsque le chauffeur est \"En ligne\", la position en arrière-plan permet d'attribuer les demandes proches, réduisant le temps d'attente et le carburant.",
+        s3_d_reason2_t: "Sécurité et suivi du trajet :",
+        s3_d_reason2_d: "Pendant une course active, la localisation assure la traçabilité de la marchandise et l'estimation précise de l'heure d'arrivée.",
+        s3_driver_ctrl_t: "Contrôle total du chauffeur",
+        s3_driver_ctrl_p: "Le chauffeur garde le contrôle absolu : dès qu'il bascule son statut sur \"Hors ligne\", tout suivi en arrière-plan cesse immédiatement.",
+        s4_title: "04. Autorisations caméra & stockage",
+        s4_p1: "Nos applications demandent l'accès à la caméra et au stockage de l'appareil exclusivement pour :",
+        s4_f1_t: "Validation KYC Chauffeur",
+        s4_f1_p: "Prise de photo du permis et de la carte grise pour validation administrative avant activation du compte.",
+        s4_f2_t: "Photo de profil",
+        s4_f2_p: "Téléchargement d'une photo pour faciliter la reconnaissance entre client et chauffeur lors du transport.",
+        s4_f3_t: "Stockage cloud sécurisé",
+        s4_f3_p: "Transmission chiffrée par protocole TLS vers les serveurs Cloudinary, sans aucun usage publicitaire.",
+        s5_title: "05. Utilisation de vos informations",
+        s5_p1: "Nous utilisons les données collectées uniquement pour la bonne marche du service, notamment pour :",
+        s5_item1: "Associer les demandes de transport aux chauffeurs les plus proches à Tamanrasset selon le véhicule.",
+        s5_item2: "Permettre l'appel téléphonique direct entre client et chauffeur pour coordonner le chargement.",
+        s5_item3: "Calculer les tarifs transparents et générer les reçus de course.",
+        s5_item4: "Traiter les réclamations, incidents mécaniques ou questions de sécurité.",
+        s5_item5: "Envoyer des notifications push instantanées via Firebase concernant les statuts de course.",
+        s5_item6: "Respecter nos obligations légales et réglementaires applicables.",
+        s6_title: "06. Fournisseurs tiers & Partenaires",
+        s6_p1: "Nous ne vendons ni ne louons vos données personnelles. Nous collaborons uniquement avec des tiers réputés :",
+        th_provider: "Fournisseur",
+        th_purpose: "Finalité",
+        th_data: "Données traitées",
+        th_policy: "Politique",
+        tbl_gmaps_p: "Affichage de carte, géocodage et calcul d'itinéraires",
+        tbl_gmaps_d: "Coordonnées GPS et adresses",
+        tbl_fb_p: "Envoi de notifications push en temps réel",
+        tbl_fb_d: "Tokens d'appareil, métadonnées système",
+        tbl_cloud_p: "Stockage sécurisé et chiffré des photos de profil et pièces KYC",
+        tbl_cloud_d: "Fichiers images transmis",
+        tbl_mongo_p: "Base de données cloud sécurisée pour l'infrastructure API",
+        tbl_mongo_d: "Données de compte chiffrées et historique",
+        s7_title: "07. Conservation & Normes de sécurité",
+        s7_p1: "<strong>Sécurité :</strong> Les échanges s'effectuent via TLS 1.3 / HTTPS avec des bases de données hautement protégées.",
+        s7_p2: "<strong>Conservation :</strong> Les données sont conservées tant que le compte est actif. Lors d'une demande de suppression, les données sont effacées sous 30 jours ouvrables.",
+        s8_title: "08. Suppression du compte et des données",
+        s8_p1: "Conformément aux directives de Google Play, tout utilisateur peut demander la suppression définitive de son compte et de ses données.",
+        s8_methods_t: "Méthodes disponibles pour supprimer votre compte :",
+        s8_m1_t: "Méthode 1 (Dans l'application) :",
+        s8_m1_d: "Ouvrez l'application Tashila ou Tashila Chauffeur > Allez dans le Profil > Cliquez sur \"Supprimer le compte\" et confirmez.",
+        s8_m2_t: "Méthode 2 (Par email ou téléphone) :",
+        s8_m2_d: "Écrivez-nous directement à tashilaapp@gmail.com ou appelez le 0791453050 pour demander la suppression immédiate.",
+        s8_warning_t: "Conséquences de la suppression",
+        s8_warning_p: "La suppression est irréversible. Le profil, le numéro, les documents et les journaux de localisation sont définitivement purgés.",
+        s9_title: "09. Protection des mineurs",
+        s9_p1: "Nos services sont exclusivement destinés aux adultes (18 ans et plus). Nous ne collectons aucune donnée d'enfants de moins de 13 ans.",
+        s10_title: "10. Vos droits légaux",
+        s10_p1: "Vous disposez à tout moment des droits suivants sur vos données personnelles :",
+        s10_r1_t: "Droit d'accès :",
+        s10_r1_d: "Obtenir une copie des données personnelles enregistrées.",
+        s10_r2_t: "Droit de rectification :",
+        s10_r2_d: "Corriger ou mettre à jour des informations inexactes de profil.",
+        s10_r3_t: "Droit à l'effacement :",
+        s10_r3_d: "Demander la suppression complète de votre compte et données.",
+        s10_r4_t: "Révocation des autorisations :",
+        s10_r4_d: "Désactiver la position ou la caméra à tout moment via les paramètres de votre téléphone.",
+        s11_title: "11. Contact & Responsable de traitement",
+        s11_p1: "Pour toute question ou demande concernant la confidentialité de vos données, vous pouvez nous contacter via :",
+        s11_email_t: "Email du support",
+        s11_operator_t: "Exploitant de la plateforme",
+        s11_operator_name: "Tashila Logistique & Transport",
+        s11_operator_loc: "Tamanrasset, Algérie",
+        s11_phone_t: "Téléphone :",
+        s11_response_t: "Délai de réponse",
+        s11_response_d: "Nous répondons à toute demande formelle sous 24 à 48 heures ouvrables.",
+        footer_desc: "Tashila est la 1ère plateforme numérique à Tamanrasset reliant clients et transporteurs de petites camionnettes avec intelligence et sécurité.",
+        footer_quick_links: "Liens Rapides",
+        footer_legal: "Légal & Sécurité",
+        footer_contact: "Contactez-nous",
+        footer_rights: "© 2026 Tashila. Tous droits réservés.",
+        footer_algeria: "Conçu avec fierté en Algérie 🇩🇿"
+      },
+
+      en: {
+        doc_title: "Privacy Policy | Tashila & Tashila Driver",
+        brand_name: "Tashila",
+        legal_hub: "Privacy Policy",
+        nav_home: "Home",
+        nav_fleet: "Fleet",
+        nav_features: "Features",
+        nav_drivers: "Become a Driver",
+        nav_privacy: "Privacy Policy",
+        nav_delete: "Delete Account",
+        nav_terms: "Terms of Service",
+        nav_download: "Download App",
+        badge_compliance: "Google Play Store Compliant Privacy Document",
+        hero_title: "Privacy Policy for <span class=\"highlight\">Tashila</span>",
+        hero_desc: "This Privacy Policy describes how Tashila collects, uses, protects, and discloses information gathered through Tashila Client and Tashila Driver mobile applications in Tamanrasset.",
+        meta_effective: "Effective Date: September 19, 2026",
+        meta_updated: "Last Updated: September 19, 2026",
+        meta_status: "Status: Active & Verified",
+        app_client_title: "Tashila (Client App)",
+        app_client_desc: "Client Cargo & Utility Transport App",
+        app_driver_title: "Tashila Driver (Driver App)",
+        app_driver_desc: "Partner Driver & Truck Operator App",
+        toc_heading: "Contents",
+        toc_1: "1. Overview & Scope",
+        toc_2: "2. Information We Collect",
+        toc_3: "3. Location Data & Background Use",
+        toc_4: "4. Camera & Storage Permissions",
+        toc_5: "5. How We Use Data",
+        toc_6: "6. Third-Party Services",
+        toc_7: "7. Retention & Security",
+        toc_8: "8. Account & Data Deletion",
+        toc_9: "9. Children's Privacy",
+        toc_10: "10. Your Rights & Choices",
+        toc_11: "11. Contact Information",
+        btn_delete_page: "Account Deletion Page",
+        btn_print: "Print / PDF Copy",
+        s1_title: "01. Overview & Scope",
+        s1_p1: "Welcome to <strong>Tashila</strong> (\"we\", \"us\", or \"our\"). Tashila operates an on-demand freight and logistics transportation technology platform in Tamanrasset that connects customers needing cargo transportation (\"Clients\") with independent transport providers operating single-cabin and double-cabin utility trucks (\"Drivers\").",
+        s1_p2: "This Privacy Policy applies to the <strong>Tashila Client</strong> mobile application, the <strong>Tashila Driver</strong> mobile application, our website, and associated online services.",
+        s1_p3: "By downloading, accessing, or using any of our applications, you acknowledge that you have read and understood this Privacy Policy.",
+        s2_title: "02. Information We Collect",
+        s2_p1: "To provide safe, reliable, and efficient logistics services, we collect information directly provided by you and automatically generated during app usage.",
+        s2_sub1: "A. Information You Provide to Us",
+        s2_li1_t: "Account Registration Details:",
+        s2_li1_d: "When you register as a Client or Driver, we collect your mobile phone number for One-Time Password (OTP) verification, full name, profile picture, and language preference.",
+        s2_li2_t: "Driver Verification Documents (KYC):",
+        s2_li2_d: "For Tashila Driver accounts, we collect and verify statutory identification documents including government-issued driver's license, vehicle registration papers (\"Carte Grise\"), vehicle insurance certificates, vehicle type classification (Single Cabin or Double Cabin pickup truck), and vehicle license plate number.",
+        s2_li3_t: "Communications & Support:",
+        s2_li3_d: "Records of inquiries, dispute reports, customer service chats, and ratings or feedback provided after completing trips.",
+        s2_sub2: "B. Information Automatically Collected",
+        s2_li4_t: "Precise & Coarse Location Data:",
+        s2_li4_d: "Real-time GPS coordinates collected from your mobile device (see Section 3 for detailed disclosure).",
+        s2_li5_t: "Device & Hardware Identifiers:",
+        s2_li5_d: "Device model, operating system version, unique device identifier, network carrier, IP address, and Firebase Cloud Messaging (FCM) push tokens used to send order alerts.",
+        s2_li6_t: "Transaction & Order History:",
+        s2_li6_d: "Pickup coordinates, delivery destination, timestamp of request, completion time, truck category chosen, calculated distance, and agreed fare.",
+        s3_title: "03. Location Data & Background Use Disclosure",
+        s3_alert_t: "Prominent Disclosure: Location Access in Tashila & Tashila Driver",
+        s3_alert_p: "Location access is essential to the core functionality of Tashila freight transportation. Below we explicitly detail how location is gathered for both apps, including background location tracking.",
+        s3_client_t: "1. Tashila Client App (Foreground Location)",
+        s3_client_p: "The Client app uses location access exclusively while the application is active on screen to automatically set pickup locations, display nearby active drivers, and estimate travel routes.",
+        s3_driver_t: "2. Tashila Driver App (Foreground & Background Location)",
+        s3_driver_p1: "The Tashila Driver app collects precise location data even when the application is running in the background or when the screen is closed, under the following strict conditions:",
+        s3_d_reason1_t: "Dispatch & Order Matching:",
+        s3_d_reason1_d: "While a driver is \"Online\", continuous background location enables our algorithm to match nearby shipment requests with the most optimal driver, preventing wasted fuel.",
+        s3_d_reason2_t: "Real-Time Transit & Safety Tracking:",
+        s3_d_reason2_d: "During an accepted delivery mission, background location tracking transmits accurate transit telemetry to ensure cargo safety, transparency, and accurate arrival estimates.",
+        s3_driver_ctrl_t: "Driver Control Over Location",
+        s3_driver_ctrl_p: "Drivers maintain full control over background location tracking. When a driver toggles status to \"Offline\", background location reporting immediately ceases completely.",
+        s4_title: "04. Camera & Device Storage Permissions",
+        s4_p1: "Our applications request access to the device camera and media storage under explicit user confirmation for the following exclusive purposes:",
+        s4_f1_t: "Driver KYC Verification",
+        s4_f1_p: "Drivers photograph their valid driver's license and vehicle registration document during onboarding so administrators can review and approve roadworthiness.",
+        s4_f2_t: "Profile Avatar Upload",
+        s4_f2_p: "Users may upload a profile picture from their gallery or camera to identify themselves to drivers and clients for seamless order handoff.",
+        s4_f3_t: "Secure Cloud Storage",
+        s4_f3_p: "Uploaded photos are transmitted over encrypted TLS connections to secured cloud buckets (Cloudinary) and are never used for marketing purposes.",
+        s5_title: "05. How We Use Your Information",
+        s5_p1: "We utilize collected data solely for legitimate business operations, specifically:",
+        s5_item1: "Matching freight requests with suitable drivers in Tamanrasset based on truck size (single vs. double cabin).",
+        s5_item2: "Facilitating direct phone call communication between assigned Driver and Client to coordinate loading and unloading.",
+        s5_item3: "Generating transparent fare estimates, trip receipts, and trip route logs.",
+        s5_item4: "Investigating customer disputes, vehicle breakdowns, or safety concerns.",
+        s5_item5: "Sending critical push alerts regarding ride acceptance, driver arrival, or security notifications via Firebase Cloud Messaging.",
+        s5_item6: "Complying with applicable legal, fiscal, and transportation regulatory requirements.",
+        s6_title: "06. Third-Party Service Providers",
+        s6_p1: "We do not sell, rent, or trade your personal information. We partner with vetted third-party service providers who adhere to rigorous data privacy standards:",
+        th_provider: "Provider",
+        th_purpose: "Purpose",
+        th_data: "Data Processed",
+        th_policy: "Privacy Link",
+        tbl_gmaps_p: "Geocoding, route mapping & distance calculation",
+        tbl_gmaps_d: "GPS coordinates, destination addresses",
+        tbl_fb_p: "Push notifications for real-time dispatch",
+        tbl_fb_d: "Device tokens, OS metadata, app instance IDs",
+        tbl_cloud_p: "Encrypted storage of KYC verification photos & avatars",
+        tbl_cloud_d: "Uploaded image files",
+        tbl_mongo_p: "Secure cloud database for API infrastructure",
+        tbl_mongo_d: "Encrypted backend database records",
+        s7_title: "07. Data Retention & Security Standards",
+        s7_p1: "<strong>Security:</strong> All communication between Tashila mobile apps and our backend servers occurs over modern Transport Layer Security (HTTPS / TLS 1.3). Sensitive credentials and access tokens are hashed and securely stored.",
+        s7_p2: "<strong>Retention:</strong> We retain user personal data for as long as the account remains active. If you request account deletion, we delete personal identifiers, location logs, and profile assets within 30 business days.",
+        s8_title: "08. Account & Data Deletion Policy",
+        s8_p1: "In strict adherence to Google Play Store requirements, users have the unconditional right to request the permanent deletion of their account and all associated personal data.",
+        s8_methods_t: "How to Request Account Deletion:",
+        s8_m1_t: "Method 1 (In-App):",
+        s8_m1_d: "Open Tashila or Tashila Driver app > Navigate to Profile > Tap \"Delete Account\" and confirm the prompt.",
+        s8_m2_t: "Method 2 (Direct Email or Phone):",
+        s8_m2_d: "Send an email to tashilaapp@gmail.com or call us directly at 0791453050 to request immediate account and data deletion.",
+        s8_warning_t: "What Happens Upon Deletion",
+        s8_warning_p: "Account deletion is permanent. Your phone profile, avatar, driver licensing documents, vehicle records, rating history, and location logs will be purged permanently from active production databases.",
+        s9_title: "09. Children's Privacy Protection",
+        s9_p1: "Our Services are strictly directed toward adults and business operators capable of entering legally binding commercial transport contracts. We do not knowingly collect personal identifiable information from children under the age of 18 (and specifically under 13).",
+        s10_title: "10. Your Legal Rights & Choices",
+        s10_p1: "Depending on your jurisdiction, you possess the following rights regarding your personal information:",
+        s10_r1_t: "Right of Access:",
+        s10_r1_d: "Request a copy of the personal data we maintain about you in the app.",
+        s10_r2_t: "Right to Rectification:",
+        s10_r2_d: "Correct inaccurate or incomplete profile or vehicle information.",
+        s10_r3_t: "Right to Erasure:",
+        s10_r3_d: "Request permanent removal of your data as outlined in Section 8.",
+        s10_r4_t: "Revocation of Permissions:",
+        s10_r4_d: "Revoke Location or Camera permissions at any time via your device OS settings (Settings > Apps > Tashila > Permissions).",
+        s11_title: "11. Contact Information & Data Controller",
+        s11_p1: "If you have questions, inquiries, complaints, or feedback regarding this Privacy Policy or our privacy practices, please contact our Data Protection Officer:",
+        s11_email_t: "Support Email",
+        s11_operator_t: "Platform Operator",
+        s11_operator_name: "Tashila Logistics & Transport",
+        s11_operator_loc: "Tamanrasset, Algeria",
+        s11_phone_t: "Phone:",
+        s11_response_t: "Response Time",
+        s11_response_d: "We review and respond to formal privacy inquiries within 24 to 48 business hours.",
+        footer_desc: "Tashila is the premier digital platform in Tamanrasset connecting clients and cargo owners with small utility trucks smartly and safely.",
+        footer_quick_links: "Quick Links",
+        footer_legal: "Legal & Privacy",
+        footer_contact: "Contact Us",
+        footer_rights: "© 2026 Tashila. All rights reserved.",
+        footer_algeria: "Proudly made in Algeria 🇩🇿"
       }
     };
 
-    // Shared language handling for AR, FR, EN
     const STORAGE_KEY = 'tashila_preferred_lang';
     let currentLang = localStorage.getItem(STORAGE_KEY) || 'ar';
 
@@ -626,7 +1051,7 @@
       currentLang = lang;
       localStorage.setItem(STORAGE_KEY, lang);
       document.documentElement.lang = lang;
-      document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+      document.documentElement.dir = (lang === 'ar') ? 'rtl' : 'ltr';
 
       document.querySelectorAll('[data-lang-btn]').forEach(btn => {
         if (btn.getAttribute('data-lang-btn') === lang) {
@@ -636,19 +1061,19 @@
         }
       });
 
+      const dict = translations[lang] || translations.ar;
+
       document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
-        if (!el.getAttribute('data-i18n-orig')) {
-          el.setAttribute('data-i18n-orig', el.innerHTML);
-        }
-        if (lang === 'ar' && translations.ar && translations.ar[key]) {
-          el.innerHTML = translations.ar[key];
-        } else if (lang === 'fr' && translations.fr && translations.fr[key]) {
-          el.innerHTML = translations.fr[key];
-        } else {
-          el.innerHTML = el.getAttribute('data-i18n-orig');
+        if (dict && dict[key] !== undefined) {
+          el.innerHTML = dict[key];
         }
       });
+
+      // Update doc title
+      if (dict && dict.doc_title) {
+        document.title = dict.doc_title;
+      }
     }
 
     document.querySelectorAll('[data-lang-btn]').forEach(btn => {
@@ -668,7 +1093,7 @@
       let current = '';
       sections.forEach(section => {
         const sectionTop = section.offsetTop;
-        if (pageYOffset >= sectionTop - 120) {
+        if (window.pageYOffset >= sectionTop - 120) {
           current = section.getAttribute('id');
         }
       });

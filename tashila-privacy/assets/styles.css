@@ -41,6 +41,10 @@
   box-sizing: border-box;
 }
 
+button, input, select, textarea {
+  font-family: inherit;
+}
+
 html {
   scroll-behavior: smooth;
   color-scheme: light;
@@ -62,8 +66,12 @@ body {
   position: relative;
 }
 
-html[lang="ar"], html[dir="rtl"] body {
+html[lang="ar"], html[dir="rtl"], html[dir="rtl"] body, html[dir="rtl"] button, html[dir="rtl"] input, html[dir="rtl"] select, html[dir="rtl"] textarea {
   font-family: var(--font-ar);
+}
+
+html[dir="rtl"] * {
+  letter-spacing: normal !important;
 }
 
 /* Background Subtle Ambient Lights (Soft and light) */
@@ -314,16 +322,18 @@ html[dir="rtl"] .hero-content {
 .app-tab-btn {
   background: transparent;
   border: none;
+  font-family: inherit;
   color: var(--text-muted);
-  font-size: 0.94rem;
+  font-size: 1rem;
   font-weight: 700;
-  padding: 0.6rem 1.35rem;
+  padding: 0.65rem 1.45rem;
   border-radius: 10px;
   cursor: pointer;
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
+  letter-spacing: normal !important;
 }
 
 .app-tab-btn.active {
@@ -378,12 +388,13 @@ html[dir="rtl"] .store-badge-text {
 }
 
 .store-badge-sub {
-  font-size: 0.68rem;
+  font-family: inherit;
+  font-size: 0.8rem;
   font-weight: 600;
   color: #94A3B8;
-  letter-spacing: 0.04em;
+  letter-spacing: normal !important;
   text-transform: uppercase;
-  line-height: 1.1;
+  line-height: 1.25;
 }
 
 .store-badge-title {
@@ -441,11 +452,29 @@ html[dir="rtl"] .store-badge-text {
 }
 
 .phone-notch {
-  width: 120px;
-  height: 20px;
+  width: 110px;
+  height: 18px;
   background: #1E293B;
-  border-radius: 0 0 16px 16px;
-  margin: 0 auto;
+  border-radius: 0 0 14px 14px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+}
+
+.phone-screen-screenshot {
+  width: 100%;
+  overflow: hidden;
+  display: block;
+  background: #FFFFFF;
+}
+
+.app-screenshot-img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
 }
 
 .phone-screen {
@@ -1090,6 +1119,25 @@ html[dir="rtl"] .fleet-payload-tag {
   color: var(--text-dim);
   font-size: 0.9rem;
   font-weight: 500;
+}
+
+@media (max-width: 900px) {
+  .footer-container {
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .footer-container {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .footer-bottom {
+    flex-direction: column;
+    gap: 1rem;
+    text-align: center;
+  }
 }
 
 /* ========================================================

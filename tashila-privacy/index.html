@@ -3,10 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>تسهيلة | Tashila - منصة نقل البضائع والعفش الأولى في الجزائر</title>
-  <meta name="description" content="تطبيق تسهيلة يربطك بأقرب سائق شاحنة نفعية معتمد (كابينة فردية أو مزدوجة) في كافة ولايات الجزائر. تتبع مباشر عبر GPS وأسعار واضحة وعادلة.">
+  <title>تسهيلة | Tashila - المنصة الأولى لنقل البضائع في تمنراست</title>
+  <meta name="description" content="تطبيق تسهيلة لنقل البضائع في تمنراست. اطلب شاحنة صغيرة نفعية كابينة مفردة أو كابينة مزدوجة بأسعار واضحة وتتبع مباشر.">
   <link rel="icon" type="image/jpeg" href="assets/logo.jpeg">
-  <link rel="stylesheet" href="assets/styles.css?v=3.5">
+  <link rel="stylesheet" href="assets/styles.css?v=4.1">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -21,18 +21,36 @@
     html, body {
       background-color: #F8FAFC !important;
       color: #0F172A !important;
+      font-family: 'Cairo', -apple-system, BlinkMacSystemFont, sans-serif !important;
+    }
+    button, input, select, textarea, .app-tab-btn, .store-badge, .store-badge-sub, .store-badge-title {
+      font-family: inherit !important;
+    }
+    html[dir="rtl"] * {
+      letter-spacing: normal !important;
+    }
+    .app-tab-btn {
+      font-size: 1rem !important;
+    }
+    .store-badge-sub {
+      font-size: 0.8rem !important;
+      letter-spacing: normal !important;
     }
     .fleet-image-wrap {
       background: #FFFFFF !important;
       display: flex !important;
       align-items: center !important;
       justify-content: center !important;
+      padding: 1.5rem !important;
+      box-sizing: border-box !important;
     }
     .fleet-image-wrap img {
       background: #FFFFFF !important;
       object-fit: contain !important;
-      width: 100% !important;
-      height: 100% !important;
+      max-width: 90% !important;
+      max-height: 200px !important;
+      width: auto !important;
+      height: auto !important;
     }
     .landing-title, .section-title, .feature-title, .fleet-name, .brand-title {
       color: #0F172A !important;
@@ -46,16 +64,17 @@
     .fleet-specs-list li {
       color: #334155 !important;
     }
-    .phone-screen {
-      background-color: #F8FAFC !important;
+    .phone-screen-screenshot {
+      width: 100% !important;
+      overflow: hidden !important;
+      display: block !important;
+      background: #FFFFFF !important;
     }
-    .vehicle-pill-item {
-      background-color: #F1F5F9 !important;
-      color: #0F172A !important;
-    }
-    .vehicle-pill-item.active {
-      background-color: #FFF7ED !important;
-      color: #F58A0C !important;
+    .app-screenshot-img {
+      width: 100% !important;
+      height: auto !important;
+      display: block !important;
+      object-fit: cover !important;
     }
   </style>
 </head>
@@ -105,15 +124,15 @@
   <section class="landing-hero" id="home">
     <div class="hero-content">
       <div class="badge-pill">
-        <span data-i18n="badge_algeria">🇩🇿 المنصة الأولى لنقل البضائع والعفش في الجزائر • 58 ولاية</span>
+        <span data-i18n="badge_algeria">المنصة الأولى لنقل البضائع في تمنراست</span>
       </div>
 
       <h1 class="landing-title">
-        <span data-i18n="hero_title">انقل بضائعك وعفشك بكل أمان وسهولة بضغطة زر واحدة</span>
+        <span data-i18n="hero_title">انقل بضائعك و تنقل بكل امان و سهولة بضغطة زر واحدة</span>
       </h1>
 
       <p class="landing-subtitle" data-i18n="hero_subtitle">
-        تطبيق تسهيلة يربطك مباشرة بأقرب سائق شاحنة نفعية معتمد في ولايتك. كابينة فردية أو مزدوجة مع تتبع حي عبر GPS وأسعار واضحة وعادلة بدون مساومة.
+        تطبيق تسهيلة يربطك بأقرب سائق شاحنة صغيرة نفعية معتمد في تمنراست. كابينة مفردة أو مزدوجة، بأسعار واضحة وأمان تام.
       </p>
 
       <!-- App Switcher Tabs & Download Badges -->
@@ -174,8 +193,8 @@
             <path d="M449.6 226.7l-64.2-36.9-60.1 60.1 60.1 60.1 64.2-36.9c16.3-9.4 16.3-24.8 0-46.4z" fill="#00E676"/>
           </svg>
           <div class="store-badge-text">
-            <span class="store-badge-sub">تطبيق السائقين</span>
-            <span class="store-badge-title">Google Play</span>
+            <span class="store-badge-sub" data-i18n="google_play_desc">احصل عليه من</span>
+            <span class="store-badge-title" data-i18n="google_play_name">Google Play</span>
           </div>
         </a>
 
@@ -185,8 +204,8 @@
             <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.74 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.35.13-9.16-1.9-14.42-6.08-3.69-3.04-7.67-7.81-11.96-14.32-6.53-9.91-11.75-21.3-15.66-34.19-3.92-12.88-5.88-25.04-5.88-36.48 0-14.58 3.69-26.73 11.06-36.48 7.38-9.74 16.92-14.74 28.63-14.99 4.36 0 9.29 1.16 14.8 3.49 5.51 2.33 9.4 3.55 11.66 3.65 1.85 0 5.88-1.22 12.09-3.65 6.21-2.43 11.43-3.54 15.66-3.33 13.93.84 24.64 5.92 32.14 15.23-12.23 7.42-18.23 17.58-18.01 30.49.22 10.27 4.13 18.96 11.74 26.07 7.6 7.12 16.65 11.12 27.15 12.01-2.39 7.4-5.32 15.17-8.81 23.3zM119.22 33.15c0-7.62 2.72-14.91 8.16-21.87 5.44-6.96 12.18-11.05 20.22-12.28.22 1.09.33 2.18.33 3.27 0 7.4-2.83 14.79-8.49 22.18-5.66 7.4-12.51 11.53-20.55 12.41-.21-1.2-.33-2.4-.33-3.71z"/>
           </svg>
           <div class="store-badge-text">
-            <span class="store-badge-sub">تطبيق السائقين</span>
-            <span class="store-badge-title">App Store</span>
+            <span class="store-badge-sub" data-i18n="app_store_desc">متوفر على</span>
+            <span class="store-badge-title" data-i18n="app_store_name">App Store</span>
           </div>
         </a>
       </div>
@@ -198,12 +217,6 @@
             <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
           </svg>
           <span data-i18n="verified_badge">سائقون معتمدون ومفحوصون 100%</span>
-        </div>
-        <div class="trust-item">
-          <svg width="18" height="18" fill="currentColor" viewBox="0 0 20 20">
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-          </svg>
-          <span data-i18n="rating_badge">★ 4.9 من أكثر من 5,000 تقييم</span>
         </div>
       </div>
     </div>
@@ -230,48 +243,8 @@
       <!-- Phone Frame -->
       <div class="phone-mockup">
         <div class="phone-notch"></div>
-        <div class="phone-screen">
-          <!-- Mock Map -->
-          <div class="phone-map-card">
-            <div class="map-grid-bg"></div>
-            <div class="map-marker" style="top:40%; left:35%;" data-i18n="mockup_pin">
-              📍 الجزائر
-            </div>
-            <div style="position:absolute; bottom:20px; right:30px; background:rgba(255,255,255,0.9); border:1px solid var(--border-subtle); border-radius:50%; padding:6px; box-shadow:0 2px 8px rgba(0,0,0,0.1);">
-              🚚
-            </div>
-          </div>
-
-          <!-- Trip Selector Card -->
-          <div class="phone-ui-card">
-            <div class="phone-ui-title" data-i18n="mockup_trip_type">طلب شاحنة نفعية</div>
-            <div class="phone-ui-vehicle-row">
-              <div class="vehicle-pill-item active">
-                <img src="assets/singlecabin_icon.png" alt="Single" style="height:22px; display:block; margin:0 auto 2px;">
-                <span data-i18n="mockup_single">كابينة فردية</span>
-              </div>
-              <div class="vehicle-pill-item">
-                <img src="assets/doublecabin_icon.png" alt="Double" style="height:22px; display:block; margin:0 auto 2px;">
-                <span data-i18n="mockup_double">كابينة مزدوجة</span>
-              </div>
-            </div>
-
-            <div class="phone-fare-row">
-              <div style="font-size:0.8rem; color:var(--text-muted)" data-i18n="mockup_fare_label">السعر التقديري الثابت</div>
-              <div class="fare-amount" data-i18n="mockup_price">3,800 دج</div>
-            </div>
-          </div>
-
-          <!-- Active Driver Card -->
-          <div class="phone-ui-card" style="display:flex; align-items:center; gap:0.75rem;">
-            <div style="width:36px; height:36px; border-radius:50%; background:var(--primary-light); display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:bold;" data-i18n="mockup_avatar">
-              أ.ب
-            </div>
-            <div style="flex:1;">
-              <div style="font-size:0.82rem; font-weight:700; color:var(--text-main)" data-i18n="mockup_driver_name">أحمد ب. • ★ 4.9</div>
-              <div style="font-size:0.7rem; color:var(--success)" data-i18n="mockup_status">السائق في الطريق إليك (4 دقائق)</div>
-            </div>
-          </div>
+        <div class="phone-screen-screenshot">
+          <img id="appMockupImg" src="assets/app_screenshot.png?v=5.0" alt="تطبيق تسهيلة لنقل البضائع" class="app-screenshot-img">
         </div>
       </div>
     </div>
@@ -290,8 +263,8 @@
     <div class="fleet-grid">
       <!-- Single Cabin Card -->
       <div class="fleet-card">
-        <div class="fleet-image-wrap" style="background:#FFFFFF !important;">
-          <img src="assets/singlecabin.jpeg?v=3.5" alt="Single Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important;">
+        <div class="fleet-image-wrap" style="background:#FFFFFF !important; padding: 1.5rem;">
+          <img src="assets/singlecabin_icon.png?v=4.0" alt="Single Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important; max-height: 200px; width: auto; margin: auto;">
         </div>
         <div class="fleet-card-body" style="text-align: center; padding: 1.5rem 1rem;">
           <h3 class="fleet-name" data-i18n="single_cabin_title" style="margin-bottom: 0; font-size: 1.35rem;">شاحنة كابينة فردية</h3>
@@ -300,8 +273,8 @@
 
       <!-- Double Cabin Card -->
       <div class="fleet-card">
-        <div class="fleet-image-wrap" style="background:#FFFFFF !important;">
-          <img src="assets/doublecabin.jpeg?v=3.5" alt="Double Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important;">
+        <div class="fleet-image-wrap" style="background:#FFFFFF !important; padding: 1.5rem;">
+          <img src="assets/doublecabin_icon.png?v=4.0" alt="Double Cabin Utility Truck" style="background:#FFFFFF !important; object-fit:contain !important; max-height: 200px; width: auto; margin: auto;">
         </div>
         <div class="fleet-card-body" style="text-align: center; padding: 1.5rem 1rem;">
           <h3 class="fleet-name" data-i18n="double_cabin_title" style="margin-bottom: 0; font-size: 1.35rem;">شاحنة كابينة مزدوجة</h3>
@@ -355,21 +328,11 @@
       <div class="feature-card">
         <div class="feature-icon-box">
           <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
           </svg>
         </div>
-        <h3 class="feature-title" data-i18n="feat_4_title">تتبع مسار الحمولة بالـ GPS</h3>
-        <p class="feature-desc" data-i18n="feat_4_desc">تابع حركة شاحنتك على الخريطة لحظة بلحظة مع إمكانية مشاركة رابط التتبع مع المستلم.</p>
-      </div>
-
-      <div class="feature-card">
-        <div class="feature-icon-box">
-          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
-          </svg>
-        </div>
-        <h3 class="feature-title" data-i18n="feat_5_title">إشعارات فورية وتواصل مباشر</h3>
-        <p class="feature-desc" data-i18n="feat_5_desc">اتصال هاتفي مباشر ودردشة داخل التطبيق مع إشعارات Push تنبهك بكل مرحلة من مراحل النقل.</p>
+        <h3 class="feature-title" data-i18n="feat_5_title">اتصال وتواصل هاتفي مباشر</h3>
+        <p class="feature-desc" data-i18n="feat_5_desc">اتصال هاتفي مباشر برقم السائق لتنسيق تفاصيل النقل ومتابعة وصول الشاحنة بسهولة ودون تعقيد.</p>
       </div>
 
       <div class="feature-card">
@@ -395,7 +358,7 @@
       <div class="step-card">
         <div class="step-number">01</div>
         <h3 class="step-title" data-i18n="how_step_1_title">1. حدد المسار ونوع الشاحنة</h3>
-        <p class="step-desc" data-i18n="how_step_1_desc">افتح التطبيق، اختر موقع الانطلاق والوصول، وحدد شاحنة كابينة فردية أو مزدوجة.</p>
+        <p class="step-desc" data-i18n="how_step_1_desc">افتح التطبيق، اختر موقع الانطلاق والوصول، وحدد نوع الشاحنة الصغيرة كابينة مفردة أو مزدوجة.</p>
       </div>
 
       <div class="step-card">
@@ -419,7 +382,7 @@
         <div class="badge-pill" style="align-self:flex-start;" data-i18n="driver_badge">انضم لشبكة شركائنا</div>
         <h2 class="driver-cta-title" data-i18n="driver_cta_title">تملك شاحنة نفعية؟ ضاعف دخلك اليومي مع تسهيلة</h2>
         <p class="driver-cta-desc" data-i18n="driver_cta_desc">
-          اعمل بحرية تامة في أوقات فراغك، استقبل طلبات نقل مستمرة في ولايتك، واستلم أرباحك مباشرة بعد كل رحلة بدون وسيط.
+          اعمل بحرية تامة في أوقات فراغك، استقبل طلبات نقل مستمرة في تمنراست، واستلم أرباحك مباشرة بعد كل رحلة بدون وسيط.
         </p>
         <ul class="driver-benefits-list">
           <li class="driver-benefit-item">
@@ -447,7 +410,9 @@
       </div>
 
       <div class="driver-cta-badge-box">
-        <img src="assets/arabic_logo.jpeg" alt="Tashila Arabic Logo" style="width:130px; border-radius:18px; margin-bottom:1rem; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+        <div style="width:160px; max-width:100%; border-radius:18px; overflow:hidden; border:2px solid rgba(255,255,255,0.2); box-shadow:0 12px 28px rgba(0,0,0,0.45); margin:0 auto 1rem; background:#111;">
+          <img src="assets/driver_app_screenshot.png?v=5.0" alt="تطبيق تسهيلة سائق" style="width:100%; height:auto; display:block;">
+        </div>
         <div style="font-size:1.15rem; font-weight:700; color:#fff; margin-bottom:0.25rem;">تطبيق تسهيلة سائق</div>
         <div style="font-size:0.85rem; color:var(--text-muted)">متوفر للتحميل المباشر على أندرويد</div>
       </div>
@@ -467,7 +432,7 @@
           </div>
         </div>
         <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.7;" data-i18n="footer_desc">
-          تسهيلة هي المنصة الرقمية الرائدة في الجزائر لربط الزبائن وأصحاب البضائع بشاحنات النقل النفعية بذكاء وأمان.
+          تسهيلة هي المنصة الرقمية الاولى في تمنراست لربط الزبائن و اصحاب البضائع بشاحنات صغيرة نفعية بذكاء و أمان
         </p>
       </div>
 
@@ -492,10 +457,10 @@
 
       <div class="footer-col">
         <h4 class="footer-title" data-i18n="footer_contact">تواصل معنا</h4>
-        <p style="color:var(--text-muted); font-size:0.9rem;">
-          الجزائر العاصمة، الجزائر<br>
-          <a href="mailto:support@tashila.dz" style="color:var(--primary); text-decoration:none;">support@tashila.dz</a><br>
-          هاتف: +213 (0) 550 00 00 00
+        <p style="color:var(--text-muted); font-size:0.9rem; line-height:1.8;">
+          تمنراست، الجزائر<br>
+          <a href="mailto:tashilaapp@gmail.com" style="color:var(--primary); text-decoration:none; font-weight:600;">tashilaapp@gmail.com</a><br>
+          هاتف: <a href="tel:0791453050" style="color:inherit; text-decoration:none; direction:ltr; unicode-bidi:embed;">0791453050</a>
         </p>
       </div>
     </div>
@@ -507,23 +472,41 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="assets/i18n.js?v=2.0"></script>
+  <script src="assets/i18n.js?v=4.1"></script>
   <script>
+    window.currentAppTab = 'client';
+
     function switchAppTab(type) {
+      window.currentAppTab = type;
       const clientBadges = document.getElementById('clientBadges');
       const driverBadges = document.getElementById('driverBadges');
       const tabBtns = document.querySelectorAll('.app-tab-btn');
+      const appImg = document.getElementById('appMockupImg');
+      const heroTitle = document.querySelector('[data-i18n="hero_title"]');
+      const heroSubtitle = document.querySelector('[data-i18n="hero_subtitle"]');
+      const heroBadge = document.querySelector('[data-i18n="badge_algeria"]');
+      
+      const lang = (window.getCurrentLang ? window.getCurrentLang() : (localStorage.getItem('tashila_preferred_lang') || 'ar'));
+      const dict = (window.i18nData && window.i18nData[lang]) ? window.i18nData[lang] : (typeof i18nData !== 'undefined' ? i18nData[lang] : {});
 
       if (type === 'client') {
         clientBadges.style.display = 'flex';
         driverBadges.style.display = 'none';
         tabBtns[0].classList.add('active');
         tabBtns[1].classList.remove('active');
+        if (appImg) appImg.src = 'assets/app_screenshot.png?v=5.0';
+        if (heroTitle && dict.hero_title) heroTitle.textContent = dict.hero_title;
+        if (heroSubtitle && dict.hero_subtitle) heroSubtitle.textContent = dict.hero_subtitle;
+        if (heroBadge && dict.badge_algeria) heroBadge.textContent = dict.badge_algeria;
       } else {
         clientBadges.style.display = 'none';
         driverBadges.style.display = 'flex';
         tabBtns[0].classList.remove('active');
         tabBtns[1].classList.add('active');
+        if (appImg) appImg.src = 'assets/driver_app_screenshot.png?v=5.0';
+        if (heroTitle && dict.hero_title_driver) heroTitle.textContent = dict.hero_title_driver;
+        if (heroSubtitle && dict.hero_subtitle_driver) heroSubtitle.textContent = dict.hero_subtitle_driver;
+        if (heroBadge && dict.hero_badge_driver) heroBadge.textContent = dict.hero_badge_driver;
       }
     }
   </script>
