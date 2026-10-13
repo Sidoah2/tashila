@@ -132,12 +132,13 @@ def send_direct_fcm_test(token):
         message = messaging.Message(
             token=token,
             notification=messaging.Notification(
-                title="Tashila Test: طلب رحلة تجريبي",
-                body="اضغط هنا للدخول مباشرة لشاشة العرض والقبول (Trip Offer Test)",
+                title="طلب رحلة جديد",
+                body="الانطلاق: Place des Martyrs, Alger\nالوصول: Bab Ezzouar, Alger\nالسعر: 1800 دج",
             ),
             data={
                 "type": "trip_request",
                 "pickupAddress": "Place des Martyrs, Alger",
+                "dropoffAddress": "Bab Ezzouar, Alger",
                 "fare": "1800",
                 "tripId": "test_trip_offer_123",
             },
@@ -172,7 +173,7 @@ def test_live_dispatch_flow(db, driver):
     truck_type = driver.get("truckType", "single_cabin")
 
     # 1. Log in a virtual client via test OTP
-    client_phone = "+213555999888"
+    client_phone = "+213711223344"
     print(f"   Logging in test client ({client_phone})...")
     try:
         requests.post(f"{base_url}/auth/otp/send", json={"phone": client_phone, "role": "client"}, timeout=10)

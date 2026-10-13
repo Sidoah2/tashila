@@ -26,6 +26,43 @@ final FlutterLocalNotificationsPlugin _localNotifications =
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp();
+    final data = message.data;
+    if (data['type'] == 'trip_request' && message.notification == null) {
+      final pickup = (data['pickupAddress'] as String?)?.trim();
+      final dropoff = (data['dropoffAddress'] as String?)?.trim();
+      final fare = (data['fare'] as String?)?.trim();
+      final String body;
+      if (dropoff != null && dropoff.isNotEmpty) {
+        body = 'الانطلاق: ${pickup ?? "نقطة الانطلاق"}\nالوصول: $dropoff\nالسعر: ${fare ?? ""} دج';
+      } else {
+        body = 'الانطلاق: ${pickup ?? "نقطة الانطلاق"}\nالسعر: ${fare ?? ""} دج';
+      }
+      const title = 'طلب رحلة جديد';
+      final bigTextStyle = BigTextStyleInformation(
+        body,
+        contentTitle: title,
+        summaryText: 'عرض رحلة جديد',
+      );
+      await _localNotifications.show(
+        DateTime.now().millisecond,
+        title,
+        body,
+        NotificationDetails(
+          android: AndroidNotificationDetails(
+            kTripOfferChannel.id,
+            kTripOfferChannel.name,
+            channelDescription: kTripOfferChannel.description,
+            importance: Importance.max,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+            styleInformation: bigTextStyle,
+          ),
+        ),
+        payload: data['tripId'] ?? 'trip_request',
+      );
+    }
   } catch (_) {}
 }
 
@@ -150,10 +187,23 @@ class FcmService {
       );
 
       // Show high-priority local notification
-      final notification = message.notification;
-      final title = notification?.title ?? 'طلب رحلة جديد';
-      final body = notification?.body ??
-          '${data['pickupAddress'] ?? 'Pickup'} — ${data['fare'] ?? ''} DZD';
+      final title = 'طلب رحلة جديد';
+      final pickup = (data['pickupAddress'] as String?)?.trim();
+      final dropoff = (data['dropoffAddress'] as String?)?.trim();
+      final fare = (data['fare'] as String?)?.trim();
+
+      final String body;
+      if (dropoff != null && dropoff.isNotEmpty) {
+        body = 'الانطلاق: ${pickup ?? "نقطة الانطلاق"}\nالوصول: $dropoff\nالسعر: ${fare ?? ""} دج';
+      } else {
+        body = 'الانطلاق: ${pickup ?? "نقطة الانطلاق"}\nالسعر: ${fare ?? ""} دج';
+      }
+
+      final bigTextStyle = BigTextStyleInformation(
+        body,
+        contentTitle: title,
+        summaryText: 'عرض رحلة جديد',
+      );
 
       _localNotifications.show(
         DateTime.now().millisecond,
@@ -169,6 +219,7 @@ class FcmService {
             icon: '@mipmap/ic_launcher',
             playSound: true,
             enableVibration: true,
+            styleInformation: bigTextStyle,
           ),
         ),
         payload: data['tripId'] ?? 'trip_request',
@@ -197,6 +248,11 @@ class FcmService {
     required String tripId,
   }) async {
     try {
+      final bigTextStyle = BigTextStyleInformation(
+        body,
+        contentTitle: title,
+        summaryText: 'عرض رحلة جديد',
+      );
       await _localNotifications.show(
         tripId.hashCode,
         title,
@@ -211,6 +267,7 @@ class FcmService {
             icon: '@mipmap/ic_launcher',
             playSound: true,
             enableVibration: true,
+            styleInformation: bigTextStyle,
           ),
         ),
         payload: tripId,

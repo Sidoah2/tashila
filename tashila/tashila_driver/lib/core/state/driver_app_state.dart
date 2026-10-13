@@ -999,10 +999,22 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           volume: 4.0,
         );
       } catch (_) {}
+      final pickup = offer.request.pickup.trim().isNotEmpty
+          ? offer.request.pickup.trim()
+          : 'نقطة الانطلاق';
+      final dropOff = offer.request.dropOff.trim();
+      final fare = offer.request.fare.toInt();
+      final String notifBody;
+      if (dropOff.isNotEmpty) {
+        notifBody = 'الانطلاق: $pickup\nالوصول: $dropOff\nالسعر: $fare دج';
+      } else {
+        notifBody = 'الانطلاق: $pickup\nالسعر: $fare دج';
+      }
+
       unawaited(
         FcmService.instance.showTripOfferNotification(
-          title: 'new_trip_offer'.tr(),
-          body: '${offer.request.pickup} — ${offer.request.fare.toInt()} DZD',
+          title: 'طلب رحلة جديد',
+          body: notifBody,
           tripId: offer.request.id,
         ),
       );

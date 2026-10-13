@@ -226,11 +226,19 @@ async def push_trip_request(
     pickup_address: str,
     fare: float,
     trip_id: str | None = None,
+    dropoff_address: str | None = None,
 ) -> bool:
     fare_str = f"{fare:.0f}" if fare == int(fare) else f"{fare:.2f}"
+    title = "طلب رحلة جديد"
+    if dropoff_address and dropoff_address.strip():
+        body = f"الانطلاق: {pickup_address}\nالوصول: {dropoff_address}\nالسعر: {fare_str} دج"
+    else:
+        body = f"الانطلاق: {pickup_address}\nالسعر: {fare_str} دج"
+
     payload: dict[str, Any] = {
         "type": "trip_request",
         "pickupAddress": pickup_address,
+        "dropoffAddress": dropoff_address or "",
         "fare": fare_str,
     }
     if trip_id:
@@ -238,8 +246,8 @@ async def push_trip_request(
     return await send_push(
         driver_id,
         "driver",
-        "New trip request",
-        f"Pickup: {pickup_address} — {fare_str} DZD",
+        title,
+        body,
         payload,
     )
 
@@ -248,8 +256,8 @@ async def push_driver_approved(driver_id: str) -> bool:
     return await send_push(
         driver_id,
         "driver",
-        "Account approved",
-        "Your driver account has been approved. You can go online now.",
+        "تمت الموافقة على الحساب",
+        "تم قبول حساب السائق الخاص بك. يمكنك بدء العمل واستقبال الطلبات الآن.",
         {"type": "driver_approved"},
     )
 
@@ -260,14 +268,22 @@ async def push_document_status(
     approved: bool,
     reason: str | None = None,
 ) -> bool:
-    label = doc_type.replace("_", " ").title()
+    doc_labels = {
+        "driving_license": "رخصة السياقة",
+        "registration_card": "البطاقة الرمادية",
+        "identity_card": "بطاقة التعريف",
+        "criminal_record": "صحيفة السوابق العدلية",
+        "insurance": "التأمين",
+        "technical_inspection": "المراقبة التقنية",
+    }
+    label = doc_labels.get(doc_type, doc_type.replace("_", " ").title())
     if approved:
-        title = f"{label} approved"
-        body = f"Your {label} has been approved."
+        title = f"تمت الموافقة على {label}"
+        body = f"تم قبول وثيقة {label} بنجاح."
         status = "approved"
     else:
-        title = f"{label} rejected"
-        body = reason or f"Your {label} was rejected."
+        title = f"تم رفض {label}"
+        body = reason or f"تم رفض وثيقة {label}، يرجى إعادة رفعها."
         status = "rejected"
 
     return await send_push(
