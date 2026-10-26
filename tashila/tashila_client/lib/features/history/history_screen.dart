@@ -31,7 +31,7 @@ class _HistoryScreenState extends ConsumerState<HistoryScreen>
   @override
   Widget build(BuildContext context) {
     final history = ref.watch(appStateProvider).history;
-    final money = dzdCurrency();
+    final money = dzdCurrency(context: context);
 
     final now = DateTime.now();
     final todayStart = DateTime(now.year, now.month, now.day);
@@ -175,11 +175,15 @@ class _HistoryListView extends StatelessWidget {
               ),
               _detailRow(ctx, 'earnings_trip_detail_status'.tr(), statusLabel),
               _detailRow(ctx, 'truck_type_label'.tr(), truckLabel),
-              _detailRow(ctx, 'earnings_trip_detail_pickup'.tr(), trip.pickup),
+              _detailRow(
+                ctx,
+                'earnings_trip_detail_pickup'.tr(),
+                formatLocationName(trip.pickup, ctx),
+              ),
               _detailRow(
                 ctx,
                 'earnings_trip_detail_dropoff'.tr(),
-                trip.dropoff,
+                formatLocationName(trip.dropoff, ctx),
               ),
               _detailRow(ctx, 'earnings_trip_detail_completed'.tr(), dateLabel),
               if (!trip.cancelled && trip.rating > 0)

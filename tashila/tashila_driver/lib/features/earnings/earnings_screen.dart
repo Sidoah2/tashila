@@ -39,7 +39,7 @@ class _EarningsScreenState extends ConsumerState<EarningsScreen>
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(driverAppStateProvider);
-    final money = dzdCurrency();
+    final money = dzdCurrency(context: context);
     final trips = state.tripHistory;
     final CompletedTrips = trips.where((t) => t.status == "completed");
     final totalBalance = CompletedTrips.fold(0.0, (sum, t) => sum + t.fare);
@@ -208,13 +208,17 @@ class _EarningsListView extends StatelessWidget {
               _detailRow(
                 ctx,
                 'earnings_trip_detail_distance'.tr(),
-                '${westernDigits(trip.distanceKm.toStringAsFixed(1))} km',
+                formatDistanceKm(trip.distanceKm, ctx),
               ),
-              _detailRow(ctx, 'earnings_trip_detail_pickup'.tr(), trip.pickup),
+              _detailRow(
+                ctx,
+                'earnings_trip_detail_pickup'.tr(),
+                formatLocationName(trip.pickup, ctx),
+              ),
               _detailRow(
                 ctx,
                 'earnings_trip_detail_dropoff'.tr(),
-                trip.dropOff,
+                formatLocationName(trip.dropOff, ctx),
               ),
               _detailRow(ctx, 'earnings_trip_detail_completed'.tr(), dateLabel),
               if (trip.rating != null)

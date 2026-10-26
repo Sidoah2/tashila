@@ -58,7 +58,7 @@ dependencies:
   google_api_headers: ^5.1.1
   package_info_plus: ^9.0.1
   image_picker: ^1.1.2
-  font_awesome_flutter: ^10.7.0
+  font_awesome_flutter: ^11.0.0
 
 dev_dependencies:
   flutter_test:

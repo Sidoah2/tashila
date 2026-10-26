@@ -75,6 +75,8 @@ async def lifespan(app: FastAPI):
     await connect_db()
     await connect_redis()
     bridge_task = asyncio.create_task(start_redis_bridge())
+    from app.services.inactivity_service import start_inactivity_monitor
+    inactivity_task = asyncio.create_task(start_inactivity_monitor())
     try:
         await _cleanup_stale_requested_trips()
     except Exception:
@@ -84,8 +86,13 @@ async def lifespan(app: FastAPI):
     yield
 
     bridge_task.cancel()
+    inactivity_task.cancel()
     try:
         await bridge_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await inactivity_task
     except asyncio.CancelledError:
         pass
     await close_redis()

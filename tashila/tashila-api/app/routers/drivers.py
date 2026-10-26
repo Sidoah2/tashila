@@ -47,6 +47,17 @@ async def update_availability(
     return await driver_service.set_availability(driver["id"], body.availability)
 
 
+@router.post("/me/heartbeat")
+async def driver_heartbeat(driver: dict = _driver_auth) -> dict:
+    return await driver_service.record_heartbeat(driver["id"])
+
+
+@router.post("/inactivity-check")
+async def trigger_inactivity_check() -> dict:
+    from app.services.inactivity_service import check_and_notify_inactive_drivers
+    return await check_and_notify_inactive_drivers()
+
+
 @router.put("/me/location")
 async def update_location(
     body: DriverLocationUpdate,

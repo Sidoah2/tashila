@@ -466,7 +466,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                         color: AppColors.textSecondary.withValues(alpha: 0.1),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: const FaIcon(
                           FontAwesomeIcons.whatsapp,
                           color: Color(0xFF25D366),
                         ),
@@ -505,7 +505,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                   child: _SettingsCard(
                     children: [
                       ListTile(
-                        leading: const Icon(
+                        leading: const FaIcon(
                           FontAwesomeIcons.facebook,
                           color: Color(0xFF1877F2),
                         ),
@@ -523,7 +523,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                         color: AppColors.textSecondary.withValues(alpha: 0.1),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: const FaIcon(
                           FontAwesomeIcons.tiktok,
                           color: Colors.black,
                         ),
@@ -541,7 +541,7 @@ class ProfileSettingsScreen extends ConsumerWidget {
                         color: AppColors.textSecondary.withValues(alpha: 0.1),
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: const FaIcon(
                           FontAwesomeIcons.instagram,
                           color: Color(0xFFE1306C),
                         ),

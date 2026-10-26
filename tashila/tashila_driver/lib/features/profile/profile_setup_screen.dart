@@ -2430,7 +2430,7 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
 
   Widget _profileTile({
     required BuildContext context,
-    required IconData icon,
+    required dynamic icon,
     required Color iconBg,
     required Color iconColor,
     required String title,
@@ -2446,7 +2446,9 @@ class _ProfileSetupScreenState extends ConsumerState<ProfileSetupScreen> {
           shape: isCircle ? BoxShape.circle : BoxShape.rectangle,
           borderRadius: isCircle ? null : BorderRadius.circular(12),
         ),
-        child: Icon(icon, color: iconColor, size: 20),
+        child: icon is FaIconData
+            ? FaIcon(icon, color: iconColor, size: 20)
+            : Icon(icon as IconData, color: iconColor, size: 20),
       ),
       title: Text(
         title,
@@ -2651,7 +2653,7 @@ class _ProfileOverviewCard extends StatelessWidget {
     final ratingToShow = (officialRating != null && officialRating! > 0)
         ? officialRating!
         : avgRating;
-    final money = dzdCurrency();
+    final money = dzdCurrency(context: context);
     final platform = platformEarnings ?? const DriverPlatformEarnings();
 
     return _ProfileCardContainer(

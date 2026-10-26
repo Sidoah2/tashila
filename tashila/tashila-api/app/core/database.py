@@ -39,6 +39,7 @@ async def create_indexes(database: AsyncIOMotorDatabase) -> None:
     await drivers.create_index([("location", GEOSPHERE)])
     await drivers.create_index([("approvalStatus", ASCENDING)])
     await drivers.create_index([("availability", ASCENDING)])
+    await drivers.create_index([("availability", ASCENDING), ("lastActiveAt", ASCENDING)])
     await drivers.create_index(
         [
             ("availability", ASCENDING),

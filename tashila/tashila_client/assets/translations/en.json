@@ -270,5 +270,11 @@
   "settings_button": "Settings",
   "location_disabled_body": "Location services (GPS) are disabled. Please enable them in settings to continue.",
   "link_error": "Sorry, could not open the link.",
-  "connectivity_no_internet": "No internet connection"
+  "connectivity_no_internet": "No internet connection",
+  "dzd_currency": "DZD",
+  "payload_700kg": "700kg",
+  "payload_1400kg": "1400kg",
+  "kg_unit": "kg",
+  "custom_pickup_point": "Custom Pickup Point",
+  "custom_dropoff_point": "Custom Drop-off Point"
 }

@@ -32,6 +32,8 @@ def _send_via_firebase_admin(
     title: str,
     body: str,
     data: dict[str, str],
+    channel_id: str = "driver_trip_offers",
+    apns_category: str | None = None,
 ) -> bool:
     try:
         from app.services.auth_service import _get_firebase_app
@@ -40,19 +42,49 @@ def _send_via_firebase_admin(
         if not app:
             return False
 
-        message = messaging.Message(
-            token=token,
-            notification=messaging.Notification(title=title, body=body),
-            data=data,
-            android=messaging.AndroidConfig(
+        clean_data = dict(data)
+        clean_data.setdefault("title", title)
+        clean_data.setdefault("body", body)
+
+        apns_config = None
+        if apns_category:
+            apns_config = messaging.APNSConfig(
+                payload=messaging.APNSPayload(
+                    aps=messaging.Aps(
+                        category=apns_category,
+                        sound="default",
+                        content_available=True,
+                        alert=messaging.ApsAlert(title=title, body=body),
+                    ),
+                ),
+            )
+
+        # For interactive notifications (e.g. driver_inactivity_check):
+        # On Android, flutter_local_notifications creates the rich notification with action buttons.
+        # If top-level `notification` is included, Google Play Services automatically renders a
+        # second, redundant plain notification (without buttons).
+        is_interactive = bool(apns_category or clean_data.get("type") == "driver_inactivity_check")
+
+        notification_payload = None if is_interactive else messaging.Notification(title=title, body=body)
+
+        android_config = messaging.AndroidConfig(priority="high")
+        if not is_interactive:
+            android_config = messaging.AndroidConfig(
                 priority="high",
                 notification=messaging.AndroidNotification(
-                    channel_id="driver_trip_offers",
+                    channel_id=channel_id,
                     priority="high",
                     default_sound=True,
                     click_action="FLUTTER_NOTIFICATION_CLICK",
                 ),
-            ),
+            )
+
+        message = messaging.Message(
+            token=token,
+            notification=notification_payload,
+            data=clean_data,
+            android=android_config,
+            apns=apns_config,
         )
         messaging.send(message, app=app)
         return True
@@ -68,10 +100,12 @@ async def _send_fcm(
     data: dict[str, Any],
     owner_id: str,
     role: str,
+    channel_id: str = "driver_trip_offers",
+    apns_category: str | None = None,
 ) -> bool:
     clean_data = _fcm_data_payload(data)
     # 1. Try modern Firebase Admin SDK first (HTTP v1)
-    if _send_via_firebase_admin(token, title, body, clean_data):
+    if _send_via_firebase_admin(token, title, body, clean_data, channel_id=channel_id, apns_category=apns_category):
         logger.info("FCM push sent via Firebase Admin SDK to %s/%s", role, owner_id)
         return True
 
@@ -135,6 +169,8 @@ async def send_push(
     title: str,
     body: str,
     data: dict[str, Any] | None = None,
+    channel_id: str = "driver_trip_offers",
+    apns_category: str | None = None,
 ) -> bool:
     try:
         token_doc = await get_database()[PUSH_TOKENS_COLLECTION].find_one(
@@ -151,7 +187,16 @@ async def send_push(
         push_data = dict(data or {})
 
         if platform == "fcm":
-            return await _send_fcm(token, title, body, push_data, owner_id, role)
+            return await _send_fcm(
+                token,
+                title,
+                body,
+                push_data,
+                owner_id,
+                role,
+                channel_id=channel_id,
+                apns_category=apns_category,
+            )
 
         logger.debug("Push platform %s not supported for %s/%s", platform, role, owner_id)
         return False
@@ -161,6 +206,26 @@ async def send_push(
 
 
 # --- Convenience wrappers ---
+
+
+async def push_driver_inactivity_check(driver_id: str) -> bool:
+    title = "هل ما زلت متاحاً للعمل؟"
+    body = "أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق."
+    payload = {
+        "type": "driver_inactivity_check",
+        "category": "INACTIVITY_CHECK",
+        "action_stay_online": "ACTION_STAY_ONLINE",
+        "action_go_offline": "ACTION_GO_OFFLINE",
+    }
+    return await send_push(
+        driver_id,
+        "driver",
+        title,
+        body,
+        payload,
+        channel_id="driver_inactivity_check",
+        apns_category="INACTIVITY_CHECK",
+    )
 
 
 async def push_trip_accepted(client_id: str, driver_name: str, trip_id: str) -> bool:

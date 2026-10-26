@@ -6,9 +6,12 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:tashila_driver/core/models/models.dart';
 import 'package:tashila_driver/core/router/app_router.dart';
 import 'package:tashila_driver/core/services/api_client.dart';
 import 'package:tashila_driver/core/state/driver_app_state.dart';
+
+import 'package:shared_preferences/shared_preferences.dart';
 
 const AndroidNotificationChannel kTripOfferChannel = AndroidNotificationChannel(
   'driver_trip_offers',
@@ -19,14 +22,123 @@ const AndroidNotificationChannel kTripOfferChannel = AndroidNotificationChannel(
   enableVibration: true,
 );
 
+const AndroidNotificationChannel kInactivityChannel = AndroidNotificationChannel(
+  'driver_inactivity_check',
+  'Inactivity Reminders',
+  description: 'Notifications checking if driver is still available',
+  importance: Importance.high,
+  playSound: true,
+  enableVibration: true,
+);
+
+const String kActionStayOnline = 'ACTION_STAY_ONLINE';
+const String kActionGoOffline = 'ACTION_GO_OFFLINE';
+
 final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
+
+@pragma('vm:entry-point')
+void notificationTapBackground(NotificationResponse response) {
+  unawaited(
+    _processNotificationAction(
+      actionId: response.actionId,
+      payload: response.payload,
+    ),
+  );
+}
+
+Future<void> _processNotificationAction({
+  required String? actionId,
+  required String? payload,
+  WidgetRef? ref,
+}) async {
+  if (actionId == kActionGoOffline) {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(kAvailability, AvailabilityStatus.offline.name);
+    } catch (_) {}
+
+    if (ref != null) {
+      try {
+        await ref
+            .read(driverAppStateProvider.notifier)
+            .setAvailability(AvailabilityStatus.offline);
+        return;
+      } catch (_) {}
+    }
+
+    try {
+      final client = ApiClient();
+      await client.put(
+        '/drivers/me/availability',
+        data: {'availability': 'offline'},
+      );
+    } catch (_) {}
+  } else if (actionId == kActionStayOnline) {
+    if (ref != null) {
+      try {
+        final client = ref.read(apiClientProvider);
+        await client.post('/drivers/me/heartbeat');
+        return;
+      } catch (_) {}
+    }
+
+    try {
+      final client = ApiClient();
+      await client.post('/drivers/me/heartbeat');
+    } catch (_) {}
+  }
+}
 
 @pragma('vm:entry-point')
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   try {
     await Firebase.initializeApp();
     final data = message.data;
+
+    if (data['type'] == 'driver_inactivity_check') {
+      const title = 'هل ما زلت متاحاً للعمل؟';
+      const body = 'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
+      await _localNotifications.show(
+        999,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'driver_inactivity_check',
+            'Inactivity Reminders',
+            channelDescription:
+                'Notifications checking if driver is still available',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+            actions: [
+              AndroidNotificationAction(
+                kActionStayOnline,
+                'أنا متاح',
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                kActionGoOffline,
+                'تحويل إلى غير متصل',
+                showsUserInterface: false,
+              ),
+            ],
+          ),
+          iOS: DarwinNotificationDetails(
+            categoryIdentifier: 'INACTIVITY_CHECK',
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: 'driver_inactivity_check',
+      );
+      return;
+    }
+
     if (data['type'] == 'trip_request' && message.notification == null) {
       final pickup = (data['pickupAddress'] as String?)?.trim();
       final dropoff = (data['dropoffAddress'] as String?)?.trim();
@@ -91,20 +203,65 @@ class FcmService {
       sound: true,
     );
 
-    // 2. Setup Android notification channel
-    await _localNotifications
+    // 2. Setup Android notification channels
+    final androidPlugin = _localNotifications
         .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin>()
-        ?.createNotificationChannel(kTripOfferChannel);
+            AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.createNotificationChannel(kTripOfferChannel);
+    await androidPlugin?.createNotificationChannel(kInactivityChannel);
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+
+    final darwinCategories = <DarwinNotificationCategory>[
+      DarwinNotificationCategory(
+        'INACTIVITY_CHECK',
+        actions: <DarwinNotificationAction>[
+          DarwinNotificationAction.plain(
+            kActionStayOnline,
+            'أنا متاح',
+            options: {DarwinNotificationActionOption.foreground},
+          ),
+          DarwinNotificationAction.plain(
+            kActionGoOffline,
+            'تحويل إلى غير متصل',
+            options: {DarwinNotificationActionOption.destructive},
+          ),
+        ],
+        options: <DarwinNotificationCategoryOption>{
+          DarwinNotificationCategoryOption.hiddenPreviewShowTitle,
+        },
+      ),
+    ];
+
+    final darwinSettings = DarwinInitializationSettings(
+      requestAlertPermission: true,
+      requestBadgePermission: true,
+      requestSoundPermission: true,
+      notificationCategories: darwinCategories,
+    );
+
+    final initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: darwinSettings,
+      macOS: darwinSettings,
+    );
 
     await _localNotifications.initialize(
       initSettings,
       onDidReceiveNotificationResponse: (response) {
-        _handleNotificationTap(ref, response.payload);
+        if (response.actionId != null && response.actionId!.isNotEmpty) {
+          unawaited(
+            _processNotificationAction(
+              actionId: response.actionId,
+              payload: response.payload,
+              ref: ref,
+            ),
+          );
+        } else {
+          _handleNotificationTap(ref, response.payload);
+        }
       },
+      onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
     );
 
     // 3. Register background handler
@@ -224,7 +381,53 @@ class FcmService {
         ),
         payload: data['tripId'] ?? 'trip_request',
       );
+    } else if (type == 'driver_inactivity_check') {
+      showInactivityCheckNotification();
     }
+  }
+
+  Future<void> showInactivityCheckNotification() async {
+    const title = 'هل ما زلت متاحاً للعمل؟';
+    const body = 'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
+    try {
+      await _localNotifications.show(
+        999,
+        title,
+        body,
+        const NotificationDetails(
+          android: AndroidNotificationDetails(
+            'driver_inactivity_check',
+            'Inactivity Reminders',
+            channelDescription:
+                'Notifications checking if driver is still available',
+            importance: Importance.high,
+            priority: Priority.high,
+            icon: '@mipmap/ic_launcher',
+            playSound: true,
+            enableVibration: true,
+            actions: [
+              AndroidNotificationAction(
+                kActionStayOnline,
+                'أنا متاح',
+                showsUserInterface: true,
+              ),
+              AndroidNotificationAction(
+                kActionGoOffline,
+                'تحويل إلى غير متصل',
+                showsUserInterface: false,
+              ),
+            ],
+          ),
+          iOS: DarwinNotificationDetails(
+            categoryIdentifier: 'INACTIVITY_CHECK',
+            presentAlert: true,
+            presentBadge: true,
+            presentSound: true,
+          ),
+        ),
+        payload: 'driver_inactivity_check',
+      );
+    } catch (_) {}
   }
 
   void _handleNotificationTap(WidgetRef ref, String? payload) {

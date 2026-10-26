@@ -44,6 +44,7 @@ async def client() -> AsyncGenerator[AsyncClient, None]:
         patch("app.main.connect_redis", new_callable=AsyncMock),
         patch("app.main.close_redis", new_callable=AsyncMock),
         patch("app.main.start_redis_bridge", side_effect=_noop_bridge),
+        patch("app.services.inactivity_service.start_inactivity_monitor", side_effect=_noop_bridge),
     ):
         from app.main import app as fastapi_app
 

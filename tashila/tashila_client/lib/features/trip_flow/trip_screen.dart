@@ -337,7 +337,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                       ),
                     ),
                     Text(
-                      state.pickup,
+                      formatLocationName(state.pickup, context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -356,7 +356,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                       ),
                     ),
                     Text(
-                      state.dropoff,
+                      formatLocationName(state.dropoff, context),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -674,7 +674,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      '${distance.toStringAsFixed(1)} ${'trip_summary_km_unit'.tr()}',
+                      formatDistanceKm(distance, context),
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w900,
@@ -1024,7 +1024,7 @@ class _TripScreenState extends ConsumerState<TripScreen> {
                             ),
                             const SizedBox(height: 2),
                             Text(
-                              '${distance.toStringAsFixed(1)} ${'trip_summary_km_unit'.tr()}',
+                              formatDistanceKm(distance, context),
                               style: const TextStyle(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w900,

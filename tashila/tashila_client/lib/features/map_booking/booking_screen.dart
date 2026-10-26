@@ -142,7 +142,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                               _modernLocationRow(
                                 context,
                                 title: 'pickup'.tr(),
-                                value: state.pickup,
+                                value: formatLocationName(state.pickup, context),
                                 onTap: () => _openLocationSearch(
                                   context,
                                   isPickup: true,
@@ -155,7 +155,7 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                               _modernLocationRow(
                                 context,
                                 title: 'dropoff'.tr(),
-                                value: state.dropoff,
+                                value: formatLocationName(state.dropoff, context),
                                 onTap: () => _openLocationSearch(
                                   context,
                                   isPickup: false,
@@ -210,8 +210,8 @@ class _BookingScreenState extends ConsumerState<BookingScreen> {
                                   ? 'assets/images/singlecabin_icon.png'
                                   : 'assets/images/doublecabin_icon.png';
                               final load = type == TruckType.singleCabine
-                                  ? '700kg'
-                                  : '700kg';
+                                  ? 'payload_700kg'.tr()
+                                  : 'payload_700kg'.tr();
 
                               return Expanded(
                                 child: GestureDetector(

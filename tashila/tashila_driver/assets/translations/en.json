@@ -308,5 +308,10 @@
   "cancel": "Cancel",
   "connectivity_no_internet": "No internet connection",
   "validation_video_not_allowed": "Videos are not allowed. Please select an image.",
-  "validation_invalid_plate_format": "Please enter a valid plate format (e.g. 12938 213 29)."
+  "validation_invalid_plate_format": "Please enter a valid plate format (e.g. 12938 213 29).",
+  "payload_700kg": "700kg",
+  "payload_1400kg": "1400kg",
+  "kg_unit": "kg",
+  "custom_pickup_point": "Custom Pickup Point",
+  "custom_dropoff_point": "Custom Drop-off Point"
 }

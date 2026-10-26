@@ -9,7 +9,6 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_ringtone_player/flutter_ringtone_player.dart';
-import 'package:flutter_background_service/flutter_background_service.dart';
 
 import '../config/map_config.dart';
 import '../models/models.dart';
@@ -311,7 +310,22 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Future<void> resumeSessionOnForeground() async {
     if (!state.isAuthenticated) return;
     unawaited(FcmService.instance.syncPushToken(ref));
+
+    // Check if background notification action changed availability to offline
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedAvail = prefs.getString(kAvailability);
+      if (storedAvail != null && storedAvail != state.availability.name) {
+        final newAvail = AvailabilityStatus.values.firstWhere(
+          (v) => v.name == storedAvail,
+          orElse: () => state.availability,
+        );
+        _setState(state.copyWith(availability: newAvail));
+      }
+    } catch (_) {}
+
     if (state.availability == AvailabilityStatus.online) {
+      unawaited(_apiClient.post('/drivers/me/heartbeat').then((_) {}, onError: (_) {}));
       await _restoreOnlineSession();
     }
     if (!ref.mounted) return;
@@ -494,13 +508,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _syncLocationTracking();
     await refreshNearbyRequests();
 
-    try {
-      final service = FlutterBackgroundService();
-      final isRunning = await service.isRunning();
-      if (!isRunning) {
-        await service.startService();
-      }
-    } catch (_) {}
     if (!ref.mounted) return;
     _startRequestPolling();
   }
@@ -656,10 +663,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     await _driverSocket?.disconnect();
     _locallyExpiredTripIds.clear();
 
-    try {
-      FlutterBackgroundService().invoke('stopService');
-    } catch (_) {}
-
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await prefs.setBool(kSeenOnboarding, true);
@@ -720,10 +723,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _apiClient.delete('/drivers/me');
     } catch (_) {}
     await _driverSocket?.disconnect();
-
-    try {
-      FlutterBackgroundService().invoke('stopService');
-    } catch (_) {}
 
     final prefs = await SharedPreferences.getInstance();
     final seen = prefs.getBool(kSeenOnboarding) ?? false;
@@ -957,13 +956,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _ensureDriverSocket(online: true);
       _syncLocationTracking();
 
-      try {
-        final service = FlutterBackgroundService();
-        final isRunning = await service.isRunning();
-        if (!isRunning) {
-          await service.startService();
-        }
-      } catch (_) {}
     } else {
       _requestPollTimer?.cancel();
       _offerCountdownTimer?.cancel();
@@ -971,10 +963,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       _locallyExpiredTripIds.clear();
       _setState(state.copyWith(clearIncomingOffers: true));
       _syncLocationTracking();
-
-      try {
-        FlutterBackgroundService().invoke('stopService');
-      } catch (_) {}
     }
   }
 

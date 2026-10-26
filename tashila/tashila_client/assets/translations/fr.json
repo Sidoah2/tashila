@@ -262,5 +262,11 @@
   "settings_button": "Paramètres",
   "location_disabled_body": "Les services de localisation (GPS) sont désactivés. Veuillez les activer dans les paramètres pour continuer.",
   "link_error": "Désolé, impossible d'ouvrir le lien.",
-  "connectivity_no_internet": "Pas de connexion internet"
+  "connectivity_no_internet": "Pas de connexion internet",
+  "dzd_currency": "DZD",
+  "payload_700kg": "700kg",
+  "payload_1400kg": "1400kg",
+  "kg_unit": "kg",
+  "custom_pickup_point": "Point de départ personnalisé",
+  "custom_dropoff_point": "Point d'arrivée personnalisé"
 }

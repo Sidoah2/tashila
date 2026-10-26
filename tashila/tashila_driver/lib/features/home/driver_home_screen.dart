@@ -1648,15 +1648,12 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                       ),
                     ),
                     const Spacer(),
-                    Directionality(
-                      textDirection: ui.TextDirection.ltr,
-                      child: Text(
-                        '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+                    Text(
+                      formatDistanceKm(request.distanceKm, context),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                     ),
                   ],
@@ -1724,7 +1721,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            request.pickup,
+                            formatLocationName(request.pickup, context),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -1768,7 +1765,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                           ),
                           const SizedBox(height: 2),
                           Text(
-                            request.dropOff,
+                            formatLocationName(request.dropOff, context),
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
                             style: const TextStyle(
@@ -2153,7 +2150,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                           ),
                         ),
                         Text(
-                          '${westernDigits(request.distanceKm.toStringAsFixed(1))} km',
+                          formatDistanceKm(request.distanceKm, context),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -2175,7 +2172,7 @@ class _ActiveTripPanelState extends State<_ActiveTripPanel> {
                           ),
                         ),
                         Text(
-                          dzdCurrency().format(request.fare),
+                          dzdCurrency(context: context).format(request.fare),
                           style: TextStyle(
                             fontSize: 15,
                             fontWeight: FontWeight.w600,
@@ -2434,7 +2431,7 @@ class _TripConclusionCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  dzdCurrency().format(record.fare),
+                  dzdCurrency(context: context).format(record.fare),
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 17,
@@ -2686,7 +2683,7 @@ class _TripConclusionCard extends StatelessWidget {
             _summaryRow(
               context,
               'trip_summary_price_label'.tr(),
-              dzdCurrency().format(record.fare),
+              dzdCurrency(context: context).format(record.fare),
               emphasize: true,
               compact: compact,
               bottom: rowPad,

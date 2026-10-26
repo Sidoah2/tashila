@@ -116,7 +116,7 @@ async def update_driver_location(driver_id: str, lat: float, lng: float) -> dict
     location = {"type": "Point", "coordinates": [lng, lat]}
     await get_database()[DRIVERS_COLLECTION].update_one(
         {"_id": ObjectId(driver_id)},
-        {"$set": {"location": location, "updatedAt": now}},
+        {"$set": {"location": location, "updatedAt": now, "lastActiveAt": now}},
     )
     updated = await _find_driver(driver_id)
     return updated  # type: ignore[return-value]
@@ -207,9 +207,15 @@ async def set_availability(driver_id: str, status: str) -> dict[str, Any]:
         raise ForbiddenError("Not approved yet")
 
     now = datetime.now(timezone.utc)
+    update_doc: dict[str, Any] = {"availability": status, "updatedAt": now}
+    if status == "online":
+        update_doc["lastActiveAt"] = now
+        update_doc["lastInactivityAlertAt"] = None
+        update_doc["unansweredInactivityAlerts"] = 0
+
     await get_database()[DRIVERS_COLLECTION].update_one(
         {"_id": ObjectId(driver_id)},
-        {"$set": {"availability": status, "updatedAt": now}},
+        {"$set": update_doc},
     )
     await publish(
         "driver:availability_changed",
@@ -217,6 +223,25 @@ async def set_availability(driver_id: str, status: str) -> dict[str, Any]:
     )
     updated = await _find_driver(driver_id)
     return _to_driver_response(updated)  # type: ignore[arg-type]
+
+
+async def record_heartbeat(driver_id: str) -> dict[str, Any]:
+    driver = await _find_driver(driver_id)
+    if driver is None:
+        raise NotFoundError("Driver not found")
+
+    now = datetime.now(timezone.utc)
+    await get_database()[DRIVERS_COLLECTION].update_one(
+        {"_id": ObjectId(driver_id)},
+        {
+            "$set": {
+                "lastActiveAt": now,
+                "lastInactivityAlertAt": None,
+                "unansweredInactivityAlerts": 0,
+            }
+        },
+    )
+    return {"status": "ok", "lastActiveAt": now.isoformat()}
 
 
 async def get_approval_status(driver_id: str) -> dict[str, Any]:

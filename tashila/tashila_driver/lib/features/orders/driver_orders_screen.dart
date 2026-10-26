@@ -121,7 +121,7 @@ class _OrderRecordCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      dzdCurrency().format(record.fare),
+                      dzdCurrency(context: context).format(record.fare),
                       style: const TextStyle(
                         fontWeight: FontWeight.w900,
                         fontSize: 16,
@@ -146,7 +146,7 @@ class _OrderRecordCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        record.pickup,
+                        formatLocationName(record.pickup, context),
                         style: const TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w700,
@@ -164,7 +164,7 @@ class _OrderRecordCard extends StatelessWidget {
                     const SizedBox(width: 8),
                     Expanded(
                       child: Text(
-                        record.dropOff,
+                        formatLocationName(record.dropOff, context),
                         style: const TextStyle(
                           fontSize: 12,
                           color: AppColors.textSecondary,
