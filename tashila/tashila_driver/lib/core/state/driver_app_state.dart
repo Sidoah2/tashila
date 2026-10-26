@@ -314,6 +314,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     // Check if background notification action changed availability to offline
     try {
       final prefs = await SharedPreferences.getInstance();
+      await prefs.reload();
       final storedAvail = prefs.getString(kAvailability);
       if (storedAvail != null && storedAvail != state.availability.name) {
         final newAvail = AvailabilityStatus.values.firstWhere(
@@ -324,6 +325,24 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           await setAvailability(AvailabilityStatus.offline);
         } else {
           _setState(state.copyWith(availability: newAvail));
+        }
+      }
+    } catch (_) {}
+
+    // Verify true availability with backend
+    try {
+      final res = await _apiClient.get<Map<String, dynamic>>('/drivers/me');
+      final serverAvail = res.data?['availability'] as String?;
+      if (serverAvail != null) {
+        final expected = serverAvail == 'online'
+            ? AvailabilityStatus.online
+            : AvailabilityStatus.offline;
+        if (expected != state.availability) {
+          if (expected == AvailabilityStatus.offline) {
+            await setAvailability(AvailabilityStatus.offline);
+          } else {
+            _setState(state.copyWith(availability: expected));
+          }
         }
       }
     } catch (_) {}

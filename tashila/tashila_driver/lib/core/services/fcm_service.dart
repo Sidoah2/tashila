@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:isolate';
+import 'dart:ui';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +35,7 @@ const AndroidNotificationChannel kInactivityChannel = AndroidNotificationChannel
 
 const String kActionStayOnline = 'ACTION_STAY_ONLINE';
 const String kActionGoOffline = 'ACTION_GO_OFFLINE';
+const String kActionPortName = 'driver_notification_action_port';
 
 final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
@@ -40,6 +43,10 @@ final FlutterLocalNotificationsPlugin _localNotifications =
 @pragma('vm:entry-point')
 Future<void> notificationTapBackground(NotificationResponse response) async {
   WidgetsFlutterBinding.ensureInitialized();
+  try {
+    final sendPort = IsolateNameServer.lookupPortByName(kActionPortName);
+    sendPort?.send(response.actionId);
+  } catch (_) {}
   await _processNotificationAction(
     actionId: response.actionId,
     payload: response.payload,
@@ -196,6 +203,18 @@ class FcmService {
     _ref = ref;
     if (_initialized) return;
     _initialized = true;
+
+    // Listen to background isolate notification actions in real time
+    try {
+      IsolateNameServer.removePortNameMapping(kActionPortName);
+      final port = ReceivePort();
+      IsolateNameServer.registerPortWithName(port.sendPort, kActionPortName);
+      port.listen((message) {
+        if (message is String) {
+          _processNotificationAction(actionId: message, payload: null, ref: ref);
+        }
+      });
+    } catch (_) {}
 
     // 1. Request notification permissions
     final messaging = FirebaseMessaging.instance;
