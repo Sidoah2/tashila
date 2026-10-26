@@ -83,10 +83,8 @@ async def monitor_driver(db, driver_id: str, timeout_sec: int = 60):
                 last_avail = curr_avail
 
             if curr_active != last_active:
-                print(f"\n>>> [HEARTBEAT DETECTED] <<<")
-                print(f"    LastActiveAt updated: {curr_active}")
-                print("    SUCCESS: Driver tapped 'أنا متاح' (Stayed ONLINE & refreshed activity)!")
-                return
+                print(f" [*] Activity heartbeat: {curr_active}")
+                last_active = curr_active
 
         await asyncio.sleep(2)
 
