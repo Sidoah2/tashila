@@ -38,12 +38,11 @@ final FlutterLocalNotificationsPlugin _localNotifications =
     FlutterLocalNotificationsPlugin();
 
 @pragma('vm:entry-point')
-void notificationTapBackground(NotificationResponse response) {
-  unawaited(
-    _processNotificationAction(
-      actionId: response.actionId,
-      payload: response.payload,
-    ),
+Future<void> notificationTapBackground(NotificationResponse response) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await _processNotificationAction(
+    actionId: response.actionId,
+    payload: response.payload,
   );
 }
 
@@ -52,15 +51,21 @@ Future<void> _processNotificationAction({
   required String? payload,
   WidgetRef? ref,
 }) async {
+  try {
+    await _localNotifications.cancel(999);
+  } catch (_) {}
+
+  final targetRef = ref ?? FcmService.instance._ref;
+
   if (actionId == kActionGoOffline) {
     try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString(kAvailability, AvailabilityStatus.offline.name);
     } catch (_) {}
 
-    if (ref != null) {
+    if (targetRef != null) {
       try {
-        await ref
+        await targetRef
             .read(driverAppStateProvider.notifier)
             .setAvailability(AvailabilityStatus.offline);
         return;
@@ -75,9 +80,9 @@ Future<void> _processNotificationAction({
       );
     } catch (_) {}
   } else if (actionId == kActionStayOnline) {
-    if (ref != null) {
+    if (targetRef != null) {
       try {
-        final client = ref.read(apiClientProvider);
+        final client = targetRef.read(apiClientProvider);
         await client.post('/drivers/me/heartbeat');
         return;
       } catch (_) {}
@@ -119,11 +124,13 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
                 kActionStayOnline,
                 'أنا متاح',
                 showsUserInterface: true,
+                cancelNotification: true,
               ),
               AndroidNotificationAction(
                 kActionGoOffline,
                 'تحويل إلى غير متصل',
                 showsUserInterface: false,
+                cancelNotification: true,
               ),
             ],
           ),
@@ -183,8 +190,10 @@ class FcmService {
   static final FcmService instance = FcmService._();
 
   bool _initialized = false;
+  WidgetRef? _ref;
 
   Future<void> initialize(WidgetRef ref) async {
+    _ref = ref;
     if (_initialized) return;
     _initialized = true;
 
@@ -248,14 +257,12 @@ class FcmService {
 
     await _localNotifications.initialize(
       initSettings,
-      onDidReceiveNotificationResponse: (response) {
+      onDidReceiveNotificationResponse: (response) async {
         if (response.actionId != null && response.actionId!.isNotEmpty) {
-          unawaited(
-            _processNotificationAction(
-              actionId: response.actionId,
-              payload: response.payload,
-              ref: ref,
-            ),
+          await _processNotificationAction(
+            actionId: response.actionId,
+            payload: response.payload,
+            ref: ref,
           );
         } else {
           _handleNotificationTap(ref, response.payload);

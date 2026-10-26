@@ -100,21 +100,11 @@ class ApiClient {
       final token = await _secureStorage.read(key: _kAccessToken);
       if (token != null && token.isNotEmpty) return token;
     } catch (_) {}
-    // Legacy migration from SharedPreferences
-    final prefs = await SharedPreferences.getInstance();
-    final legacyToken = prefs.getString(_kAccessToken);
-    if (legacyToken != null && legacyToken.isNotEmpty) {
-      try {
-        await _secureStorage.write(key: _kAccessToken, value: legacyToken);
-        final legacyRefresh = prefs.getString(_kRefreshToken);
-        if (legacyRefresh != null && legacyRefresh.isNotEmpty) {
-          await _secureStorage.write(key: _kRefreshToken, value: legacyRefresh);
-          await prefs.remove(_kRefreshToken);
-        }
-        await prefs.remove(_kAccessToken);
-      } catch (_) {}
-      return legacyToken;
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final fallback = prefs.getString(_kAccessToken);
+      if (fallback != null && fallback.isNotEmpty) return fallback;
+    } catch (_) {}
     return null;
   }
 
@@ -123,9 +113,11 @@ class ApiClient {
       await _secureStorage.write(key: _kAccessToken, value: accessToken);
       await _secureStorage.write(key: _kRefreshToken, value: refreshToken);
     } catch (_) {}
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_kAccessToken);
-    await prefs.remove(_kRefreshToken);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_kAccessToken, accessToken);
+      await prefs.setString(_kRefreshToken, refreshToken);
+    } catch (_) {}
   }
 
   Future<void> clearTokens() async {

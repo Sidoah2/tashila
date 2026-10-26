@@ -320,7 +320,11 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
           (v) => v.name == storedAvail,
           orElse: () => state.availability,
         );
-        _setState(state.copyWith(availability: newAvail));
+        if (newAvail == AvailabilityStatus.offline) {
+          await setAvailability(AvailabilityStatus.offline);
+        } else {
+          _setState(state.copyWith(availability: newAvail));
+        }
       }
     } catch (_) {}
 
