@@ -99,3 +99,25 @@ async def test_verify_otp_driver_test_account():
         assert inserted["profileComplete"] is True
         assert "drivingLicense" in inserted["documents"]
         assert inserted["documents"]["drivingLicense"]["status"] == "approved"
+
+
+@pytest.mark.asyncio
+async def test_otp_rate_limit_sets_expire_even_if_ttl_was_missing():
+    from app.core.redis import otp_rate_limit, get_redis, _otp_rate_key
+    redis = get_redis()
+    test_phone = "+213555999888"
+    key = _otp_rate_key(test_phone)
+    try:
+        # Simulate a key that got created without a TTL (ttl = -1) and count = 2
+        await redis.set(key, "2")
+        assert await redis.ttl(key) == -1
+
+        # Calling otp_rate_limit should increment and restore TTL
+        allowed = await otp_rate_limit(test_phone)
+        assert allowed is True
+        val = await redis.get(key)
+        assert int(val) == 3
+        ttl = await redis.ttl(key)
+        assert ttl > 0
+    finally:
+        await redis.delete(key)

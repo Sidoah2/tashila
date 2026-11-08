@@ -108,10 +108,17 @@ async def otp_rate_limit(phone: str) -> bool:
     """
     redis = get_redis()
     key = _otp_rate_key(phone)
-    count = await redis.incr(key)
     window = getattr(app_settings, "otp_window_seconds", 60)
     max_attempts = getattr(app_settings, "max_otp_attempts", 5)
-    if count == 1:
+
+    pipe = redis.pipeline()
+    pipe.incr(key)
+    pipe.ttl(key)
+    results = await pipe.execute()
+    count = results[0]
+    ttl = results[1]
+
+    if count == 1 or ttl == -1:
         await redis.expire(key, window)
     if count > max_attempts:
         return False
@@ -463,8 +470,12 @@ async def is_otp_verify_locked(phone: str) -> bool:
 async def record_otp_verify_failure(phone: str, max_attempts: int = 5, lockout_seconds: int = 300) -> int:
     redis = get_redis()
     key = _otp_fail_key(phone)
-    attempts = await redis.incr(key)
-    if attempts == 1:
+    pipe = redis.pipeline()
+    pipe.incr(key)
+    pipe.ttl(key)
+    results = await pipe.execute()
+    attempts, ttl = results[0], results[1]
+    if attempts == 1 or ttl == -1:
         await redis.expire(key, lockout_seconds)
     if attempts >= max_attempts:
         await redis.set(_otp_lockout_key(phone), "1", ex=lockout_seconds)
@@ -481,8 +492,12 @@ async def is_admin_login_locked(email: str) -> bool:
 async def record_admin_login_failure(email: str, max_attempts: int = 5, lockout_seconds: int = 900) -> int:
     redis = get_redis()
     key = _admin_fail_key(email)
-    attempts = await redis.incr(key)
-    if attempts == 1:
+    pipe = redis.pipeline()
+    pipe.incr(key)
+    pipe.ttl(key)
+    results = await pipe.execute()
+    attempts, ttl = results[0], results[1]
+    if attempts == 1 or ttl == -1:
         await redis.expire(key, lockout_seconds)
     if attempts >= max_attempts:
         await redis.set(_admin_lockout_key(email), "1", ex=lockout_seconds)
