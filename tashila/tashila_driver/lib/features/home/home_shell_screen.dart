@@ -41,6 +41,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
   void didChangeAppLifecycleState(AppLifecycleState lifecycleState) {
     if (lifecycleState == AppLifecycleState.resumed) {
       _checkGpsPermission(showLoader: false);
+      ref.read(driverAppStateProvider.notifier).resumeSessionOnForeground();
     }
   }
 

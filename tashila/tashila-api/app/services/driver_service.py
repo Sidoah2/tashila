@@ -116,7 +116,7 @@ async def update_driver_location(driver_id: str, lat: float, lng: float) -> dict
     location = {"type": "Point", "coordinates": [lng, lat]}
     await get_database()[DRIVERS_COLLECTION].update_one(
         {"_id": ObjectId(driver_id)},
-        {"$set": {"location": location, "updatedAt": now, "lastActiveAt": now}},
+        {"$set": {"location": location, "updatedAt": now}},
     )
     updated = await _find_driver(driver_id)
     return updated  # type: ignore[return-value]
