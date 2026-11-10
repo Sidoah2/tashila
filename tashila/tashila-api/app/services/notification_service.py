@@ -59,25 +59,18 @@ def _send_via_firebase_admin(
                 ),
             )
 
-        # For interactive notifications (e.g. driver_inactivity_check):
-        # On Android, flutter_local_notifications creates the rich notification with action buttons.
-        # If top-level `notification` is included, Google Play Services automatically renders a
-        # second, redundant plain notification (without buttons).
-        is_interactive = bool(apns_category or clean_data.get("type") == "driver_inactivity_check")
+        notification_payload = messaging.Notification(title=title, body=body)
 
-        notification_payload = None if is_interactive else messaging.Notification(title=title, body=body)
-
-        android_config = messaging.AndroidConfig(priority="high")
-        if not is_interactive:
-            android_config = messaging.AndroidConfig(
+        android_config = messaging.AndroidConfig(
+            priority="high",
+            notification=messaging.AndroidNotification(
+                channel_id=channel_id,
                 priority="high",
-                notification=messaging.AndroidNotification(
-                    channel_id=channel_id,
-                    priority="high",
-                    default_sound=True,
-                    click_action="FLUTTER_NOTIFICATION_CLICK",
-                ),
-            )
+                default_sound=True,
+                default_vibrate_timings=True,
+                click_action="FLUTTER_NOTIFICATION_CLICK",
+            ),
+        )
 
         message = messaging.Message(
             token=token,

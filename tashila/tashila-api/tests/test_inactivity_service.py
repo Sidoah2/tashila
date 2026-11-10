@@ -58,7 +58,7 @@ async def test_record_heartbeat_updates_driver_fields() -> None:
 
 @pytest.mark.asyncio
 async def test_check_and_notify_inactive_drivers() -> None:
-    """Verifies inactive online drivers receive notification, while active/recent ones do not."""
+    """Verifies inactive online drivers receive notification, grace period is respected, and auto-offline triggers."""
     now = datetime.now(timezone.utc)
     driver1_id = ObjectId()
     driver2_id = ObjectId()
@@ -74,24 +74,24 @@ async def test_check_and_notify_inactive_drivers() -> None:
         "unansweredInactivityAlerts": 0,
     }
 
-    # Driver 2: online, inactive for 25 mins, but alerted 5 mins ago -> SHOULD BE SKIPPED
+    # Driver 2: online, inactive for 25 mins, but alerted 1 min ago -> WITHIN GRACE PERIOD, SHOULD BE SKIPPED
     d2 = {
         "_id": driver2_id,
         "availability": "online",
         "approvalStatus": "approved",
         "lastActiveAt": now - timedelta(minutes=25),
-        "lastInactivityAlertAt": now - timedelta(minutes=5),
+        "lastInactivityAlertAt": now - timedelta(minutes=1),
         "unansweredInactivityAlerts": 1,
     }
 
-    # Driver 3: has 4 unanswered alerts -> SHOULD BE AUTO-SWITCHED TO OFFLINE
+    # Driver 3: alerted 5 mins ago (grace period is 3 mins) -> SHOULD BE AUTO-SWITCHED TO OFFLINE
     d3 = {
         "_id": driver_auto_offline_id,
         "availability": "online",
         "approvalStatus": "approved",
-        "lastActiveAt": now - timedelta(minutes=65),
-        "lastInactivityAlertAt": now - timedelta(minutes=16),
-        "unansweredInactivityAlerts": 4,
+        "lastActiveAt": now - timedelta(minutes=30),
+        "lastInactivityAlertAt": now - timedelta(minutes=5),
+        "unansweredInactivityAlerts": 1,
     }
 
     class AsyncCursorMock:
@@ -109,6 +109,7 @@ async def test_check_and_notify_inactive_drivers() -> None:
     mock_db = MagicMock()
     mock_coll = MagicMock()
     mock_coll.find.return_value = AsyncCursorMock([d1, d2, d3])
+    mock_coll.find_one = AsyncMock(return_value={"token": "test-fcm-token"})
     mock_coll.update_one = AsyncMock(return_value=None)
     mock_db.__getitem__.return_value = mock_coll
 
@@ -129,3 +130,51 @@ async def test_check_and_notify_inactive_drivers() -> None:
 
         # Driver 3 was set to offline
         mock_set_avail.assert_awaited_once_with(str(driver_auto_offline_id), "offline")
+
+
+@pytest.mark.asyncio
+async def test_driver_without_push_token_auto_offline() -> None:
+    """Verifies driver without registered push token is immediately set to offline upon inactivity."""
+    now = datetime.now(timezone.utc)
+    driver_no_token_id = ObjectId()
+    d = {
+        "_id": driver_no_token_id,
+        "availability": "online",
+        "approvalStatus": "approved",
+        "lastActiveAt": now - timedelta(minutes=20),
+        "lastInactivityAlertAt": None,
+        "unansweredInactivityAlerts": 0,
+    }
+
+    class AsyncCursorMock:
+        def __init__(self, items):
+            self.items = list(items)
+
+        def __aiter__(self):
+            return self
+
+        async def __anext__(self):
+            if not self.items:
+                raise StopAsyncIteration
+            return self.items.pop(0)
+
+    mock_db = MagicMock()
+    mock_coll = MagicMock()
+    mock_coll.find.return_value = AsyncCursorMock([d])
+    mock_coll.find_one = AsyncMock(return_value=None)  # No token!
+    mock_coll.update_one = AsyncMock(return_value=None)
+    mock_db.__getitem__.return_value = mock_coll
+
+    with (
+        patch("app.services.inactivity_service.get_database", return_value=mock_db),
+        patch("app.services.inactivity_service._driver_ids_with_active_trips", new_callable=AsyncMock, return_value=set()),
+        patch("app.services.inactivity_service.push_driver_inactivity_check", new_callable=AsyncMock, return_value=True) as mock_push,
+        patch("app.services.inactivity_service.set_availability", new_callable=AsyncMock) as mock_set_avail,
+    ):
+        result = await inactivity_service.check_and_notify_inactive_drivers()
+
+        assert result["status"] == "ok"
+        assert result["notified"] == 0
+        assert result["autoOffline"] == 1
+        mock_push.assert_not_called()
+        mock_set_avail.assert_awaited_once_with(str(driver_no_token_id), "offline")

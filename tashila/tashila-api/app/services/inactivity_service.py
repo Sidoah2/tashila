@@ -13,15 +13,20 @@ from app.services.notification_service import push_driver_inactivity_check
 logger = logging.getLogger(__name__)
 
 DEFAULT_INACTIVITY_MINUTES = 15
-MAX_UNANSWERED_ALERTS = 4
+DEFAULT_GRACE_PERIOD_MINUTES = 3
+MAX_UNANSWERED_ALERTS = 1
 
 
 async def check_and_notify_inactive_drivers(
     inactivity_threshold_minutes: int = DEFAULT_INACTIVITY_MINUTES,
+    grace_period_minutes: int = DEFAULT_GRACE_PERIOD_MINUTES,
+    max_unanswered_alerts: int = MAX_UNANSWERED_ALERTS,
 ) -> dict[str, Any]:
     """
     Finds drivers that have been online without app activity for >= 15 minutes,
     and sends them an interactive push notification asking if they are still available.
+    If the driver has no push token or fails to answer within the grace period,
+    their status is automatically set to offline.
     """
     now = datetime.now(timezone.utc)
     inactivity_cutoff = now - timedelta(minutes=inactivity_threshold_minutes)
@@ -48,24 +53,39 @@ async def check_and_notify_inactive_drivers(
         if driver_id in busy_drivers:
             continue
 
-        last_alert = driver.get("lastInactivityAlertAt")
-        if last_alert:
-            if last_alert.tzinfo is None:
-                last_alert = last_alert.replace(tzinfo=timezone.utc)
-            if (now - last_alert) < timedelta(minutes=inactivity_threshold_minutes):
-                continue
-
-        unanswered = int(driver.get("unansweredInactivityAlerts", 0))
-
-        if unanswered >= MAX_UNANSWERED_ALERTS:
+        # Check if driver has a registered push token
+        token_doc = await db["push_tokens"].find_one(
+            {"ownerId": driver_id, "role": "driver"}
+        )
+        if not token_doc or not token_doc.get("token"):
             logger.info(
-                "Driver %s had %d unanswered inactivity alerts. Auto-setting to offline.",
+                "Driver %s has no push token. Auto-setting to offline after %d min inactivity.",
                 driver_id,
-                unanswered,
+                inactivity_threshold_minutes,
             )
             await set_availability(driver_id, "offline")
             auto_offline_count += 1
             continue
+
+        last_alert = driver.get("lastInactivityAlertAt")
+        unanswered = int(driver.get("unansweredInactivityAlerts", 0))
+
+        if unanswered >= max_unanswered_alerts and last_alert:
+            if last_alert.tzinfo is None:
+                last_alert = last_alert.replace(tzinfo=timezone.utc)
+            if (now - last_alert) >= timedelta(minutes=grace_period_minutes):
+                logger.info(
+                    "Driver %s did not answer inactivity alert within %d minutes (unanswered=%d). Auto-setting to offline.",
+                    driver_id,
+                    grace_period_minutes,
+                    unanswered,
+                )
+                await set_availability(driver_id, "offline")
+                auto_offline_count += 1
+                continue
+            else:
+                # Still within grace period
+                continue
 
         sent = await push_driver_inactivity_check(driver_id)
         logger.info(

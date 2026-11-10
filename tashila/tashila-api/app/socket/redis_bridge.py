@@ -110,6 +110,22 @@ async def handle_channel(channel: str, data: dict[str, Any]) -> None:
                 room=ADMIN_MAP_ROOM,
             )
 
+        elif channel == "driver:availability_changed":
+            driver_id = data.get("driverId")
+            status = data.get("status")
+            if status == "offline" and driver_id:
+                await sio.emit(
+                    "admin:driver_went_offline",
+                    {"driverId": driver_id},
+                    room=ADMIN_MAP_ROOM,
+                )
+            elif status == "online" and driver_id:
+                await sio.emit(
+                    "admin:driver_went_online",
+                    {"driverId": driver_id},
+                    room=ADMIN_MAP_ROOM,
+                )
+
     except Exception:
         logger.exception("Redis bridge handler failed for channel=%s", channel)
 
