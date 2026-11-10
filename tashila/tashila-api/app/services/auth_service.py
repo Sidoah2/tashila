@@ -650,6 +650,16 @@ async def logout(token: str, secret: str) -> None:
     if ttl > 0:
         await blacklist_token(jti, ttl)
 
+    # When a driver logs out, set availability directly to offline
+    role = payload.get("role")
+    user_id = payload.get("sub")
+    if role == "driver" and user_id:
+        from app.services.driver_service import set_availability
+        try:
+            await set_availability(user_id, "offline")
+        except Exception:
+            pass
+
 
 async def admin_login(email: str, password: str) -> dict[str, Any]:
     # C6: Check admin brute-force lockout

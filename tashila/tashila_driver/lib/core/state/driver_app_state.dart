@@ -701,9 +701,25 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     _requestPollTimer?.cancel();
     _offerCountdownTimer?.cancel();
     _locationTimer?.cancel();
+
+    // 1. Tell backend directly to mark driver offline
+    try {
+      await _apiClient.put<Map<String, dynamic>>(
+        '/drivers/me/availability',
+        data: {'availability': 'offline'},
+      );
+    } catch (_) {}
+
+    // 2. Call logout endpoint
+    try {
+      await _apiClient.post('/auth/logout');
+    } catch (_) {}
+
+    // 3. Disconnect socket
     await _driverSocket?.disconnect();
     _locallyExpiredTripIds.clear();
 
+    // 4. Clear local preferences and tokens
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     await prefs.setBool(kSeenOnboarding, true);
