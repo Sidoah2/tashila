@@ -5,6 +5,7 @@ import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' as foundation;
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
@@ -133,12 +134,14 @@ class DriverHomeScreen extends ConsumerWidget {
     print("locale:" + Localizations.localeOf(context).languageCode);
 
     return PopScope(
-      canPop: state.tripStatus != TripStatus.awaitingClientRating,
+      canPop: false,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         if (state.tripStatus == TripStatus.awaitingClientRating) {
           _openClientRatingBottomSheet(context);
+          return;
         }
+        SystemNavigator.pop();
       },
       child: Scaffold(
         backgroundColor: Colors.white,

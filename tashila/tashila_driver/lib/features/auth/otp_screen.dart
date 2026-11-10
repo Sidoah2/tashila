@@ -101,7 +101,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
     try {
       final ok = await ref
           .read(driverAppStateProvider.notifier)
-          .verifyOtp(pin.text);
+          .verifyOtp(pin.text, phone: widget.phone);
 
       ApiOverlayManager.hide();
 
@@ -243,7 +243,11 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
                             defaultPinTheme: defaultPinTheme,
                             focusedPinTheme: focusedPinTheme,
                             submittedPinTheme: focusedPinTheme,
-                            onCompleted: (_) => _verifyAndContinue(),
+                            onCompleted: (_) {
+                              if (!_isVerifying) {
+                                _verifyAndContinue();
+                              }
+                            },
                           ),
                         ),
                       ),

@@ -1,5 +1,6 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:go_router/go_router.dart';
@@ -176,13 +177,23 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
 
     final effectiveIndex = hasActiveTrip ? 0 : currentIndex;
 
-    return Scaffold(
-      body: tabs[effectiveIndex],
-      bottomNavigationBar: hasActiveTrip
-          ? null
-          : SafeArea(
-        top: false,
-        child: Container(
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (effectiveIndex != 0) {
+          setState(() => currentIndex = 0);
+          return;
+        }
+        SystemNavigator.pop();
+      },
+      child: Scaffold(
+        body: tabs[effectiveIndex],
+        bottomNavigationBar: hasActiveTrip
+            ? null
+            : SafeArea(
+          top: false,
+          child: Container(
           // margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           decoration: BoxDecoration(
             color: Colors.white,
@@ -224,7 +235,7 @@ class _HomeShellScreenState extends ConsumerState<HomeShellScreen>
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildNavItem({

@@ -586,56 +586,72 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     }
   }
 
-  Future<bool> verifyOtp(String otp) async {
-    _setState(state.copyWith(isBusy: true, clearError: true));
+  Future<bool> verifyOtp(String otp, {String? phone}) async {
+    final targetPhone = (phone != null && phone.isNotEmpty) ? phone : state.phone;
+    _setState(state.copyWith(isBusy: true, clearError: true, phone: targetPhone));
+    final OtpVerifyResult result;
     try {
-      final result = await _authRepository.verifyOtp(
-        phone: state.phone,
+      result = await _authRepository.verifyOtp(
+        phone: targetPhone,
         otp: otp,
       );
-      if (!result.success) {
-        _setState(state.copyWith(error: 'invalid_otp'.tr(), isBusy: false));
-        return false;
-      }
+    } catch (e) {
+      _setState(state.copyWith(error: e.toString(), isBusy: false));
+      return false;
+    }
 
+    if (!result.success) {
+      final err = result.errorMessage ?? 'invalid_otp'.tr();
+      _setState(state.copyWith(error: err, isBusy: false));
+      return false;
+    }
+
+    // Authentication succeeded: persist session and update state immediately
+    try {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(kSession, true);
-      await prefs.setString(kPhone, state.phone);
+      await prefs.setString(kPhone, targetPhone);
       await prefs.setBool(kProfileSetupComplete, result.profileComplete);
+    } catch (_) {}
 
+    _setState(
+      state.copyWith(
+        isAuthenticated: true,
+        profileSetupComplete: result.profileComplete,
+        isBusy: false,
+        clearError: true,
+      ),
+    );
+
+    // Non-fatal background sync tasks: do not block or fail login
+    unawaited(_postLoginSync());
+    return true;
+  }
+
+  Future<void> _postLoginSync() async {
+    try {
       await refreshProfileFromServer();
-
-      _setState(
-        state.copyWith(
-          isAuthenticated: true,
-          profileSetupComplete: result.profileComplete,
-          isBusy: false,
-        ),
-      );
+    } catch (_) {}
+    try {
       await _resumeActiveTripIfAny();
+    } catch (_) {}
+    try {
       await syncTripHistoryFromServer();
+    } catch (_) {}
+    try {
       await syncPlatformEarningsFromServer();
+    } catch (_) {}
+    try {
       unawaited(FcmService.instance.syncPushToken(ref));
+    } catch (_) {}
+    try {
       if (state.availability == AvailabilityStatus.online) {
         await _restoreOnlineSession();
       } else {
         await refreshDriverLocation(sendToServer: false);
         _syncLocationTracking();
       }
-      return true;
-    } catch (e) {
-      String errMsg = e.toString();
-      if (e is DioException) {
-        final data = e.response?.data;
-        if (data is Map && data['detail'] == 'Account suspended') {
-          errMsg = 'account_suspended_err'.tr();
-        } else if (data is String && data.contains('Account suspended')) {
-          errMsg = 'account_suspended_err'.tr();
-        }
-      }
-      _setState(state.copyWith(error: errMsg, isBusy: false));
-      return false;
-    }
+    } catch (_) {}
   }
 
   Future<bool> verifyFirebaseOtp(String phone, String firebaseIdToken) async {
@@ -1325,8 +1341,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   Future<void> refreshIncomingOffers() => refreshNearbyRequests();
 
   Future<void> refreshNearbyRequests() async {
-    if (state.availability == AvailabilityStatus.offline) {
-      _setState(state.copyWith(error: 'driver_offline_requests_hint'.tr()));
+    if (!state.isAuthenticated || state.availability == AvailabilityStatus.offline) {
       return;
     }
     if (state.currentRequest != null) return;

@@ -2,10 +2,15 @@ import '../models/models.dart';
 import 'api_client.dart';
 
 class OtpVerifyResult {
-  const OtpVerifyResult({required this.success, this.profileComplete = false});
+  const OtpVerifyResult({
+    required this.success,
+    this.profileComplete = false,
+    this.errorMessage,
+  });
 
   final bool success;
   final bool profileComplete;
+  final String? errorMessage;
 }
 
 abstract class AuthRepository {

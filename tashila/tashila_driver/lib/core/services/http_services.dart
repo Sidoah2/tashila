@@ -49,8 +49,17 @@ class HttpAuthRepository implements AuthRepository {
       final user = data['user'] as Map<String, dynamic>?;
       final profileComplete = user?['profileComplete'] as bool? ?? false;
       return OtpVerifyResult(success: true, profileComplete: profileComplete);
-    } catch (_) {
-      return const OtpVerifyResult(success: false);
+    } on DioException catch (e) {
+      String? msg;
+      final data = e.response?.data;
+      if (data is Map && data['detail'] != null) {
+        msg = data['detail'].toString();
+      } else if (data is String && data.isNotEmpty) {
+        msg = data;
+      }
+      return OtpVerifyResult(success: false, errorMessage: msg);
+    } catch (e) {
+      return OtpVerifyResult(success: false, errorMessage: e.toString());
     }
   }
 
@@ -73,8 +82,17 @@ class HttpAuthRepository implements AuthRepository {
       final user = data['user'] as Map<String, dynamic>?;
       final profileComplete = user?['profileComplete'] as bool? ?? false;
       return OtpVerifyResult(success: true, profileComplete: profileComplete);
-    } catch (_) {
-      return const OtpVerifyResult(success: false);
+    } on DioException catch (e) {
+      String? msg;
+      final data = e.response?.data;
+      if (data is Map && data['detail'] != null) {
+        msg = data['detail'].toString();
+      } else if (data is String && data.isNotEmpty) {
+        msg = data;
+      }
+      return OtpVerifyResult(success: false, errorMessage: msg);
+    } catch (e) {
+      return OtpVerifyResult(success: false, errorMessage: e.toString());
     }
   }
 }

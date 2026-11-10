@@ -34,6 +34,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     super.initState();
     _phoneController = TextEditingController();
     _phoneController.addListener(() {
+      if (ref.read(driverAppStateProvider).error != null) {
+        ref.read(driverAppStateProvider.notifier).clearError();
+      }
       final text = _phoneController.text.trim();
       if (text.startsWith('0')) {
         if (text.length > 10) {
@@ -55,6 +58,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ..onTap = () => _openLegalUrl(kPrivacyPolicyUrl);
     _termsTap = TapGestureRecognizer()
       ..onTap = () => _openLegalUrl(kTermsOfServiceUrl);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        ref.read(driverAppStateProvider.notifier).clearError();
+      }
+    });
   }
 
   @override
