@@ -615,6 +615,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _resumeActiveTripIfAny();
       await syncTripHistoryFromServer();
       await syncPlatformEarningsFromServer();
+      unawaited(FcmService.instance.syncPushToken(ref));
       if (state.availability == AvailabilityStatus.online) {
         await _restoreOnlineSession();
       } else {
@@ -666,6 +667,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await _resumeActiveTripIfAny();
       await syncTripHistoryFromServer();
       await syncPlatformEarningsFromServer();
+      unawaited(FcmService.instance.syncPushToken(ref));
       if (state.availability == AvailabilityStatus.online) {
         await _restoreOnlineSession();
       } else {
@@ -973,6 +975,7 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
     await prefs.setString(kAvailability, status.name);
     _setState(state.copyWith(availability: status));
     if (status == AvailabilityStatus.online) {
+      unawaited(FcmService.instance.syncPushToken(ref));
       await refreshDriverLocation();
       await refreshNearbyRequests();
       _startRequestPolling();

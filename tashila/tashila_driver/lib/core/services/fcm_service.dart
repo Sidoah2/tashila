@@ -109,8 +109,23 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final data = message.data;
 
     if (data['type'] == 'driver_inactivity_check') {
+      if (message.notification != null) {
+        return;
+      }
       const title = 'هل ما زلت متاحاً للعمل؟';
       const body = 'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
+      try {
+        const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+        await _localNotifications.initialize(
+          const InitializationSettings(android: androidSettings),
+          onDidReceiveNotificationResponse: notificationTapBackground,
+          onDidReceiveBackgroundNotificationResponse: notificationTapBackground,
+        );
+        final androidPlugin = _localNotifications
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>();
+        await androidPlugin?.createNotificationChannel(kInactivityChannel);
+      } catch (_) {}
       await _localNotifications.show(
         999,
         title,
@@ -231,10 +246,11 @@ class FcmService {
       sound: true,
     );
 
-    // 2. Setup Android notification channels
+    // 2. Setup Android notification channels & request Android 13+ permission
     final androidPlugin = _localNotifications
         .resolvePlatformSpecificImplementation<
             AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.requestNotificationsPermission();
     await androidPlugin?.createNotificationChannel(kTripOfferChannel);
     await androidPlugin?.createNotificationChannel(kInactivityChannel);
 
@@ -457,6 +473,13 @@ class FcmService {
   }
 
   void _handleNotificationTap(WidgetRef ref, String? payload) {
+    if (payload == 'driver_inactivity_check' || payload == 'INACTIVITY_CHECK') {
+      try {
+        final client = ref.read(apiClientProvider);
+        unawaited(client.post('/drivers/me/heartbeat'));
+      } catch (_) {}
+    }
+
     // Navigate driver to home screen where incoming offer is displayed
     final ctx = rootNavigatorKey.currentContext;
     if (ctx != null) {
