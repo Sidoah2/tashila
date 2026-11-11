@@ -34,6 +34,7 @@ def _send_via_firebase_admin(
     data: dict[str, str],
     channel_id: str = "driver_trip_offers",
     apns_category: str | None = None,
+    data_only: bool = False,
 ) -> bool:
     try:
         from app.services.auth_service import _get_firebase_app
@@ -59,18 +60,24 @@ def _send_via_firebase_admin(
                 ),
             )
 
-        notification_payload = messaging.Notification(title=title, body=body)
-
-        android_config = messaging.AndroidConfig(
-            priority="high",
-            notification=messaging.AndroidNotification(
-                channel_id=channel_id,
+        if data_only:
+            # Data-only payload: Android OS will not post a default notification.
+            # Instead, Flutter's background handler wakes up and creates a rich
+            # local notification with interactive action buttons.
+            notification_payload = None
+            android_config = messaging.AndroidConfig(priority="high")
+        else:
+            notification_payload = messaging.Notification(title=title, body=body)
+            android_config = messaging.AndroidConfig(
                 priority="high",
-                default_sound=True,
-                default_vibrate_timings=True,
-                click_action="FLUTTER_NOTIFICATION_CLICK",
-            ),
-        )
+                notification=messaging.AndroidNotification(
+                    channel_id=channel_id,
+                    priority="high",
+                    default_sound=True,
+                    default_vibrate_timings=True,
+                    click_action="FLUTTER_NOTIFICATION_CLICK",
+                ),
+            )
 
         message = messaging.Message(
             token=token,
@@ -95,10 +102,21 @@ async def _send_fcm(
     role: str,
     channel_id: str = "driver_trip_offers",
     apns_category: str | None = None,
+    data_only: bool = False,
 ) -> bool:
     clean_data = _fcm_data_payload(data)
+    clean_data.setdefault("title", title)
+    clean_data.setdefault("body", body)
     # 1. Try modern Firebase Admin SDK first (HTTP v1)
-    if _send_via_firebase_admin(token, title, body, clean_data, channel_id=channel_id, apns_category=apns_category):
+    if _send_via_firebase_admin(
+        token,
+        title,
+        body,
+        clean_data,
+        channel_id=channel_id,
+        apns_category=apns_category,
+        data_only=data_only,
+    ):
         logger.info("FCM push sent via Firebase Admin SDK to %s/%s", role, owner_id)
         return True
 
@@ -111,11 +129,18 @@ async def _send_fcm(
         "Authorization": f"key={settings.fcm_server_key}",
         "Content-Type": "application/json",
     }
-    payload = {
-        "to": token,
-        "notification": {"title": title, "body": body},
-        "data": _fcm_data_payload(data),
-    }
+    if data_only:
+        payload = {
+            "to": token,
+            "data": clean_data,
+            "priority": "high",
+        }
+    else:
+        payload = {
+            "to": token,
+            "notification": {"title": title, "body": body},
+            "data": clean_data,
+        }
 
     async with httpx.AsyncClient(timeout=10.0) as client:
         response = await client.post(FCM_URL, headers=headers, json=payload)
@@ -164,6 +189,7 @@ async def send_push(
     data: dict[str, Any] | None = None,
     channel_id: str = "driver_trip_offers",
     apns_category: str | None = None,
+    data_only: bool = False,
 ) -> bool:
     try:
         token_doc = await get_database()[PUSH_TOKENS_COLLECTION].find_one(
@@ -189,6 +215,7 @@ async def send_push(
                 role,
                 channel_id=channel_id,
                 apns_category=apns_category,
+                data_only=data_only,
             )
 
         logger.debug("Push platform %s not supported for %s/%s", platform, role, owner_id)
@@ -209,6 +236,8 @@ async def push_driver_inactivity_check(driver_id: str) -> bool:
         "category": "INACTIVITY_CHECK",
         "action_stay_online": "ACTION_STAY_ONLINE",
         "action_go_offline": "ACTION_GO_OFFLINE",
+        "title": title,
+        "body": body,
     }
     return await send_push(
         driver_id,
@@ -216,8 +245,9 @@ async def push_driver_inactivity_check(driver_id: str) -> bool:
         title,
         body,
         payload,
-        channel_id="driver_inactivity_check",
+        channel_id="driver_inactivity_actions_v2",
         apns_category="INACTIVITY_CHECK",
+        data_only=True,
     )
 
 

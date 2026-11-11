@@ -25,10 +25,10 @@ const AndroidNotificationChannel kTripOfferChannel = AndroidNotificationChannel(
 );
 
 const AndroidNotificationChannel kInactivityChannel = AndroidNotificationChannel(
-  'driver_inactivity_check',
+  'driver_inactivity_actions_v2',
   'Inactivity Reminders',
   description: 'Notifications checking if driver is still available',
-  importance: Importance.high,
+  importance: Importance.max,
   playSound: true,
   enableVibration: true,
 );
@@ -109,11 +109,9 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
     final data = message.data;
 
     if (data['type'] == 'driver_inactivity_check') {
-      if (message.notification != null) {
-        return;
-      }
-      const title = 'هل ما زلت متاحاً للعمل؟';
-      const body = 'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
+      final title = (data['title'] as String?)?.trim() ?? 'هل ما زلت متاحاً للعمل؟';
+      final body = (data['body'] as String?)?.trim() ??
+          'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
       try {
         const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
         await _localNotifications.initialize(
@@ -126,26 +124,30 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
                 AndroidFlutterLocalNotificationsPlugin>();
         await androidPlugin?.createNotificationChannel(kInactivityChannel);
       } catch (_) {}
+      final bigTextStyle = BigTextStyleInformation(
+        body,
+        contentTitle: title,
+      );
       await _localNotifications.show(
         999,
         title,
         body,
-        const NotificationDetails(
+        NotificationDetails(
           android: AndroidNotificationDetails(
-            'driver_inactivity_check',
-            'Inactivity Reminders',
-            channelDescription:
-                'Notifications checking if driver is still available',
-            importance: Importance.high,
+            kInactivityChannel.id,
+            kInactivityChannel.name,
+            channelDescription: kInactivityChannel.description,
+            importance: Importance.max,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
             playSound: true,
             enableVibration: true,
-            actions: [
+            styleInformation: bigTextStyle,
+            actions: const [
               AndroidNotificationAction(
                 kActionStayOnline,
                 'أنا متاح',
-                showsUserInterface: true,
+                showsUserInterface: false,
                 cancelNotification: true,
               ),
               AndroidNotificationAction(
@@ -156,7 +158,7 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
               ),
             ],
           ),
-          iOS: DarwinNotificationDetails(
+          iOS: const DarwinNotificationDetails(
             categoryIdentifier: 'INACTIVITY_CHECK',
             presentAlert: true,
             presentBadge: true,
@@ -428,39 +430,49 @@ class FcmService {
     }
   }
 
-  Future<void> showInactivityCheckNotification() async {
-    const title = 'هل ما زلت متاحاً للعمل؟';
-    const body = 'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
+  Future<void> showInactivityCheckNotification({
+    String? customTitle,
+    String? customBody,
+  }) async {
+    final title = customTitle ?? 'هل ما زلت متاحاً للعمل؟';
+    final body = customBody ??
+        'أنت متصل في وضع الاستعداد منذ 15 دقيقة دون نشاط في التطبيق.';
     try {
+      final bigTextStyle = BigTextStyleInformation(
+        body,
+        contentTitle: title,
+      );
       await _localNotifications.show(
         999,
         title,
         body,
-        const NotificationDetails(
+        NotificationDetails(
           android: AndroidNotificationDetails(
-            'driver_inactivity_check',
-            'Inactivity Reminders',
-            channelDescription:
-                'Notifications checking if driver is still available',
-            importance: Importance.high,
+            kInactivityChannel.id,
+            kInactivityChannel.name,
+            channelDescription: kInactivityChannel.description,
+            importance: Importance.max,
             priority: Priority.high,
             icon: '@mipmap/ic_launcher',
             playSound: true,
             enableVibration: true,
-            actions: [
+            styleInformation: bigTextStyle,
+            actions: const [
               AndroidNotificationAction(
                 kActionStayOnline,
                 'أنا متاح',
-                showsUserInterface: true,
+                showsUserInterface: false,
+                cancelNotification: true,
               ),
               AndroidNotificationAction(
                 kActionGoOffline,
                 'تحويل إلى غير متصل',
                 showsUserInterface: false,
+                cancelNotification: true,
               ),
             ],
           ),
-          iOS: DarwinNotificationDetails(
+          iOS: const DarwinNotificationDetails(
             categoryIdentifier: 'INACTIVITY_CHECK',
             presentAlert: true,
             presentBadge: true,
