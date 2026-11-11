@@ -114,7 +114,12 @@ class DriverAppState {
   final String? infoMessage;
   final bool isBusy;
 
-  bool get needsProfileSetup => !(profile?.isReadyForDashboard ?? false);
+  bool get needsProfileSetup {
+    if (profileSetupComplete && profile == null) {
+      return false;
+    }
+    return !(profile?.isReadyForDashboard ?? false);
+  }
 
   bool get hasActiveTrip =>
       currentRequest != null && tripStatus != TripStatus.idle;
@@ -614,10 +619,20 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
       await prefs.setBool(kProfileSetupComplete, result.profileComplete);
     } catch (_) {}
 
+    // Await profile refresh so state has full profile data BEFORE setting isAuthenticated
+    // and before navigating out of the OTP screen. This prevents brief flicker of profile setup.
+    try {
+      await refreshProfileFromServer();
+    } catch (_) {}
+
+    final isProfileComplete = result.profileComplete ||
+        (state.profile?.isReadyForDashboard ?? false) ||
+        (state.profile?.isComplete ?? false);
+
     _setState(
       state.copyWith(
         isAuthenticated: true,
-        profileSetupComplete: result.profileComplete,
+        profileSetupComplete: isProfileComplete,
         isBusy: false,
         clearError: true,
       ),
@@ -629,9 +644,6 @@ class DriverAppNotifier extends Notifier<DriverAppState> {
   }
 
   Future<void> _postLoginSync() async {
-    try {
-      await refreshProfileFromServer();
-    } catch (_) {}
     try {
       await _resumeActiveTripIfAny();
     } catch (_) {}

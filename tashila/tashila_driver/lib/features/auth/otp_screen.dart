@@ -108,7 +108,9 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
       if (!mounted) return;
       if (ok) {
         final driverState = ref.read(driverAppStateProvider);
-        final ready = driverState.profile?.isReadyForDashboard ?? false;
+        final ready = (driverState.profile?.isReadyForDashboard ?? false) ||
+            (driverState.profileSetupComplete &&
+                driverState.profile?.approvalStatus == 'approved');
         context.go(ready ? '/home' : '/profile');
       } else {
         pin.clear();
